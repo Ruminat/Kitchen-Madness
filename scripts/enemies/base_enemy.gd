@@ -94,6 +94,10 @@ func get_contact_damage() -> int:
 	return 10
 
 
+func get_collision_radius() -> float:
+	return _get_radius()
+
+
 func _get_radius() -> float:
 	if definition:
 		return definition.radius

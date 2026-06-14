@@ -40,7 +40,7 @@ func _spawn_enemy() -> void:
 	if enemy_container.get_child_count() >= max_enemies:
 		return
 
-	var definition := _pick_enemy_definition()
+	var definition: EnemyDefinition = SpawnTable.pick_weighted(wave_definition.enemy_weights)
 	var scene := _scene_for_definition(definition)
 	if scene == null:
 		return
@@ -60,29 +60,6 @@ func _scene_for_definition(definition: EnemyDefinition) -> PackedScene:
 	if wave_definition and wave_definition.fallback_enemy_scene:
 		return wave_definition.fallback_enemy_scene
 	return null
-
-
-func _pick_enemy_definition() -> EnemyDefinition:
-	if wave_definition == null or wave_definition.enemy_weights.is_empty():
-		return null
-
-	var total_weight := 0
-	for entry in wave_definition.enemy_weights:
-		if entry and entry.definition:
-			total_weight += maxi(entry.weight, 1)
-
-	if total_weight <= 0:
-		return null
-
-	var roll := randi() % total_weight
-	for entry in wave_definition.enemy_weights:
-		if entry == null or entry.definition == null:
-			continue
-		roll -= maxi(entry.weight, 1)
-		if roll < 0:
-			return entry.definition
-
-	return wave_definition.enemy_weights[0].definition
 
 
 func _random_edge_position() -> Vector2:
@@ -110,4 +87,3 @@ func _random_edge_position() -> Vector2:
 				bounds.end.x - EDGE_MARGIN,
 				randf_range(bounds.position.y + EDGE_MARGIN, bounds.end.y - EDGE_MARGIN)
 			)
-

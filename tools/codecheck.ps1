@@ -28,11 +28,19 @@ function Find-Godot {
     return $null
 }
 
+function Invoke-CheckedCommand {
+    param([scriptblock]$Command)
+    & $Command
+    $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
+    if ($exitCode -ne 0) {
+        $script:Failed = $true
+    }
+}
+
 Write-Step "Lint (gdlint)"
 $Gdlint = Get-Command gdlint -ErrorAction SilentlyContinue
 if ($Gdlint) {
-    & gdlint scripts/ tests/ 2>&1
-    if ($LASTEXITCODE -ne 0) { $Failed = $true }
+    Invoke-CheckedCommand { & gdlint scripts/ tests/ 2>&1 }
 } else {
     Write-Host "SKIP: gdlint not found (pip install gdtoolkit)" -ForegroundColor Yellow
 }
@@ -40,8 +48,7 @@ if ($Gdlint) {
 Write-Step "Format check (gdformat)"
 $Gdformat = Get-Command gdformat -ErrorAction SilentlyContinue
 if ($Gdformat) {
-    & gdformat --check scripts/ tests/ 2>&1
-    if ($LASTEXITCODE -ne 0) { $Failed = $true }
+    Invoke-CheckedCommand { & gdformat --check scripts/ tests/ 2>&1 }
 } else {
     Write-Host "SKIP: gdformat not found (pip install gdtoolkit)" -ForegroundColor Yellow
 }
@@ -49,16 +56,20 @@ if ($Gdformat) {
 Write-Step "Headless boot smoke"
 $Godot = Find-Godot
 if ($Godot) {
-    & $Godot --headless --path $ProjectRoot --quit-after 1 2>&1
-    if ($LASTEXITCODE -ne 0) { $Failed = $true }
+    Invoke-CheckedCommand { & $Godot --headless --path $ProjectRoot --quit-after 1 2>&1 }
 } else {
     Write-Host "SKIP: Godot not found on PATH or in default install locations" -ForegroundColor Yellow
 }
 
 Write-Step "Unit tests"
 if ($Godot -and (Test-Path "addons/gdUnit4/bin/GdUnitCmdTool.gd")) {
-    & $Godot --headless --path $ProjectRoot -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/ 2>&1
-    if ($LASTEXITCODE -ne 0) { $Failed = $true }
+    Invoke-CheckedCommand {
+        & $Godot --headless --path $ProjectRoot `
+            -s --remote-debug "tcp://127.0.0.1:0" `
+            res://addons/gdUnit4/bin/GdUnitCmdTool.gd `
+            -a tests/ `
+            --ignoreHeadlessMode 2>&1
+    }
 } else {
     Write-Host "SKIP: GdUnit4 not installed or Godot unavailable" -ForegroundColor Yellow
 }

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Run codecheck before commits on the master branch.
+set -euo pipefail
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+if [[ "$BRANCH" != "master" ]]; then
+	exit 0
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+echo "pre-commit: running codecheck on master..."
+
+if [[ -f "$ROOT/tools/codecheck.sh" ]]; then
+	bash "$ROOT/tools/codecheck.sh"
+elif [[ -f "$ROOT/tools/codecheck.ps1" ]]; then
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$ROOT/tools/codecheck.ps1"
+else
+	echo "pre-commit: codecheck script not found" >&2
+	exit 1
+fi

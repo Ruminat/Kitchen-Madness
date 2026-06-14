@@ -62,17 +62,27 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 | Task | Status | Notes |
 |---|---|---|
-| GdUnit4 or GUT addon | ⬜ Not started | |
-| Unit tests (wave, spawn, XP, health) | ⬜ Not started | |
-| Integration test (game boot) | ⬜ Not started | |
-| Full `codecheck` pipeline | 🔄 Partial | Smoke script exists; needs Godot + gdtoolkit on PATH |
-| Pre-commit hook (optional) | ⬜ Not started | |
+| GdUnit4 addon | ✅ Done | `addons/gdUnit4` |
+| Unit tests (health, wave, spawn, arena) | ✅ Done | `tests/unit/` |
+| Integration test (game run state) | ✅ Done | `tests/integration/` |
+| Full `codecheck` pipeline | ✅ Done | Lint + format + boot + GdUnit4 tests |
+| Pre-commit hook (optional) | ✅ Done | `.githooks/pre-commit` on master via `install-git-hooks` |
 
 ---
 
 ## Changelog
 
-### Phase 2B (in progress)
+### Phase 2E (started)
+
+- Added GdUnit4 test framework and unit/integration tests
+- Extracted `SpawnTable` for testable weighted enemy picks
+- `WindowSetup` skipped in headless mode for CI/tests
+
+- Fixed phantom contact damage (distance-based overlap check)
+- Polished HUD: compact panel, thin HP bar, consistent typography
+- Invulnerability reduced to 0.1s
+- Window fills usable screen area (windowed); 1920×1080 viewport with camera zoom
+- Borderless full-monitor window; pause tree when run ends (death / wave complete)
 
 - Added 3 enemy archetypes: Chaser (red), Tank (dark red, slow/tanky), Sprinter (orange, zigzag)
 - `wave_01.tres` spawns weighted mix of all three types
@@ -91,4 +101,5 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 1. Open project in Godot 4.6+ and press **F5**
 2. Survive the 30-second wave — enemies now include red Chasers, large dark-red Tanks, and fast orange Sprinters
-3. Run `.\tools\codecheck.ps1` before handoff (install `gdtoolkit` + add Godot to PATH for full checks)
+3. Run `.\tools\codecheck.ps1` before handoff (Godot on PATH + optional `pip install gdtoolkit`)
+4. Run tests only: `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/`

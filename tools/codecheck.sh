@@ -40,7 +40,11 @@ fi
 
 step "Unit tests"
 if command -v godot >/dev/null 2>&1 && [[ -f addons/gdUnit4/bin/GdUnitCmdTool.gd ]]; then
-    godot --headless --path "$PROJECT_ROOT" -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/ || FAILED=1
+    godot --headless --path "$PROJECT_ROOT" \
+        -s --remote-debug "tcp://127.0.0.1:0" \
+        res://addons/gdUnit4/bin/GdUnitCmdTool.gd \
+        -a tests/ \
+        --ignoreHeadlessMode || FAILED=1
 else
     echo "SKIP: GdUnit4 not installed or godot unavailable"
 fi

@@ -43,6 +43,9 @@ resources/
   enemies/, weapons/, waves/
 tools/
   codecheck.ps1, codecheck.sh
+tests/
+  unit/                  Health, wave, spawn, arena tests
+  integration/           Game scene + pause-on-end tests
 progress.md            Implementation status vs plans.md
 plans.md               Roadmap for Phase 2+
 ```

@@ -91,6 +91,30 @@ gdlint scripts/
 gdformat scripts/
 ```
 
+### Run tests
+
+Requires Godot 4.5+ on PATH (same binary used for F5):
+
+```powershell
+# Full check (lint + boot + tests)
+.\tools\codecheck.ps1
+
+# Tests only
+godot --headless --path . -s --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode
+```
+
+Test suites live in `tests/unit/` (logic) and `tests/integration/` (scene boot + pause-on-end).
+
+### Git hooks (master branch)
+
+Install once after clone — runs `codecheck` before each commit on `master`:
+
+```powershell
+.\tools\install-git-hooks.ps1
+```
+
+On other branches the hook is skipped.
+
 ---
 
 ## Project layout

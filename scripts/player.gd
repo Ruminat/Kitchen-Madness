@@ -4,9 +4,11 @@ signal died
 
 const MOVE_SPEED := 220.0
 const CONTACT_DAMAGE := 10
+const BODY_RADIUS := 14.0
+## Small buffer so fast enemies still register contact on the frame they touch.
+const CONTACT_FORGIVENESS := 2.0
 
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
-var _damage_cooldown := 0.0
 
 @onready var visual: Node2D = $Visual
 @onready var health_component: HealthComponent = $HealthComponent
@@ -24,9 +26,6 @@ func _physics_process(delta: float) -> void:
 	if not is_alive():
 		return
 
-	if _damage_cooldown > 0.0:
-		_damage_cooldown -= delta
-
 	var input_dir := Vector2(
 		Input.get_axis("move_left", "move_right"),
 		Input.get_axis("move_up", "move_down")
@@ -37,12 +36,13 @@ func _physics_process(delta: float) -> void:
 	velocity = input_dir * MOVE_SPEED
 	move_and_slide()
 	_clamp_to_arena()
+	_check_contact_damage()
 
 	if input_dir.length_squared() > 0.01:
 		visual.rotation = input_dir.angle()
 
 	if health_component.is_invincible():
-		visual.modulate.a = 0.4 + 0.6 * abs(sin(Time.get_ticks_msec() * 0.02))
+		visual.modulate.a = 0.55 + 0.45 * abs(sin(Time.get_ticks_msec() * 0.04))
 	else:
 		visual.modulate.a = 1.0
 
@@ -85,17 +85,27 @@ func _on_died() -> void:
 
 
 func _clamp_to_arena() -> void:
-	global_position = ArenaClamp.clamp_position(global_position, arena_bounds, 14.0)
+	global_position = ArenaClamp.clamp_position(global_position, arena_bounds, BODY_RADIUS)
 
 
-func _on_hurtbox_body_entered(body: Node2D) -> void:
-	if not body.is_in_group("enemies"):
-		return
-	if _damage_cooldown > 0.0:
+func _check_contact_damage() -> void:
+	if health_component.is_invincible():
 		return
 
-	_damage_cooldown = 0.35
-	var damage := CONTACT_DAMAGE
-	if body.has_method("get_contact_damage"):
-		damage = body.get_contact_damage()
-	health_component.take_damage(damage)
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy) or not enemy is Node2D:
+			continue
+
+		var enemy_radius := 12.0
+		if enemy.has_method("get_collision_radius"):
+			enemy_radius = enemy.get_collision_radius()
+
+		var touch_distance := BODY_RADIUS + enemy_radius + CONTACT_FORGIVENESS
+		if global_position.distance_squared_to(enemy.global_position) > touch_distance * touch_distance:
+			continue
+
+		var damage := CONTACT_DAMAGE
+		if enemy.has_method("get_contact_damage"):
+			damage = enemy.get_contact_damage()
+		health_component.take_damage(damage)
+		return
