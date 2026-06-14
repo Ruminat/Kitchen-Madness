@@ -41,6 +41,19 @@ func _apply_definition() -> void:
 	health.current_health = definition.max_health
 	health.health_changed.emit(health.current_health, health.max_health)
 	_apply_visual(definition)
+	_setup_health_bar(definition)
+
+
+func _setup_health_bar(enemy_definition: EnemyDefinition) -> void:
+	if enemy_definition.max_health < 50:
+		return
+	if has_node("EnemyHealthBar"):
+		return
+
+	var bar := Node2D.new()
+	bar.name = "EnemyHealthBar"
+	bar.set_script(load("res://scripts/components/enemy_health_bar.gd"))
+	add_child(bar)
 
 
 func _get_health_component() -> HealthComponent:

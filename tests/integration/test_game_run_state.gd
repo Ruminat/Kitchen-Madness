@@ -41,6 +41,16 @@ func test_game_pauses_on_wave_complete() -> void:
 	assert_bool(game.is_run_active()).is_false()
 
 
+func test_game_includes_xp_and_floating_text_ui() -> void:
+	var game: Node2D = auto_free(GAME_SCENE.instantiate())
+	add_child(game)
+	await _wait_ready(game)
+	assert_object(game.get_node_or_null("XpSystem")).is_not_null()
+	var ui: CanvasLayer = game.get_node("UI") as CanvasLayer
+	assert_object(ui.get_node_or_null("FloatingTextManager")).is_not_null()
+	assert_object(ui.get_node_or_null("XpPanel")).is_not_null()
+
+
 func _wait_ready(node: Node) -> void:
 	if not node.is_node_ready():
 		await node.ready

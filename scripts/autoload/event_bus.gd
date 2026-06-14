@@ -6,6 +6,7 @@ signal enemy_killed(enemy: Node, killer: Node)
 signal player_health_changed(current: int, maximum: int)
 signal player_died
 signal xp_changed(current: int, to_next: int, level: int)
-signal pickup_collected(type: StringName)
+signal level_up(level: int)
+signal pickup_collected(type: StringName, world_pos: Vector2, value: int)
 signal wave_time_changed(seconds_remaining: float)
 signal wave_completed

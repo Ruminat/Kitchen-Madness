@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=3 format=3 uid="uid://enemydef_sprinter"]
+[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=4 format=3 uid="uid://enemydef_sprinter"]
 
 [ext_resource type="Script" path="res://scripts/data/enemy_definition.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://enemy_sprinter" path="res://scenes/enemy/sprinter_enemy.tscn" id="2"]
+[ext_resource type="Resource" uid="uid://drop_xp_small" path="res://resources/drops/xp_orb_small.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
@@ -10,5 +11,6 @@ scene = ExtResource("2")
 max_health = 15
 move_speed = 160.0
 contact_damage = 8
+xp_drop = ExtResource("3")
 color = Color(1, 0.55, 0.1, 1)
 radius = 9.0

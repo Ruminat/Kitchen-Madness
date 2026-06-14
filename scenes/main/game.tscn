@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://game001"]
+[gd_scene load_steps=12 format=3 uid="uid://game001"]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="PackedScene" uid="uid://arena001" path="res://scenes/arena/arena.tscn" id="2_arena"]
@@ -7,10 +7,14 @@
 [ext_resource type="Script" path="res://scripts/systems/wave_manager.gd" id="5_wave"]
 [ext_resource type="Script" path="res://scripts/systems/enemy_spawner.gd" id="6_spawner"]
 [ext_resource type="Resource" uid="uid://wavedef_01" path="res://resources/waves/wave_01.tres" id="7_wave"]
+[ext_resource type="Script" path="res://scripts/systems/loot_spawner.gd" id="8_loot"]
+[ext_resource type="Resource" uid="uid://drop_health" path="res://resources/drops/health_pickup.tres" id="9_health"]
+[ext_resource type="Script" path="res://scripts/systems/xp_system.gd" id="10_xp"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
 wave_definition = ExtResource("7_wave")
+health_drop = ExtResource("9_health")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
@@ -22,10 +26,18 @@ wave_definition = ExtResource("7_wave")
 
 [node name="ProjectileContainer" type="Node2D" parent="."]
 
+[node name="PickupContainer" type="Node2D" parent="."]
+
 [node name="WaveManager" type="Node" parent="."]
 script = ExtResource("5_wave")
 
 [node name="EnemySpawner" type="Node" parent="."]
 script = ExtResource("6_spawner")
+
+[node name="LootSpawner" type="Node" parent="."]
+script = ExtResource("8_loot")
+
+[node name="XpSystem" type="Node" parent="."]
+script = ExtResource("10_xp")
 
 [node name="UI" parent="." instance=ExtResource("4_ui")]

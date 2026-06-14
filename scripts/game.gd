@@ -1,6 +1,7 @@
 extends Node2D
 
 @export var wave_definition: WaveDefinition
+@export var health_drop: DropDefinition
 
 var is_wave_complete := false
 var is_game_over := false
@@ -10,8 +11,10 @@ var is_game_over := false
 @onready var player: CharacterBody2D = $Player
 @onready var enemy_container: Node2D = $EnemyContainer
 @onready var projectile_container: Node2D = $ProjectileContainer
+@onready var pickup_container: Node2D = $PickupContainer
 @onready var wave_manager: WaveManager = $WaveManager
 @onready var enemy_spawner: EnemySpawner = $EnemySpawner
+@onready var loot_spawner: LootSpawner = $LootSpawner
 @onready var ui: CanvasLayer = $UI
 
 
@@ -24,6 +27,7 @@ func _ready() -> void:
 	player.setup(bounds, projectile_container)
 	wave_manager.configure(wave)
 	enemy_spawner.configure(wave, enemy_container, bounds)
+	loot_spawner.configure(pickup_container, health_drop)
 
 	EventBus.wave_completed.connect(_on_wave_completed)
 	EventBus.player_died.connect(_on_player_died)

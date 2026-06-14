@@ -1,28 +1,38 @@
 extends Area2D
 
-const SPEED := 480.0
-const LIFETIME := 2.0
+const DEFAULT_SPEED := 480.0
+const DEFAULT_LIFETIME := 2.0
 
 var direction := Vector2.RIGHT
 var damage := 15
+var speed := DEFAULT_SPEED
+var lifetime := DEFAULT_LIFETIME
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 
 
 func _ready() -> void:
 	add_to_group("projectiles")
-	get_tree().create_timer(LIFETIME).timeout.connect(queue_free)
+	get_tree().create_timer(lifetime).timeout.connect(queue_free)
 
 
 func _physics_process(delta: float) -> void:
-	position += direction * SPEED * delta
+	position += direction * speed * delta
 
 	if not arena_bounds.has_point(global_position):
 		queue_free()
 
 
-func setup(fire_direction: Vector2, bounds: Rect2, projectile_damage: int = 15) -> void:
+func setup(
+	fire_direction: Vector2,
+	bounds: Rect2,
+	projectile_damage: int = 15,
+	projectile_speed: float = DEFAULT_SPEED,
+	projectile_lifetime: float = DEFAULT_LIFETIME
+) -> void:
 	direction = fire_direction.normalized()
 	damage = projectile_damage
+	speed = projectile_speed
+	lifetime = projectile_lifetime
 	rotation = direction.angle()
 	arena_bounds = bounds
 

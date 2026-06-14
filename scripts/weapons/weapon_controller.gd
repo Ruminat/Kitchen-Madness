@@ -2,6 +2,7 @@ class_name WeaponController
 extends Node2D
 
 @export var starting_weapon: WeaponDefinition
+@export var extra_weapons: Array[WeaponDefinition] = []
 
 var _weapons: Array[BaseWeapon] = []
 var _projectile_container: Node2D
@@ -18,6 +19,9 @@ func setup(projectile_container: Node2D, bounds: Rect2) -> void:
 
 	if starting_weapon and _weapons.is_empty():
 		add_weapon(starting_weapon)
+
+	for weapon_definition in extra_weapons:
+		add_weapon(weapon_definition)
 
 
 func add_weapon(definition: WeaponDefinition) -> BaseWeapon:

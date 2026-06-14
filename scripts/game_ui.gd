@@ -6,19 +6,25 @@ const COLOR_PANEL := Color(0.07, 0.08, 0.11, 0.82)
 const COLOR_BAR_BG := Color(0.14, 0.15, 0.19, 1.0)
 const COLOR_BAR_FILL := Color(0.78, 0.22, 0.28, 1.0)
 const COLOR_BAR_FILL_LOW := Color(0.95, 0.42, 0.18, 1.0)
+const COLOR_XP_FILL := Color(0.28, 0.62, 0.95, 1.0)
+const COLOR_XP_FLASH := Color(0.55, 0.88, 1.0, 1.0)
 
 @onready var hp_bar: ProgressBar = $HudPanel/MarginContainer/VBox/HPRow/HPBar
 @onready var hp_value_label: Label = $HudPanel/MarginContainer/VBox/HPRow/HPValue
 @onready var timer_label: Label = $HudPanel/MarginContainer/VBox/StatsRow/TimerLabel
 @onready var kill_label: Label = $HudPanel/MarginContainer/VBox/StatsRow/KillLabel
 @onready var hud_panel: PanelContainer = $HudPanel
+@onready var xp_panel: PanelContainer = $XpPanel
+@onready var xp_bar: ProgressBar = $XpPanel/MarginContainer/HBox/XpBar
+@onready var level_label: Label = $XpPanel/MarginContainer/HBox/LevelLabel
 @onready var overlay: ColorRect = $Overlay
 @onready var overlay_label: Label = $Overlay/CenterContainer/VBox/OverlayLabel
 @onready var restart_hint: Label = $Overlay/CenterContainer/VBox/RestartHint
 @onready var restart_button: Button = $Overlay/CenterContainer/VBox/RestartButton
 
 var _kills := 0
-var _hp_fill_style: StyleBoxFlat
+var _timer_pulse_tween: Tween
+var _xp_flash_tween: Tween
 
 
 func _ready() -> void:
@@ -30,29 +36,23 @@ func _ready() -> void:
 	EventBus.player_health_changed.connect(_on_player_health_changed)
 	EventBus.wave_time_changed.connect(_on_wave_time_changed)
 	EventBus.enemy_killed.connect(_on_enemy_killed)
+	EventBus.xp_changed.connect(_on_xp_changed)
+	EventBus.level_up.connect(_on_level_up)
 
 
 func _apply_hud_theme() -> void:
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_PANEL
 	panel_style.set_corner_radius_all(8)
-	panel_style.content_margin_left = 0
-	panel_style.content_margin_top = 0
-	panel_style.content_margin_right = 0
-	panel_style.content_margin_bottom = 0
 	hud_panel.add_theme_stylebox_override("panel", panel_style)
+	xp_panel.add_theme_stylebox_override("panel", panel_style)
 
-	var bar_bg := StyleBoxFlat.new()
-	bar_bg.bg_color = COLOR_BAR_BG
-	bar_bg.set_corner_radius_all(3)
-	hp_bar.add_theme_stylebox_override("background", bar_bg)
+	hp_bar.set_script(load("res://scripts/ui/stat_bar.gd"))
+	hp_bar.setup_bar(COLOR_BAR_BG, COLOR_BAR_FILL, 8.0)
+	xp_bar.set_script(load("res://scripts/ui/stat_bar.gd"))
+	xp_bar.setup_bar(COLOR_BAR_BG, COLOR_XP_FILL, 8.0)
 
-	_hp_fill_style = StyleBoxFlat.new()
-	_hp_fill_style.bg_color = COLOR_BAR_FILL
-	_hp_fill_style.set_corner_radius_all(3)
-	hp_bar.add_theme_stylebox_override("fill", _hp_fill_style)
-
-	for label in [timer_label, kill_label, hp_value_label]:
+	for label in [timer_label, kill_label, hp_value_label, level_label]:
 		label.add_theme_color_override("font_color", COLOR_TEXT)
 		label.add_theme_font_size_override("font_size", 14)
 
@@ -76,21 +76,54 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_player_health_changed(current: int, maximum: int) -> void:
-	hp_bar.max_value = maximum
-	hp_bar.value = current
+	hp_bar.set_value_smooth(float(current), float(maximum))
 	hp_value_label.text = "%d / %d" % [current, maximum]
 
 	var ratio := float(current) / float(maxi(maximum, 1))
-	_hp_fill_style.bg_color = COLOR_BAR_FILL.lerp(COLOR_BAR_FILL_LOW, 1.0 - ratio)
+	hp_bar.set_fill_color(COLOR_BAR_FILL.lerp(COLOR_BAR_FILL_LOW, 1.0 - ratio))
+
+
+func _on_xp_changed(current: int, to_next: int, level: int) -> void:
+	xp_bar.set_value_smooth(float(current), float(maxi(to_next, 1)))
+	level_label.text = "Lv %d" % level
+
+
+func _on_level_up(_level: int) -> void:
+	if _xp_flash_tween:
+		_xp_flash_tween.kill()
+	xp_bar.set_fill_color(COLOR_XP_FLASH)
+	_xp_flash_tween = create_tween()
+	_xp_flash_tween.tween_property(xp_bar, "modulate", Color(1.4, 1.4, 1.4, 1.0), 0.08)
+	_xp_flash_tween.tween_property(xp_bar, "modulate", Color.WHITE, 0.25)
+	_xp_flash_tween.tween_callback(func() -> void: xp_bar.set_fill_color(COLOR_XP_FILL))
 
 
 func _on_wave_time_changed(seconds_remaining: float) -> void:
 	var seconds := ceili(maxf(seconds_remaining, 0.0))
 	timer_label.text = "%ds" % seconds
+
+	var urgent := seconds <= 10
 	timer_label.add_theme_color_override(
 		"font_color",
-		Color(0.95, 0.55, 0.35, 1.0) if seconds <= 10 else COLOR_TEXT
+		Color(0.95, 0.55, 0.35, 1.0) if urgent else COLOR_TEXT
 	)
+	_update_timer_pulse(urgent)
+
+
+func _update_timer_pulse(urgent: bool) -> void:
+	if not urgent:
+		if _timer_pulse_tween:
+			_timer_pulse_tween.kill()
+			_timer_pulse_tween = null
+		timer_label.scale = Vector2.ONE
+		return
+
+	if _timer_pulse_tween:
+		return
+
+	_timer_pulse_tween = create_tween().set_loops()
+	_timer_pulse_tween.tween_property(timer_label, "scale", Vector2(1.08, 1.08), 0.35)
+	_timer_pulse_tween.tween_property(timer_label, "scale", Vector2.ONE, 0.35)
 
 
 func _on_enemy_killed(_enemy: Node, _killer: Node) -> void:

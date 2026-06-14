@@ -48,9 +48,28 @@ func _fire_at(target: Node2D) -> void:
 		return
 
 	var damage := definition.damage if definition else 15
-	var direction := (target.global_position - global_position).normalized()
+	var base_direction := (target.global_position - global_position).normalized()
+	var pellet_count := definition.pellet_count if definition else 1
+	var spread := deg_to_rad(definition.spread_degrees if definition else 0.0)
+
+	for pellet_index in pellet_count:
+		var angle_offset := 0.0
+		if pellet_count > 1:
+			var t := float(pellet_index) / float(pellet_count - 1)
+			angle_offset = lerpf(-spread * 0.5, spread * 0.5, t)
+		var direction := base_direction.rotated(angle_offset)
+		_spawn_projectile(container, direction, damage)
+
+
+func _spawn_projectile(container: Node2D, direction: Vector2, damage: int) -> void:
 	var projectile := definition.projectile_scene.instantiate()
 	if projectile.has_method("setup"):
-		projectile.setup(direction, arena_bounds, damage)
+		projectile.setup(
+			direction,
+			arena_bounds,
+			damage,
+			definition.projectile_speed,
+			definition.projectile_lifetime
+		)
 	container.add_child(projectile)
 	projectile.global_position = global_position

@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=3 format=3 uid="uid://enemydef_tank"]
+[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=4 format=3 uid="uid://enemydef_tank"]
 
 [ext_resource type="Script" path="res://scripts/data/enemy_definition.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://enemy_tank" path="res://scenes/enemy/tank_enemy.tscn" id="2"]
+[ext_resource type="Resource" uid="uid://drop_xp_large" path="res://resources/drops/xp_orb_large.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
@@ -10,5 +11,6 @@ scene = ExtResource("2")
 max_health = 80
 move_speed = 45.0
 contact_damage = 15
+xp_drop = ExtResource("3")
 color = Color(0.55, 0.08, 0.08, 1)
 radius = 18.0

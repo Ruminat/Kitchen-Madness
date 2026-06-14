@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase.
 
-**Last updated:** Phase 2B started (enemies)
+**Last updated:** Phase 2C complete
 
 ---
 
@@ -24,27 +24,29 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ---
 
-## Phase 2B — Enemies, guns, drops 🔄
+## Phase 2B — Enemies, guns, drops ✅
 
 | Task | Status | Notes |
 |---|---|---|
 | `base_enemy.gd` + 3 archetypes | ✅ Done | Chaser, Tank, Sprinter scenes + `.tres` |
 | `WaveDefinition` weighted spawns | ✅ Done | `wave_01.tres` — weights 5/2/3 |
-| Shotgun + orbit blade weapons | ⬜ Not started | |
-| XP orbs + `DropDefinition` | ⬜ Not started | |
+| Shotgun + orbit blade weapons | ✅ Done | Pellet spread + orbiting blades; player has all 3 |
+| XP orbs + `DropDefinition` | ✅ Done | Small/large XP + 5% health drop via `LootSpawner` |
 | Pistol migrated to data-driven | ✅ Done | Completed in 2A |
 
 ---
 
-## Phase 2C — UI polish
+## Phase 2C — UI polish ✅
 
 | Task | Status | Notes |
 |---|---|---|
 | HUD listens to EventBus only | ✅ Done | Completed in 2A refactor |
-| Floating damage numbers | ⬜ Not started | `damage_dealt` signal ready |
-| XP bar + level label | ⬜ Not started | |
-| Improved HP bar styling | ⬜ Not started | |
-| Pickup feedback text | ⬜ Not started | |
+| Floating damage numbers | ✅ Done | `FloatingTextManager` on `damage_dealt` |
+| XP bar + level label | ✅ Done | Bottom bar + `XpSystem` tracks orbs |
+| Improved HP bar styling | ✅ Done | Smooth tween via `stat_bar.gd` |
+| Pickup feedback text | ✅ Done | `+N XP` / `+N HP` floating text on collect |
+| Wave timer pulse (<10s) | ✅ Done | Color + scale pulse |
+| Tank enemy HP bars | ✅ Done | Thin bar above enemies with 50+ HP |
 
 ---
 
@@ -52,7 +54,7 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 | Task | Status | Notes |
 |---|---|---|
-| XP system | ⬜ Not started | Orbs → bar fill |
+| XP system | ✅ Done | `XpSystem` added in 2C (orbs → bar fill, level-up signal) |
 | Level-up picker | ⬜ Not started | 1 of 3 upgrades overlay |
 | Upgrade definitions | ⬜ Not started | Damage, speed, HP, etc. |
 
@@ -65,12 +67,32 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 | GdUnit4 addon | ✅ Done | `addons/gdUnit4` |
 | Unit tests (health, wave, spawn, arena) | ✅ Done | `tests/unit/` |
 | Integration test (game run state) | ✅ Done | `tests/integration/` |
+| `test_xp_system.gd` | ✅ Done | 7 cases |
 | Full `codecheck` pipeline | ✅ Done | Lint + format + boot + GdUnit4 tests |
 | Pre-commit hook (optional) | ✅ Done | `.githooks/pre-commit` on master via `install-git-hooks` |
 
 ---
 
 ## Changelog
+
+### Phase 2C
+
+- **Floating damage numbers** float up and fade on `damage_dealt`
+- **Pickup feedback** shows `+N XP` / `+N HP` at collect position
+- **XP bar** at bottom with level label; fills from orb pickups via `XpSystem`
+- **Level-up flash** on XP bar when threshold reached (`level_up` signal)
+- **HP bar** smooth tween + color shift at low health
+- **Timer pulse** when under 10 seconds remaining
+- **Tank HP bars** thin red bar above high-HP enemies
+- `pickup_collected` now includes `world_pos` and `value`
+
+### Phase 2B
+
+- **Shotgun:** 5 pellets, 32° spread, short range (data-driven via `WeaponDefinition`)
+- **Orbit blade:** 2 rotating blades around player with per-enemy hit cooldown
+- **Drops:** Cyan XP orbs (small +5, large +20 from tanks), green health pickups (+15 HP, 5% chance)
+- `LootSpawner` listens to `enemy_killed`, spawns drops from `EnemyDefinition.xp_drop`
+- `BasePickup` with magnet pull toward player; health pickup heals via `HealthComponent`
 
 ### Phase 2E (started)
 
@@ -100,6 +122,8 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 ## How to try it
 
 1. Open project in Godot 4.6+ and press **F5**
-2. Survive the 30-second wave — enemies now include red Chasers, large dark-red Tanks, and fast orange Sprinters
-3. Run `.\tools\codecheck.ps1` before handoff (Godot on PATH + optional `pip install gdtoolkit`)
-4. Run tests only: `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/`
+2. Kill enemies — damage numbers pop, XP orbs fill the bottom bar, health pickups show `+15 HP`
+3. Watch tanks for overhead HP bars; timer pulses orange under 10s
+4. Level up by collecting enough orbs — XP bar flashes
+5. Run `.\tools\codecheck.ps1` before handoff (Godot on PATH + optional `pip install gdtoolkit`)
+6. Run tests only: `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/`
