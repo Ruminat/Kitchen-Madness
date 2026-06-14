@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=3 format=3 uid="uid://enemydef_tank"]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_definition.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://enemy_tank" path="res://scenes/enemy/tank_enemy.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "tank"
+scene = ExtResource("2")
+max_health = 80
+move_speed = 45.0
+contact_damage = 15
+color = Color(0.55, 0.08, 0.08, 1)
+radius = 18.0

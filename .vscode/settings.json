@@ -1,5 +1,11 @@
 {
   "godotTools.editorPath.godot4": "godot4",
+  "files.watcherExclude": {
+    "**/.godot/**": true
+  },
+  "search.exclude": {
+    "**/.godot": true
+  },
   "files.associations": {
     "*.gd": "gdscript",
     "*.tscn": "gdresource"

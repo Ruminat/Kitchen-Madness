@@ -4,7 +4,7 @@ A lightweight top-down arena survivor roguelite built in **Godot 4** with **GDSc
 
 Inspired by [Brotato](https://store.steampowered.com/app/1942280/Brotato/) (also made in Godot), but this is an original project — placeholder art, incremental features, eventual cross-platform / Steam release.
 
-**Current status:** Phase 1 playable prototype — one enemy type, one auto-fire weapon, 30-second wave, win/lose screen.
+**Current status:** Phase 2A foundation complete; Phase 2B in progress — 3 enemy types, data-driven weapons/waves. See [progress.md](progress.md).
 
 ---
 

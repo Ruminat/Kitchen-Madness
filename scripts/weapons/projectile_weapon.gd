@@ -1,16 +1,15 @@
-extends Node2D
+extends BaseWeapon
 
-const FIRE_COOLDOWN := 0.45
-
-@export var projectile_scene: PackedScene
-
-var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var _cooldown := 0.0
 
 
 func _process(delta: float) -> void:
-	var player := get_parent()
-	if player != null and "health" in player and player.health <= 0:
+	var player := get_parent().get_parent() as CharacterBody2D
+	if player == null:
+		return
+
+	var health_component := player.get_node_or_null("HealthComponent") as HealthComponent
+	if health_component and not health_component.is_alive():
 		return
 
 	_cooldown -= delta
@@ -22,11 +21,7 @@ func _process(delta: float) -> void:
 		return
 
 	_fire_at(target)
-	_cooldown = FIRE_COOLDOWN
-
-
-func set_arena_bounds(bounds: Rect2) -> void:
-	arena_bounds = bounds
+	_cooldown = definition.fire_rate if definition else 0.45
 
 
 func _find_nearest_enemy() -> Node2D:
@@ -45,8 +40,17 @@ func _find_nearest_enemy() -> Node2D:
 
 
 func _fire_at(target: Node2D) -> void:
-	var projectile := projectile_scene.instantiate()
+	if definition == null or definition.projectile_scene == null:
+		return
+
+	var container := get_projectile_container()
+	if container == null:
+		return
+
+	var damage := definition.damage if definition else 15
 	var direction := (target.global_position - global_position).normalized()
-	projectile.setup(direction, arena_bounds)
-	get_tree().current_scene.get_node("ProjectileContainer").add_child(projectile)
+	var projectile := definition.projectile_scene.instantiate()
+	if projectile.has_method("setup"):
+		projectile.setup(direction, arena_bounds, damage)
+	container.add_child(projectile)
 	projectile.global_position = global_position

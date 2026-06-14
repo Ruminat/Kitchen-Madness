@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WaveDefinition" load_steps=6 format=3 uid="uid://wavedef_01"]
+
+[ext_resource type="Script" path="res://scripts/data/wave_definition.gd" id="1"]
+[ext_resource type="Resource" uid="uid://spawnentry_chaser" path="res://resources/enemies/chaser_spawn_entry.tres" id="2"]
+[ext_resource type="Resource" uid="uid://spawnentry_tank" path="res://resources/enemies/tank_spawn_entry.tres" id="3"]
+[ext_resource type="Resource" uid="uid://spawnentry_sprinter" path="res://resources/enemies/sprinter_spawn_entry.tres" id="4"]
+[ext_resource type="PackedScene" uid="uid://enemy001" path="res://scenes/enemy/enemy.tscn" id="5"]
+
+[resource]
+script = ExtResource("1")
+duration = 30.0
+spawn_interval = 1.4
+max_enemies = 40
+enemy_weights = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
+fallback_enemy_scene = ExtResource("5")

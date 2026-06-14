@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EnemySpawnEntry" load_steps=3 format=3 uid="uid://spawnentry_chaser"]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_spawn_entry.gd" id="1"]
+[ext_resource type="Resource" uid="uid://enemydef_chaser" path="res://resources/enemies/chaser.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+definition = ExtResource("2")
+weight = 5

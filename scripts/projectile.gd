@@ -1,10 +1,10 @@
 extends Area2D
 
 const SPEED := 480.0
-const DAMAGE := 15
 const LIFETIME := 2.0
 
 var direction := Vector2.RIGHT
+var damage := 15
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 
 
@@ -20,13 +20,14 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 
 
-func setup(fire_direction: Vector2, bounds: Rect2) -> void:
+func setup(fire_direction: Vector2, bounds: Rect2, projectile_damage: int = 15) -> void:
 	direction = fire_direction.normalized()
+	damage = projectile_damage
 	rotation = direction.angle()
 	arena_bounds = bounds
 
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
-		body.take_damage(DAMAGE)
+		body.take_damage(damage)
 		queue_free()
