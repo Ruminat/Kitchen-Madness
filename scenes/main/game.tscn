@@ -1,0 +1,113 @@
+[gd_scene load_steps=8 format=3 uid="uid://game001"]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://enemy001" path="res://scenes/enemy/enemy.tscn" id="3_enemy"]
+[ext_resource type="PackedScene" uid="uid://gameui001" path="res://scenes/ui/game_ui.tscn" id="4_ui"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_top"]
+size = Vector2(920, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bottom"]
+size = Vector2(920, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
+size = Vector2(24, 528)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_right"]
+size = Vector2(24, 528)
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_game")
+enemy_scene = ExtResource("3_enemy")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="Arena" type="Node2D" parent="."]
+
+[node name="Background" type="ColorRect" parent="Arena"]
+offset_left = -440.0
+offset_top = -240.0
+offset_right = 440.0
+offset_bottom = 240.0
+color = Color(0.12, 0.14, 0.18, 1)
+
+[node name="FloorGrid" type="ColorRect" parent="Arena"]
+offset_left = -430.0
+offset_top = -230.0
+offset_right = 430.0
+offset_bottom = 230.0
+color = Color(0.16, 0.18, 0.22, 1)
+
+[node name="Walls" type="Node2D" parent="Arena"]
+
+[node name="TopWall" type="StaticBody2D" parent="Arena/Walls"]
+position = Vector2(0, -252)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Arena/Walls/TopWall"]
+shape = SubResource("RectangleShape2D_top")
+
+[node name="Visual" type="ColorRect" parent="Arena/Walls/TopWall"]
+offset_left = -460.0
+offset_top = -12.0
+offset_right = 460.0
+offset_bottom = 12.0
+color = Color(0.45, 0.48, 0.55, 1)
+
+[node name="BottomWall" type="StaticBody2D" parent="Arena/Walls"]
+position = Vector2(0, 252)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Arena/Walls/BottomWall"]
+shape = SubResource("RectangleShape2D_bottom")
+
+[node name="Visual" type="ColorRect" parent="Arena/Walls/BottomWall"]
+offset_left = -460.0
+offset_top = -12.0
+offset_right = 460.0
+offset_bottom = 12.0
+color = Color(0.45, 0.48, 0.55, 1)
+
+[node name="LeftWall" type="StaticBody2D" parent="Arena/Walls"]
+position = Vector2(-452, 0)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Arena/Walls/LeftWall"]
+shape = SubResource("RectangleShape2D_left")
+
+[node name="Visual" type="ColorRect" parent="Arena/Walls/LeftWall"]
+offset_left = -12.0
+offset_top = -264.0
+offset_right = 12.0
+offset_bottom = 264.0
+color = Color(0.45, 0.48, 0.55, 1)
+
+[node name="RightWall" type="StaticBody2D" parent="Arena/Walls"]
+position = Vector2(452, 0)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Arena/Walls/RightWall"]
+shape = SubResource("RectangleShape2D_right")
+
+[node name="Visual" type="ColorRect" parent="Arena/Walls/RightWall"]
+offset_left = -12.0
+offset_top = -264.0
+offset_right = 12.0
+offset_bottom = 264.0
+color = Color(0.45, 0.48, 0.55, 1)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+
+[node name="EnemyContainer" type="Node2D" parent="."]
+
+[node name="ProjectileContainer" type="Node2D" parent="."]
+
+[node name="SpawnTimer" type="Timer" parent="."]
+autostart = true
+
+[node name="UI" parent="." instance=ExtResource("4_ui")]

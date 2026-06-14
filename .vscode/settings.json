@@ -1,0 +1,11 @@
+{
+  "godotTools.editorPath.godot4": "godot4",
+  "files.associations": {
+    "*.gd": "gdscript",
+    "*.tscn": "gdresource"
+  },
+  "[gdscript]": {
+    "editor.defaultFormatter": "gdformat",
+    "editor.formatOnSave": false
+  }
+}
