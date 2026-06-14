@@ -8,8 +8,11 @@
 
 [resource]
 script = ExtResource("1")
-duration = 30.0
+duration = 60.0
 spawn_interval = 1.4
-max_enemies = 40
+max_enemies = 160
+spawn_multiplier_start = 2.0
+spawn_multiplier_end = 8.0
+spawn_multiplier_curve = 2.0
 enemy_weights = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
 fallback_enemy_scene = ExtResource("5")

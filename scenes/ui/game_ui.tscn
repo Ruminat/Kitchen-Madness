@@ -141,3 +141,61 @@ custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Restart"
+
+[node name="LevelUpOverlay" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.58)
+
+[node name="CenterContainer" type="CenterContainer" parent="LevelUpOverlay"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="LevelUpOverlay/CenterContainer"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="LevelUpOverlay/CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Level Up!"
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Choose one upgrade"
+horizontal_alignment = 1
+
+[node name="UpgradeButton1" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "Upgrade 1"
+
+[node name="UpgradeButton2" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "Upgrade 2"
+
+[node name="UpgradeButton3" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "Upgrade 3"

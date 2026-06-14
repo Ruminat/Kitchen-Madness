@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal upgrade_selected(upgrade: Resource)
+
 const COLOR_TEXT := Color(0.92, 0.94, 0.97, 1.0)
 const COLOR_MUTED := Color(0.62, 0.66, 0.74, 1.0)
 const COLOR_PANEL := Color(0.07, 0.08, 0.11, 0.82)
@@ -21,17 +23,28 @@ const COLOR_XP_FLASH := Color(0.55, 0.88, 1.0, 1.0)
 @onready var overlay_label: Label = $Overlay/CenterContainer/VBox/OverlayLabel
 @onready var restart_hint: Label = $Overlay/CenterContainer/VBox/RestartHint
 @onready var restart_button: Button = $Overlay/CenterContainer/VBox/RestartButton
+@onready var level_up_overlay: ColorRect = $LevelUpOverlay
+@onready var level_up_panel: PanelContainer = $LevelUpOverlay/CenterContainer/PanelContainer
+@onready var upgrade_button_1: Button = $LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeButton1
+@onready var upgrade_button_2: Button = $LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeButton2
+@onready var upgrade_button_3: Button = $LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeButton3
 
 var _kills := 0
 var _timer_pulse_tween: Tween
 var _xp_flash_tween: Tween
+var _upgrade_buttons: Array[Button] = []
+var _upgrade_choices: Array[Resource] = []
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_upgrade_buttons = [upgrade_button_1, upgrade_button_2, upgrade_button_3]
 	_apply_hud_theme()
 	overlay.visible = false
+	level_up_overlay.visible = false
 	restart_button.pressed.connect(_on_restart_pressed)
+	for index in _upgrade_buttons.size():
+		_upgrade_buttons[index].pressed.connect(_on_upgrade_button_pressed.bind(index))
 
 	EventBus.player_health_changed.connect(_on_player_health_changed)
 	EventBus.wave_time_changed.connect(_on_wave_time_changed)
@@ -46,6 +59,7 @@ func _apply_hud_theme() -> void:
 	panel_style.set_corner_radius_all(8)
 	hud_panel.add_theme_stylebox_override("panel", panel_style)
 	xp_panel.add_theme_stylebox_override("panel", panel_style)
+	level_up_panel.add_theme_stylebox_override("panel", panel_style)
 
 	hp_bar.set_script(load("res://scripts/ui/stat_bar.gd"))
 	hp_bar.setup_bar(COLOR_BAR_BG, COLOR_BAR_FILL, 8.0)
@@ -60,6 +74,9 @@ func _apply_hud_theme() -> void:
 	overlay_label.add_theme_font_size_override("font_size", 48)
 	restart_hint.add_theme_color_override("font_color", COLOR_MUTED)
 	restart_hint.add_theme_font_size_override("font_size", 18)
+
+	for button in _upgrade_buttons:
+		button.add_theme_font_size_override("font_size", 16)
 
 
 func _on_restart_pressed() -> void:
@@ -145,3 +162,29 @@ func show_game_over() -> void:
 	restart_hint.text = "Press R to restart"
 	restart_hint.visible = true
 	restart_button.visible = true
+
+
+func show_level_up_options(upgrades: Array[Resource]) -> void:
+	_upgrade_choices = upgrades
+	level_up_overlay.visible = true
+
+	for index in _upgrade_buttons.size():
+		var button := _upgrade_buttons[index]
+		var has_choice := index < _upgrade_choices.size()
+		button.visible = has_choice
+		button.disabled = not has_choice
+		if has_choice:
+			var upgrade: Resource = _upgrade_choices[index]
+			button.text = "%s\n%s" % [upgrade.get("title"), upgrade.get("description")]
+
+
+func hide_level_up_options() -> void:
+	level_up_overlay.visible = false
+	_upgrade_choices.clear()
+
+
+func _on_upgrade_button_pressed(index: int) -> void:
+	if index < 0 or index >= _upgrade_choices.size():
+		return
+
+	upgrade_selected.emit(_upgrade_choices[index])

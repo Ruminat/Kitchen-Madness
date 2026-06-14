@@ -26,7 +26,7 @@ func _process(delta: float) -> void:
 func _damage_enemies_at_blades(player: Node2D) -> void:
 	var blade_count := definition.pellet_count if definition else 2
 	var orbit_radius := definition.orbit_radius if definition else 60.0
-	var damage := definition.damage if definition else 10
+	var damage := get_damage()
 	var center := player.global_position
 
 	for blade_index in blade_count:

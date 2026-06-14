@@ -2,13 +2,14 @@ extends CharacterBody2D
 
 signal died
 
-const MOVE_SPEED := 220.0
+const BASE_MOVE_SPEED := 220.0
 const CONTACT_DAMAGE := 10
 const BODY_RADIUS := 14.0
 ## Small buffer so fast enemies still register contact on the frame they touch.
 const CONTACT_FORGIVENESS := 2.0
 
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
+var move_speed := BASE_MOVE_SPEED
 
 @onready var visual: Node2D = $Visual
 @onready var health_component: HealthComponent = $HealthComponent
@@ -22,7 +23,7 @@ func _ready() -> void:
 	call_deferred("_emit_initial_health")
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if not is_alive():
 		return
 
@@ -33,7 +34,7 @@ func _physics_process(delta: float) -> void:
 	if input_dir.length_squared() > 1.0:
 		input_dir = input_dir.normalized()
 
-	velocity = input_dir * MOVE_SPEED
+	velocity = input_dir * move_speed
 	move_and_slide()
 	_clamp_to_arena()
 	_check_contact_damage()
@@ -69,6 +70,25 @@ func set_arena_bounds(bounds: Rect2) -> void:
 	arena_bounds = bounds
 	_clamp_to_arena()
 	weapon_controller.set_arena_bounds(bounds)
+
+
+func increase_weapon_damage_percent(percent: float) -> void:
+	weapon_controller.increase_damage_percent(percent)
+
+
+func increase_move_speed_percent(percent: float) -> void:
+	if percent <= 0.0:
+		return
+
+	move_speed *= 1.0 + percent
+
+
+func increase_max_health(amount: int) -> void:
+	health_component.increase_max_health(amount, amount)
+
+
+func increase_orbit_blades(amount: int) -> void:
+	weapon_controller.increase_orbit_blades(amount)
 
 
 func _emit_initial_health() -> void:

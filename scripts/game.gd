@@ -15,6 +15,7 @@ var is_game_over := false
 @onready var wave_manager: WaveManager = $WaveManager
 @onready var enemy_spawner: EnemySpawner = $EnemySpawner
 @onready var loot_spawner: LootSpawner = $LootSpawner
+@onready var level_up_manager: Node = $LevelUpManager
 @onready var ui: CanvasLayer = $UI
 
 
@@ -28,6 +29,8 @@ func _ready() -> void:
 	wave_manager.configure(wave)
 	enemy_spawner.configure(wave, enemy_container, bounds)
 	loot_spawner.configure(pickup_container, health_drop)
+	if level_up_manager.has_method("configure"):
+		level_up_manager.configure(player, ui, Callable(self, "is_run_active"))
 
 	EventBus.wave_completed.connect(_on_wave_completed)
 	EventBus.player_died.connect(_on_player_died)

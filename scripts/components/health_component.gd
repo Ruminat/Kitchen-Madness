@@ -47,6 +47,15 @@ func heal(amount: int) -> void:
 	health_changed.emit(current_health, max_health)
 
 
+func increase_max_health(amount: int, heal_amount: int = 0) -> void:
+	if amount <= 0:
+		return
+
+	max_health += amount
+	current_health = mini(current_health + maxi(heal_amount, 0), max_health)
+	health_changed.emit(current_health, max_health)
+
+
 func _start_invincibility() -> void:
 	_invincible = true
 	await get_tree().create_timer(invincibility_time).timeout

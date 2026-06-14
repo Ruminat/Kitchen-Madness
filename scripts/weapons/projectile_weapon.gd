@@ -47,7 +47,7 @@ func _fire_at(target: Node2D) -> void:
 	if container == null:
 		return
 
-	var damage := definition.damage if definition else 15
+	var damage := get_damage()
 	var base_direction := (target.global_position - global_position).normalized()
 	var pellet_count := definition.pellet_count if definition else 1
 	var spread := deg_to_rad(definition.spread_degrees if definition else 0.0)

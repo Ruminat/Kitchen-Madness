@@ -1,7 +1,7 @@
 class_name XpSystem
 extends Node
 
-const BASE_XP_TO_LEVEL := 20
+const BASE_XP_TO_LEVEL := 200
 
 var level := 1
 var current_xp := 0
@@ -34,7 +34,7 @@ func _on_pickup_collected(type: StringName, _world_pos: Vector2, value: int) -> 
 
 
 func _xp_required_for_level(next_level: int) -> int:
-	return BASE_XP_TO_LEVEL + (next_level - 1) * 5
+	return BASE_XP_TO_LEVEL + (next_level - 1) * 50
 
 
 func _emit_xp_changed() -> void:

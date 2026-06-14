@@ -40,3 +40,14 @@ func set_arena_bounds(bounds: Rect2) -> void:
 	_arena_bounds = bounds
 	for weapon in _weapons:
 		weapon.set_arena_bounds(bounds)
+
+
+func increase_damage_percent(percent: float) -> void:
+	for weapon in _weapons:
+		weapon.increase_damage_percent(percent)
+
+
+func increase_orbit_blades(amount: int) -> void:
+	for weapon in _weapons:
+		if weapon.definition and weapon.definition.id == "orbit_blade":
+			weapon.increase_pellet_count(amount)

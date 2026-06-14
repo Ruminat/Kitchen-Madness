@@ -4,11 +4,11 @@ Handoff doc for new chat sessions. See [progress.md](progress.md) for task-level
 
 ## Current status (as of last session)
 
-**Phase 2A complete.** **Phase 2B complete.** **Phase 2C complete.** **Phase 2D next** (level-up picker). **Phase 2E mostly done** (GdUnit4 + codecheck + pre-commit hook).
+**Phase 2A complete.** **Phase 2B complete.** **Phase 2C complete.** **Phase 2D complete** (level-up picker + upgrades). **Phase 2E complete** (GdUnit4 + codecheck + pre-commit hook).
 
-Playable loop: 30s wave, 3 enemy types, pistol + shotgun + orbit blades, XP orbs + health drops, floating damage/pickup text, XP bar with level-ups, compact HUD, win/lose overlay. Game **pauses** on death or wave complete (only R / Restart works).
+Playable loop: 60s wave, 3 enemy types, pistol + shotgun + orbit blades, XP orbs + health drops, floating damage/pickup text, XP bar, level-up picker, compact HUD, win/lose overlay. Enemy spawning ramps from 2x to 8x over the wave; XP thresholds are 10x slower than the early prototype. Game **pauses** on level-up choices, death, or wave complete.
 
-Latest commit on `master`: `c873b19` — tests, git hooks, polish fixes. Not pushed.
+Local branch has Phase 2D/progression tuning work; not pushed.
 
 ---
 
@@ -23,14 +23,16 @@ Latest commit on `master`: `c873b19` — tests, git hooks, polish fixes. Not pus
 
 **Godot 4.6+** required. **Godot must be on PATH** (`godot` — user has 4.6.3). Optional: `pip install gdtoolkit` for lint/format in codecheck.
 
+**Local editor:** `.vscode/settings.json` is gitignored — set `godotTools.editorPath.godot4` to your Godot binary locally.
+
 ---
 
 ## Game overview
 
 Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 
-- **Done:** Arena, player, weighted enemy spawns, pistol/shotgun/orbit blades, wave timer, HUD + XP bar, floating combat text, win/lose + pause, XP orbs + health drops
-- **Next (plans):** Level-up picker (1 of 3 upgrades)
+- **Done:** Arena, player, weighted enemy spawns, pistol/shotgun/orbit blades, wave timer, HUD + XP bar, level-up picker, floating combat text, win/lose + pause, XP orbs + health drops
+- **Next (plans):** Phase 3 planning — shop using the same upgrade/stat system
 - **Long-term:** Shop, multiple maps, Steam
 
 ## Main scene
@@ -49,6 +51,7 @@ Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 | **WeaponController** | on player | Loads weapons from `WeaponDefinition` `.tres`. |
 | **SpawnTable** | `scripts/systems/spawn_table.gd` | Weighted enemy pick (unit-tested). |
 | **XpSystem** | `scripts/systems/xp_system.gd` | Listens to `pickup_collected`; emits `xp_changed` / `level_up`. |
+| **LevelUpManager** | `scripts/systems/level_up_manager.gd` | Queues level-ups, pauses for 1 of 3 upgrades, applies `UpgradeDefinition` resources. |
 | **FloatingTextManager** | `scripts/ui/floating_text_manager.gd` | Damage + pickup feedback via EventBus. |
 | **Resource definitions** | `scripts/data/*.gd` + `resources/` | Add content via `.tres`, not by editing spawner logic. |
 
@@ -59,6 +62,8 @@ Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 **Window:** `WindowSetup` autoload — borderless full monitor on boot. Skipped in headless (tests/CI).
 
 **Camera:** `game.gd` zooms to fit arena on viewport resize.
+
+**Arena visual:** floor uses `assets/arena/sand_tile.jpg` in `scenes/arena/arena.tscn`.
 
 ---
 
@@ -84,10 +89,10 @@ scenes/
 scripts/
   autoload/          event_bus.gd, window_setup.gd
   components/        health_component.gd, arena_clamp.gd, enemy_health_bar.gd
-  data/              enemy/weapon/drop/wave definitions
+  data/              enemy/weapon/drop/wave/upgrade definitions
   enemies/           base_enemy.gd, chaser_enemy.gd, sprinter_enemy.gd
   pickups/           base_pickup.gd, health_pickup.gd
-  systems/           wave_manager.gd, enemy_spawner.gd, spawn_table.gd, loot_spawner.gd, xp_system.gd
+  systems/           wave_manager.gd, enemy_spawner.gd, spawn_table.gd, loot_spawner.gd, xp_system.gd, level_up_manager.gd
   ui/                floating_text.gd, floating_text_manager.gd, stat_bar.gd
   weapons/           weapon_controller.gd, base_weapon.gd, projectile_weapon.gd, orbit_weapon.gd
   game.gd, player.gd, projectile.gd, game_ui.gd, circle_visual.gd, arena.gd
@@ -95,6 +100,7 @@ resources/
   enemies/           chaser, tank, sprinter + spawn entries
   weapons/           pistol.tres, shotgun.tres, orbit_blade.tres
   drops/             xp_orb_small.tres, xp_orb_large.tres, health_pickup.tres
+  upgrades/          damage_boost, speed_boost, max_health, orbit_blade
   waves/             wave_01.tres
 tests/
   unit/              health, wave, spawn, arena, xp
@@ -133,7 +139,7 @@ godot --headless --path . -s --remote-debug tcp://127.0.0.1:0 res://addons/gdUni
 .\tools\install-git-hooks.ps1
 ```
 
-**Tests:** 33 cases, 9 suites. Integration tests must not `await` timers after pausing the tree — assert synchronously after `EventBus` emits.
+**Tests:** 41 cases, 11 suites. Integration tests must not `await` timers after pausing the tree — assert synchronously after `EventBus` emits.
 
 **Strict typing:** Godot 4.6 + GdUnit4 treat inference warnings as errors. Use explicit types on `auto_free()` results and typed arrays.
 
@@ -141,7 +147,7 @@ godot --headless --path . -s --remote-debug tcp://127.0.0.1:0 res://addons/gdUni
 
 ## Recommended next work (from plans.md)
 
-1. **Phase 2D:** Level-up picker overlay (1 of 3 upgrades), upgrade definitions
+1. **Phase 3:** Shop / between-wave upgrade flow using existing `UpgradeDefinition` resources
 
 Vertical slices: each step playable + `codecheck` green + update `progress.md`.
 

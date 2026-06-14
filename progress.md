@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase.
 
-**Last updated:** Phase 2C complete
+**Last updated:** Phase 2D complete
 
 ---
 
@@ -50,13 +50,13 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ---
 
-## Phase 2D — XP and progression loop
+## Phase 2D — XP and progression loop ✅
 
 | Task | Status | Notes |
 |---|---|---|
 | XP system | ✅ Done | `XpSystem` added in 2C (orbs → bar fill, level-up signal) |
-| Level-up picker | ⬜ Not started | 1 of 3 upgrades overlay |
-| Upgrade definitions | ⬜ Not started | Damage, speed, HP, etc. |
+| Level-up picker | ✅ Done | Pauses after level-up, shows 1 of 3 upgrade choices |
+| Upgrade definitions | ✅ Done | Damage, speed, max HP, orbit blade resources |
 
 ---
 
@@ -74,6 +74,13 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 ---
 
 ## Changelog
+
+### Phase 2D
+
+- **Level-up picker:** after XP fills the bar, gameplay pauses briefly and offers 3 upgrades
+- **Upgrade definitions:** data resources for +10% damage, +10% speed, +20 max HP, +1 orbit blade
+- `LevelUpManager` queues level-ups, applies selected upgrades, and resumes active runs
+- Runtime weapon definitions are duplicated before upgrades modify damage or orbit blade counts
 
 ### Phase 2C
 

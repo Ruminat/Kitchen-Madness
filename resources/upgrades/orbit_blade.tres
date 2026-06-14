@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=2 format=3 uid="uid://upgrade_orbit_blade"]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "orbit_blade"
+title = "Extra Blade"
+description = "+1 orbit blade"
+effect = &"orbit_blade_flat"
+amount = 1.0

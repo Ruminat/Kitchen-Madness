@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=2 format=3 uid="uid://upgrade_health"]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "max_health"
+title = "Thick Skin"
+description = "+20 max HP and heal 20"
+effect = &"max_health_flat"
+amount = 20.0

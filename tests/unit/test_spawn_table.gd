@@ -40,3 +40,19 @@ func test_spawner_respects_max_enemy_cap() -> void:
 	spawner._spawn_enemy()
 	spawner._spawn_enemy()
 	assert_int(container.get_child_count()).is_equal(2)
+
+
+func test_spawner_scales_interval_with_wave_multiplier() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	var wave := WaveDefinition.new()
+	wave.duration = 60.0
+	wave.spawn_interval = 1.4
+	wave.spawn_multiplier_start = 2.0
+	wave.spawn_multiplier_end = 8.0
+	wave.spawn_multiplier_curve = 2.0
+	spawner.wave_definition = wave
+
+	assert_float(spawner._current_spawn_interval()).is_equal(0.7)
+
+	spawner._elapsed_time = 60.0
+	assert_float(spawner._current_spawn_interval()).is_equal(0.175)
