@@ -23,11 +23,16 @@ run_or_skip() {
     fi
 }
 
+GDSCRIPT_PATHS=(scripts/ tests/)
+while IFS= read -r -d '' tool_script; do
+    GDSCRIPT_PATHS+=("$tool_script")
+done < <(find tools -maxdepth 1 -name "*.gd" -print0)
+
 step "Lint (gdlint)"
-run_or_skip gdlint gdlint scripts/ tests/ tools/*.gd
+run_or_skip gdlint gdlint "${GDSCRIPT_PATHS[@]}"
 
 step "Format check (gdformat)"
-run_or_skip gdformat gdformat --check scripts/ tests/ tools/*.gd
+run_or_skip gdformat gdformat --check "${GDSCRIPT_PATHS[@]}"
 
 step "Headless boot smoke"
 if command -v godot >/dev/null 2>&1; then

@@ -8,13 +8,20 @@ Run the full project check before handoff:
 .\tools\codecheck.ps1
 ```
 
-This script runs optional GDScript lint/format checks when `gdtoolkit` is installed, boots Godot headless, and runs the GdUnit test suite.
+This script runs GDScript lint/format checks when `gdtoolkit` is installed, boots Godot headless, and runs the GdUnit test suite.
 
 Install optional GDScript tooling with:
 
 ```bash
 pip install gdtoolkit
 ```
+
+The repo keeps gdtoolkit config at the root:
+
+- `.gdlintrc` for `gdlint`
+- `.gdformatrc` for `gdformat`
+
+Both use the project default of tabs and 100-character lines. Run `gdformat` before handoff if format check fails, then rerun `.\tools\codecheck.ps1`.
 
 ## Tests
 

@@ -1,6 +1,8 @@
 # GdUnit generated TestSuite
 extends GdUnitTestSuite
 
+const ENEMY_SCENE := preload("res://scenes/enemy/enemy.tscn")
+
 
 func test_empty_entries_returns_null() -> void:
 	assert_object(SpawnTable.pick_weighted([], 0)).is_null()
@@ -34,7 +36,7 @@ func test_spawner_respects_max_enemy_cap() -> void:
 	var wave := WaveDefinition.new()
 	wave.max_enemies = 2
 	wave.spawn_interval = 999.0
-	wave.fallback_enemy_scene = preload("res://scenes/enemy/enemy.tscn")
+	wave.fallback_enemy_scene = ENEMY_SCENE
 
 	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	spawner._spawn_enemy()
@@ -66,10 +68,10 @@ func test_spawner_reconfigure_reuses_spawn_timer() -> void:
 
 	var wave_one := WaveDefinition.new()
 	wave_one.spawn_interval = 2.0
-	wave_one.fallback_enemy_scene = preload("res://scenes/enemy/enemy.tscn")
+	wave_one.fallback_enemy_scene = ENEMY_SCENE
 	var wave_two := WaveDefinition.new()
 	wave_two.spawn_interval = 1.0
-	wave_two.fallback_enemy_scene = preload("res://scenes/enemy/enemy.tscn")
+	wave_two.fallback_enemy_scene = ENEMY_SCENE
 
 	spawner.configure(wave_one, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	var timer := spawner._spawn_timer
@@ -77,6 +79,36 @@ func test_spawner_reconfigure_reuses_spawn_timer() -> void:
 
 	assert_object(spawner._spawn_timer).is_same(timer)
 	assert_float(spawner._spawn_timer.wait_time).is_equal(1.0)
+
+
+func test_spawner_picks_positions_outside_camera_view() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	var target: Node2D = auto_free(Node2D.new()) as Node2D
+	add_child(spawner)
+	add_child(target)
+	target.global_position = Vector2.ZERO
+
+	var container: Node2D = auto_free(Node2D.new()) as Node2D
+	add_child(container)
+	var bounds := Rect2(-1320.0, -720.0, 2640.0, 1440.0)
+	var view_size := Vector2(880.0, 480.0)
+	spawner.set_camera_spawn_target(target, view_size)
+	spawner.configure(WaveDefinition.new(), container, bounds)
+	var camera_rect := Rect2(target.global_position - view_size * 0.5, view_size)
+	var inner_bounds := bounds.grow(-EnemySpawner.EDGE_MARGIN)
+
+	for _attempt in 20:
+		var spawn_position: Vector2 = spawner._random_offscreen_position()
+		assert_bool(inner_bounds.has_point(spawn_position)).is_true()
+		assert_bool(camera_rect.has_point(spawn_position)).is_false()
+
+
+func test_spawner_falls_back_to_arena_edge_without_camera_target() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	spawner.arena_bounds = Rect2(-1320.0, -720.0, 2640.0, 1440.0)
+
+	assert_vector(spawner._random_offscreen_position()).is_equal(Vector2.INF)
+	assert_bool(spawner.arena_bounds.has_point(spawner._random_spawn_position())).is_true()
 
 
 func test_spawner_caps_elite_enemies_at_two() -> void:
@@ -100,7 +132,7 @@ func test_spawner_caps_elite_enemies_at_two() -> void:
 
 	var wave := WaveDefinition.new()
 	wave.enemy_weights = [chaser_entry, tank_entry]
-	wave.fallback_enemy_scene = preload("res://scenes/enemy/enemy.tscn")
+	wave.fallback_enemy_scene = ENEMY_SCENE
 
 	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	_add_elite_stub(container, tank)

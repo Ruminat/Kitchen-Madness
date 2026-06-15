@@ -32,8 +32,7 @@ func _physics_process(_delta: float) -> void:
 		return
 
 	var input_dir := Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_axis("move_up", "move_down")
+		Input.get_axis("move_left", "move_right"), Input.get_axis("move_up", "move_down")
 	)
 	if input_dir.length_squared() > 1.0:
 		input_dir = input_dir.normalized()
@@ -138,7 +137,9 @@ func get_health_drop_chance_bonus() -> float:
 
 
 func _emit_initial_health() -> void:
-	EventBus.player_health_changed.emit(health_component.current_health, health_component.max_health)
+	EventBus.player_health_changed.emit(
+		health_component.current_health, health_component.max_health
+	)
 
 
 func _on_health_changed(current: int, maximum: int) -> void:
@@ -167,7 +168,10 @@ func _check_contact_damage() -> void:
 			enemy_radius = enemy.get_collision_radius()
 
 		var touch_distance := BODY_RADIUS + enemy_radius + CONTACT_FORGIVENESS
-		if global_position.distance_squared_to(enemy.global_position) > touch_distance * touch_distance:
+		if (
+			global_position.distance_squared_to(enemy.global_position)
+			> touch_distance * touch_distance
+		):
 			continue
 
 		var damage := CONTACT_DAMAGE

@@ -3,10 +3,13 @@ extends Node
 
 const EDGE_MARGIN := 20.0
 const MAX_ELITE_ALIVE := 2
+const SPAWN_OFFSCREEN_MARGIN := 80.0
 
 var wave_definition: WaveDefinition
 var enemy_container: Node2D
 var arena_bounds := Rect2()
+var camera_target: Node2D
+var camera_view_size := Arena.DEFAULT_VIEW_SIZE
 
 var is_active := true
 var _spawn_timer: Timer
@@ -48,6 +51,15 @@ func reset() -> void:
 		_spawn_timer.start()
 
 
+func set_camera_view_size(view_size: Vector2) -> void:
+	camera_view_size = view_size
+
+
+func set_camera_spawn_target(focus_target: Node2D, view_size: Vector2) -> void:
+	camera_target = focus_target
+	camera_view_size = view_size
+
+
 func _spawn_enemy() -> void:
 	if not is_active or enemy_container == null:
 		return
@@ -65,7 +77,7 @@ func _spawn_enemy() -> void:
 
 	var enemy := scene.instantiate() as CharacterBody2D
 	enemy_container.add_child(enemy)
-	enemy.global_position = _random_edge_position()
+	enemy.global_position = _random_spawn_position()
 	if enemy.has_method("set_arena_bounds"):
 		enemy.set_arena_bounds(arena_bounds)
 	if enemy.has_method("configure") and definition:
@@ -150,7 +162,58 @@ func _current_spawn_interval() -> float:
 	return base_interval / maxf(multiplier, 0.01)
 
 
-func _random_edge_position() -> Vector2:
+func _random_spawn_position() -> Vector2:
+	var offscreen_position := _random_offscreen_position()
+	if offscreen_position != Vector2.INF:
+		return offscreen_position
+	return _random_arena_edge_position()
+
+
+func _random_offscreen_position() -> Vector2:
+	if camera_target == null:
+		return Vector2.INF
+
+	var inner_bounds := arena_bounds.grow(-EDGE_MARGIN)
+	var camera_rect := Rect2(
+		camera_target.global_position - camera_view_size * 0.5, camera_view_size
+	)
+	var spawn_bands := _build_spawn_bands(camera_rect, inner_bounds)
+	if spawn_bands.is_empty():
+		return Vector2.INF
+
+	var band: Dictionary = spawn_bands[randi() % spawn_bands.size()]
+	if band.axis == &"horizontal":
+		return Vector2(randf_range(band.min, band.max), band.fixed)
+	return Vector2(band.fixed, randf_range(band.min, band.max))
+
+
+func _build_spawn_bands(camera_rect: Rect2, inner_bounds: Rect2) -> Array[Dictionary]:
+	var bands: Array[Dictionary] = []
+	var min_x := maxf(camera_rect.position.x, inner_bounds.position.x)
+	var max_x := minf(camera_rect.end.x, inner_bounds.end.x)
+	var min_y := maxf(camera_rect.position.y, inner_bounds.position.y)
+	var max_y := minf(camera_rect.end.y, inner_bounds.end.y)
+
+	var top_y := camera_rect.position.y - SPAWN_OFFSCREEN_MARGIN
+	if top_y >= inner_bounds.position.y and min_x <= max_x:
+		bands.append({"axis": &"horizontal", "fixed": top_y, "min": min_x, "max": max_x})
+
+	var bottom_y := camera_rect.end.y + SPAWN_OFFSCREEN_MARGIN
+	if bottom_y <= inner_bounds.end.y and min_x <= max_x:
+		bands.append({"axis": &"horizontal", "fixed": bottom_y, "min": min_x, "max": max_x})
+
+	var left_x := camera_rect.position.x - SPAWN_OFFSCREEN_MARGIN
+	if left_x >= inner_bounds.position.x and min_y <= max_y:
+		bands.append({"axis": &"vertical", "fixed": left_x, "min": min_y, "max": max_y})
+
+	var right_x := camera_rect.end.x + SPAWN_OFFSCREEN_MARGIN
+	if right_x <= inner_bounds.end.x and min_y <= max_y:
+		bands.append({"axis": &"vertical", "fixed": right_x, "min": min_y, "max": max_y})
+
+	return bands
+
+
+func _random_arena_edge_position() -> Vector2:
 	var side := randi() % 4
 	var bounds := arena_bounds
 

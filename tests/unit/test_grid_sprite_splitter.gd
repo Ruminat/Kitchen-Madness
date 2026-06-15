@@ -23,16 +23,19 @@ func test_split_image_centers_subjects_from_each_cell() -> void:
 		var local_offset := Vector2i(3 + (index % 3) * 4, 4 + row * 3)
 		_paint_rect(grid, Rect2i(cell.position + local_offset, Vector2i(12, 16)), colors[index])
 
-	var sprites: Array[Image] = Splitter.split_image(
-		grid,
-		3,
-		3,
-		{
-			"output_size": Vector2i(64, 64),
-			"padding": 8,
-			"background_color": Color.BLACK,
-			"background_tolerance": 0.03,
-		}
+	var sprites: Array[Image] = (
+		Splitter
+		. split_image(
+			grid,
+			3,
+			3,
+			{
+				"output_size": Vector2i(64, 64),
+				"padding": 8,
+				"background_color": Color.BLACK,
+				"background_tolerance": 0.03,
+			}
+		)
 	)
 
 	assert_int(sprites.size()).is_equal(9)
@@ -47,17 +50,20 @@ func test_split_image_removes_only_edge_connected_background() -> void:
 	_paint_rect(grid, Rect2i(7, 7, 16, 16), Color(0.9, 0.3, 0.1))
 	_paint_rect(grid, Rect2i(13, 13, 4, 4), Color.BLACK)
 
-	var sprites: Array[Image] = Splitter.split_image(
-		grid,
-		1,
-		1,
-		{
-			"output_size": Vector2i(30, 30),
-			"padding": 0,
-			"background_color": Color.BLACK,
-			"background_tolerance": 0.03,
-			"allow_upscale": false,
-		}
+	var sprites: Array[Image] = (
+		Splitter
+		. split_image(
+			grid,
+			1,
+			1,
+			{
+				"output_size": Vector2i(30, 30),
+				"padding": 0,
+				"background_color": Color.BLACK,
+				"background_tolerance": 0.03,
+				"allow_upscale": false,
+			}
+		)
 	)
 	var sprite: Image = sprites[0]
 

@@ -140,7 +140,8 @@ func _spawn_enemy_ring(game: Node, count: int) -> void:
 		var definition: EnemyDefinition = definitions[index % definitions.size()]
 		var enemy := definition.scene.instantiate() as CharacterBody2D
 		container.add_child(enemy)
-		enemy.global_position = Vector2.RIGHT.rotated(TAU * float(index) / float(count)) * _ring_radius(index)
+		var ring_direction := Vector2.RIGHT.rotated(TAU * float(index) / float(count))
+		enemy.global_position = ring_direction * _ring_radius(index)
 		if enemy.has_method("set_arena_bounds"):
 			enemy.set_arena_bounds(arena.get_bounds())
 		if enemy.has_method("configure"):

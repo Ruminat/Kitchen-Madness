@@ -8,11 +8,7 @@ var _damage_multiplier := 1.0
 var _fire_rate_multiplier := 1.0
 
 
-func setup(
-	def: WeaponDefinition,
-	bounds: Rect2,
-	projectile_container: Node2D
-) -> void:
+func setup(def: WeaponDefinition, bounds: Rect2, projectile_container: Node2D) -> void:
 	definition = (def.duplicate() as WeaponDefinition) if def else null
 	arena_bounds = bounds
 	_projectile_container = projectile_container

@@ -7,10 +7,7 @@ var _fill_tween: Tween
 
 
 func setup_bar(
-	bg_color: Color,
-	fill_color: Color,
-	bar_height: float = 8.0,
-	corner_radius: int = 3
+	bg_color: Color, fill_color: Color, bar_height: float = 8.0, corner_radius: int = 3
 ) -> void:
 	custom_minimum_size.y = bar_height
 	show_percentage = false

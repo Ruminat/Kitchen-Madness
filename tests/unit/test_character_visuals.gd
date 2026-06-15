@@ -109,6 +109,14 @@ func test_arena_uses_dirty_kitchen_floor_tiles() -> void:
 	assert_int(background.stretch_mode).is_equal(TextureRect.STRETCH_TILE)
 
 
+func test_arena_bounds_are_three_times_camera_view() -> void:
+	var arena: Arena = auto_free(ARENA_SCENE.instantiate()) as Arena
+	add_child(arena)
+	await _wait_ready(arena)
+
+	assert_vector(arena.get_bounds().size).is_equal(Arena.DEFAULT_VIEW_SIZE * 3.0)
+
+
 func test_arena_floor_tiles_scaled_five_times_smaller() -> void:
 	var arena: Node2D = auto_free(ARENA_SCENE.instantiate()) as Node2D
 	add_child(arena)
@@ -117,10 +125,10 @@ func test_arena_floor_tiles_scaled_five_times_smaller() -> void:
 	var floor_tiles: Node2D = arena.get_node("FloorTiles") as Node2D
 	var background: TextureRect = arena.get_node("FloorTiles/Background") as TextureRect
 	assert_vector(floor_tiles.scale).is_equal(Vector2(0.2, 0.2))
-	assert_float(background.offset_left).is_equal(-2200.0)
-	assert_float(background.offset_top).is_equal(-1200.0)
-	assert_float(background.offset_right).is_equal(2200.0)
-	assert_float(background.offset_bottom).is_equal(1200.0)
+	assert_float(background.offset_left).is_equal(-6600.0)
+	assert_float(background.offset_top).is_equal(-3600.0)
+	assert_float(background.offset_right).is_equal(6600.0)
+	assert_float(background.offset_bottom).is_equal(3600.0)
 
 
 func test_projectile_uses_bolt_sprite() -> void:

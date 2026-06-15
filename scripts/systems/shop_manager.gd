@@ -27,10 +27,7 @@ func _ready() -> void:
 
 
 func configure(
-	player: Node,
-	ui: Node,
-	gold_system: GoldSystem,
-	on_continue: Callable = Callable()
+	player: Node, ui: Node, gold_system: GoldSystem, on_continue: Callable = Callable()
 ) -> void:
 	_player = player
 	_ui = ui

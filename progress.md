@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase.
 
-**Last updated:** Phase 3B sprite placeholders + wave ramp
+**Last updated:** gdtoolkit lint/format config
 
 ---
 
@@ -99,7 +99,32 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ---
 
+## Phase 3C — Larger map and off-camera spawns ✅
+
+| Task | Status | Notes |
+|---|---|---|
+| 3x arena | ✅ Done | Arena bounds now `2640x1440` from `Arena.DEFAULT_VIEW_SIZE * 3` |
+| Following camera | ✅ Done | Camera keeps old 1x view, follows player, clamps to map edges |
+| Off-camera spawns | ✅ Done | Enemies pick spawn bands just outside the current camera rect |
+| Tests | ✅ Done | Arena size, off-camera spawn positions, fallback spawning |
+
+---
+
 ## Changelog
+
+### Tooling
+
+- Added root `.gdlintrc` and `.gdformatrc` so gdtoolkit uses consistent lint/format rules
+- Fixed `codecheck.ps1` and `codecheck.sh` to pass explicit GDScript paths instead of fragile globs
+- Updated the pre-commit hook to run on `main` as well as `master`
+- Ran `gdformat` across checked GDScript paths and fixed lint issues surfaced by gdtoolkit
+
+### Phase 3C
+
+- **Map:** expanded arena geometry, walls, and tiled floor to 3x the original play area
+- **Camera:** zoom now targets the original 1x view size and follows the player across the larger map
+- **Spawns:** `EnemySpawner` uses the player/camera view to place enemies just outside the visible area, falling back to arena edges when needed
+- **Tests:** added coverage for 3x arena bounds and off-camera spawn placement
 
 ### Phase 3B
 

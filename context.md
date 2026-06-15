@@ -4,22 +4,23 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 ## Current status
 
-**Phase 3B done** — projectile/pickup sprites replaced remaining circle placeholders; wave 1-3 resources now ramp spawn pace, caps, and enemy weights; later waves reuse the final authored wave.
+**Phase 3C done** — arena is 3x larger, camera keeps the old 1x view and follows/clamps to the player, enemies spawn just outside the camera view.
 
 **Visual pass:** Sprites for player (Sprout), enemies, arena floor, projectiles, XP orbs, and health pickups. Player roster + grid splitter in `tools/` — see `docs/sprite-grid-splitter.md`.
 
 **Loop:** 60s waves → shop → next wave. Pauses on level-up, shop, death. Spawns ramp 2×–8×; XP thresholds tuned slow.
+**Map/camera:** Arena bounds are `2640x1440`; camera view targets old `880x480` play area and follows the player.
 
 ---
 
 ## Iteration rule
 
 1. Zero parser/scene errors · **F5** smoke test
-2. `.\tools\codecheck.ps1` must pass
+2. `.\tools\codecheck.ps1` must pass (gdlint + gdformat + boot + tests)
 3. Update [progress.md](progress.md) after a phase/slice
 4. For large visual/gameplay iterations, run `.\tools\capture-visuals.ps1` and inspect `visual-tests/screenshots/`
 
-**Godot 4.6+** on PATH. Optional: `pip install gdtoolkit`. **Never commit `.vscode/`** — local editor settings only (see `.gitignore`).
+**Godot 4.6+** and `gdtoolkit` on PATH. Lint/format config: `.gdlintrc`, `.gdformatrc`. **Never commit `.vscode/`**.
 
 ---
 
@@ -63,7 +64,7 @@ scripts/ui/        game_ui.gd, upgrade_display.gd, floating_text_manager.gd
 resources/upgrades/  max_health, armor, damage_boost, attack_speed, speed_boost, luck, pickup_range, xp_gain
 resources/waves/   wave_01.tres
 tests/             unit + integration (GdUnit4)
-tools/codecheck.ps1
+tools/codecheck.ps1 / .sh
 ```
 
 Sprites / hurtboxes: [hitbox.md](hitbox.md)
@@ -83,8 +84,8 @@ Integration tests: assert synchronously after `EventBus` emits — don't `await`
 
 ## Next work
 
-1. Capture/review visuals after the sprite + wave-ramp pass
-2. Tune wave 2/3 difficulty from playtest screenshots
+1. Capture/review visuals after the larger-map + off-camera-spawn pass
+2. Tune enemy spawn margin/density from playtest screenshots
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 

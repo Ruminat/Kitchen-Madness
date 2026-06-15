@@ -5,7 +5,8 @@ const USAGE := """
 Split a generated character grid into centered PNG sprites.
 
 Usage:
-  godot --headless --path . -s res://tools/split_grid_sprites.gd -- --input INPUT --output-dir DIR --grid 3x3
+  godot --headless --path . -s res://tools/split_grid_sprites.gd -- \
+    --input INPUT --output-dir DIR --grid 3x3
 
 Options:
   --input, -i PATH              Source image path.
@@ -14,7 +15,8 @@ Options:
   --cols N                      Column count. Use with --rows.
   --rows N                      Row count. Use with --cols.
   --pattern PATTERN             Output name pattern. Default: {stem}_{index}.png
-                                Tokens: {stem}, {name}, {index}, {index0}, {row}, {row0}, {col}, {col0}
+                                Tokens: {stem}, {name}, {index}, {index0},
+                                {row}, {row0}, {col}, {col0}
   --names CSV                   Optional comma-separated names in grid order. Use with {name}.
   --output-size WxH             Output sprite size. Example: 256x256. A single N means NxN.
   --padding N                   Empty pixels kept around the centered subject. Default: 8.

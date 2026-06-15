@@ -14,6 +14,17 @@ const COLOR_BAR_FILL_LOW := Color(0.95, 0.42, 0.18, 1.0)
 const COLOR_XP_FILL := Color(0.28, 0.62, 0.95, 1.0)
 const COLOR_XP_FLASH := Color(0.55, 0.88, 1.0, 1.0)
 const COLOR_LEVEL_UP_ACCENT := Color(0.55, 0.88, 1.0, 1.0)
+const STAT_BAR_SCRIPT := preload("res://scripts/ui/stat_bar.gd")
+
+var _kills := 0
+var _current_wave := 1
+var _current_gold := 0
+var _timer_pulse_tween: Tween
+var _xp_flash_tween: Tween
+var _upgrade_buttons: Array[Button] = []
+var _upgrade_choices: Array[Resource] = []
+var _shop_buttons: Array[Button] = []
+var _shop_upgrades: Array[Resource] = []
 
 @onready var hp_bar: ProgressBar = $HudPanel/MarginContainer/VBox/HPRow/HPBar
 @onready var hp_value_label: Label = $HudPanel/MarginContainer/VBox/HPRow/HPValue
@@ -30,42 +41,83 @@ const COLOR_LEVEL_UP_ACCENT := Color(0.55, 0.88, 1.0, 1.0)
 @onready var restart_button: Button = $Overlay/CenterContainer/VBox/RestartButton
 @onready var level_up_overlay: ColorRect = $LevelUpOverlay
 @onready var level_up_panel: PanelContainer = $LevelUpOverlay/CenterContainer/PanelContainer
-@onready var level_up_title_label: Label = $LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/TitleLabel
-@onready var level_up_hint_label: Label = $LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/HintLabel
-@onready var upgrade_button_1: Button = $LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeChoices/UpgradeButton1
-@onready var upgrade_button_2: Button = $LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeChoices/UpgradeButton2
-@onready var upgrade_button_3: Button = $LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeChoices/UpgradeButton3
+@onready var level_up_title_label: Label = (
+	get_node("LevelUpOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/TitleLabel")
+	as Label
+)
+@onready var level_up_hint_label: Label = (
+	get_node("LevelUpOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/HintLabel")
+	as Label
+)
+@onready var upgrade_button_1: Button = (
+	get_node(
+		(
+			"LevelUpOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/UpgradeChoices/UpgradeButton1"
+		)
+	)
+	as Button
+)
+@onready var upgrade_button_2: Button = (
+	get_node(
+		(
+			"LevelUpOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/UpgradeChoices/UpgradeButton2"
+		)
+	)
+	as Button
+)
+@onready var upgrade_button_3: Button = (
+	get_node(
+		(
+			"LevelUpOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/UpgradeChoices/UpgradeButton3"
+		)
+	)
+	as Button
+)
 @onready var shop_overlay: ColorRect = $ShopOverlay
 @onready var shop_panel: PanelContainer = $ShopOverlay/CenterContainer/PanelContainer
-@onready var shop_title_label: Label = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/TitleLabel
-@onready var shop_gold_label: Label = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/GoldLabel
-@onready var shop_button_1: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopButton1
-@onready var shop_button_2: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopButton2
-@onready var shop_button_3: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopButton3
-@onready var shop_button_4: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopButton4
-@onready var shop_button_5: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopButton5
-@onready var shop_button_6: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopButton6
-@onready var shop_button_7: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopButton7
-@onready var shop_button_8: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopButton8
-@onready var shop_continue_button: Button = $ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ContinueButton
+@onready var shop_title_label: Label = (
+	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/TitleLabel")
+	as Label
+)
+@onready var shop_gold_label: Label = (
+	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/GoldLabel")
+	as Label
+)
+@onready var shop_button_1: Button = get_node(_shop_button_path(1)) as Button
+@onready var shop_button_2: Button = get_node(_shop_button_path(2)) as Button
+@onready var shop_button_3: Button = get_node(_shop_button_path(3)) as Button
+@onready var shop_button_4: Button = get_node(_shop_button_path(4)) as Button
+@onready var shop_button_5: Button = get_node(_shop_button_path(5)) as Button
+@onready var shop_button_6: Button = get_node(_shop_button_path(6)) as Button
+@onready var shop_button_7: Button = get_node(_shop_button_path(7)) as Button
+@onready var shop_button_8: Button = get_node(_shop_button_path(8)) as Button
+@onready var shop_continue_button: Button = (
+	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ContinueButton")
+	as Button
+)
 
-var _kills := 0
-var _current_wave := 1
-var _current_gold := 0
-var _timer_pulse_tween: Tween
-var _xp_flash_tween: Tween
-var _upgrade_buttons: Array[Button] = []
-var _upgrade_choices: Array[Resource] = []
-var _shop_buttons: Array[Button] = []
-var _shop_upgrades: Array[Resource] = []
+
+func _shop_button_path(index: int) -> String:
+	return (
+		"ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ShopButton%d" % index
+	)
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_upgrade_buttons = [upgrade_button_1, upgrade_button_2, upgrade_button_3]
 	_shop_buttons = [
-		shop_button_1, shop_button_2, shop_button_3, shop_button_4,
-		shop_button_5, shop_button_6, shop_button_7, shop_button_8,
+		shop_button_1,
+		shop_button_2,
+		shop_button_3,
+		shop_button_4,
+		shop_button_5,
+		shop_button_6,
+		shop_button_7,
+		shop_button_8,
 	]
 	_apply_hud_theme()
 	overlay.visible = false
@@ -93,12 +145,14 @@ func _apply_hud_theme() -> void:
 	panel_style.set_corner_radius_all(8)
 	hud_panel.add_theme_stylebox_override("panel", panel_style)
 	xp_panel.add_theme_stylebox_override("panel", panel_style)
-	level_up_panel.add_theme_stylebox_override("panel", _make_overlay_panel_style(COLOR_LEVEL_UP_ACCENT))
+	level_up_panel.add_theme_stylebox_override(
+		"panel", _make_overlay_panel_style(COLOR_LEVEL_UP_ACCENT)
+	)
 	shop_panel.add_theme_stylebox_override("panel", panel_style)
 
-	hp_bar.set_script(load("res://scripts/ui/stat_bar.gd"))
+	hp_bar.set_script(STAT_BAR_SCRIPT)
 	hp_bar.setup_bar(COLOR_BAR_BG, COLOR_BAR_FILL, 8.0)
-	xp_bar.set_script(load("res://scripts/ui/stat_bar.gd"))
+	xp_bar.set_script(STAT_BAR_SCRIPT)
 	xp_bar.setup_bar(COLOR_BAR_BG, COLOR_XP_FILL, 8.0)
 
 	for label in [timer_label, kill_label, hp_value_label, level_label, gold_label]:
@@ -202,13 +256,7 @@ func _handle_level_up_keyboard(event: InputEventKey) -> bool:
 func _handle_shop_keyboard(event: InputEventKey) -> bool:
 	var index := _number_key_index(event)
 	if index >= 0:
-		if index >= _shop_upgrades.size():
-			return false
-		var button := _shop_buttons[index]
-		if not button.visible or button.disabled:
-			return false
-		_on_shop_button_pressed(index)
-		return true
+		return _try_press_shop_button(index)
 
 	if event.is_action_pressed("move_up") or event.is_action_pressed("ui_up"):
 		_navigate_button_focus(_shop_buttons, -1)
@@ -219,21 +267,34 @@ func _handle_shop_keyboard(event: InputEventKey) -> bool:
 		return true
 
 	if event.is_action_pressed("ui_accept"):
-		if shop_continue_button.has_focus():
-			_on_shop_continue_pressed()
-			return true
-
-		var focused_index := _focused_button_index(_shop_buttons)
-		if focused_index >= 0:
-			var button := _shop_buttons[focused_index]
-			if button.visible and not button.disabled:
-				_on_shop_button_pressed(focused_index)
-				return true
-
-		_on_shop_continue_pressed()
+		_handle_shop_accept()
 		return true
 
 	return false
+
+
+func _try_press_shop_button(index: int) -> bool:
+	if index >= _shop_upgrades.size():
+		return false
+
+	var button := _shop_buttons[index]
+	if not button.visible or button.disabled:
+		return false
+
+	_on_shop_button_pressed(index)
+	return true
+
+
+func _handle_shop_accept() -> void:
+	if shop_continue_button.has_focus():
+		_on_shop_continue_pressed()
+		return
+
+	var focused_index := _focused_button_index(_shop_buttons)
+	if focused_index >= 0 and _try_press_shop_button(focused_index):
+		return
+
+	_on_shop_continue_pressed()
 
 
 func _navigate_button_focus(buttons: Array[Button], direction: int) -> void:
@@ -259,24 +320,30 @@ func _focused_button_index(buttons: Array[Button]) -> int:
 
 
 func _number_key_index(event: InputEventKey) -> int:
-	match event.keycode:
-		KEY_1, KEY_KP_1:
-			return 0
-		KEY_2, KEY_KP_2:
-			return 1
-		KEY_3, KEY_KP_3:
-			return 2
-		KEY_4, KEY_KP_4:
-			return 3
-		KEY_5, KEY_KP_5:
-			return 4
-		KEY_6, KEY_KP_6:
-			return 5
-		KEY_7, KEY_KP_7:
-			return 6
-		KEY_8, KEY_KP_8:
-			return 7
-	return -1
+	var number_keys := [
+		KEY_1,
+		KEY_2,
+		KEY_3,
+		KEY_4,
+		KEY_5,
+		KEY_6,
+		KEY_7,
+		KEY_8,
+	]
+	var keypad_keys := [
+		KEY_KP_1,
+		KEY_KP_2,
+		KEY_KP_3,
+		KEY_KP_4,
+		KEY_KP_5,
+		KEY_KP_6,
+		KEY_KP_7,
+		KEY_KP_8,
+	]
+	var index := number_keys.find(event.keycode)
+	if index < 0:
+		index = keypad_keys.find(event.keycode)
+	return index
 
 
 func _on_player_health_changed(current: int, maximum: int) -> void:
@@ -308,8 +375,7 @@ func _on_wave_time_changed(seconds_remaining: float) -> void:
 
 	var urgent := seconds <= 10
 	timer_label.add_theme_color_override(
-		"font_color",
-		Color(0.95, 0.55, 0.35, 1.0) if urgent else COLOR_TEXT
+		"font_color", Color(0.95, 0.55, 0.35, 1.0) if urgent else COLOR_TEXT
 	)
 	_update_timer_pulse(urgent)
 

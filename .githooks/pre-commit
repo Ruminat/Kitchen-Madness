@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Run codecheck before commits on the master branch.
+# Run codecheck before commits on protected primary branches.
 set -euo pipefail
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-if [[ "$BRANCH" != "master" ]]; then
+if [[ "$BRANCH" != "main" && "$BRANCH" != "master" ]]; then
 	exit 0
 fi
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
 
-echo "pre-commit: running codecheck on master..."
+echo "pre-commit: running codecheck on $BRANCH..."
 
 if [[ -f "$ROOT/tools/codecheck.sh" ]]; then
 	bash "$ROOT/tools/codecheck.sh"

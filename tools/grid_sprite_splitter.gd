@@ -6,7 +6,9 @@ const DEFAULT_ALPHA_THRESHOLD := 0.04
 const DEFAULT_PADDING := 8
 
 
-static func split_image(source: Image, columns: int, rows: int, options: Dictionary = {}) -> Array[Image]:
+static func split_image(
+	source: Image, columns: int, rows: int, options: Dictionary = {}
+) -> Array[Image]:
 	_validate_grid(source, columns, rows)
 
 	var source_rgba := source.duplicate()
@@ -72,16 +74,17 @@ static func process_cell(cell: Image, options: Dictionary = {}) -> Image:
 
 	var padding: int = maxi(options.get("padding", DEFAULT_PADDING), 0)
 	var alpha_threshold: float = options.get("alpha_threshold", DEFAULT_ALPHA_THRESHOLD)
-	var background_tolerance: float = options.get("background_tolerance", DEFAULT_BACKGROUND_TOLERANCE)
-	var background_color: Color = options.get("background_color", _sample_background_color(cell_rgba))
+	var background_tolerance: float = options.get(
+		"background_tolerance", DEFAULT_BACKGROUND_TOLERANCE
+	)
+	var background_color: Color = options.get(
+		"background_color", _sample_background_color(cell_rgba)
+	)
 	var make_transparent: bool = options.get("make_background_transparent", true)
 	var allow_upscale: bool = options.get("allow_upscale", true)
 
 	var background_mask := _build_edge_background_mask(
-		cell_rgba,
-		background_color,
-		background_tolerance,
-		alpha_threshold
+		cell_rgba, background_color, background_tolerance, alpha_threshold
 	)
 	var content_rect := detect_content_rect(cell_rgba, background_mask, alpha_threshold)
 	var output := Image.create(output_size.x, output_size.y, false, Image.FORMAT_RGBA8)
@@ -92,8 +95,7 @@ static func process_cell(cell: Image, options: Dictionary = {}) -> Image:
 	var cleaned := _apply_background_mask(cell_rgba, background_mask, make_transparent)
 	var subject := _copy_region(cleaned, content_rect)
 	var max_subject_size := Vector2i(
-		maxi(output_size.x - padding * 2, 1),
-		maxi(output_size.y - padding * 2, 1)
+		maxi(output_size.x - padding * 2, 1), maxi(output_size.y - padding * 2, 1)
 	)
 	var scaled_size := _fit_size(subject.get_size(), max_subject_size, allow_upscale)
 	if scaled_size != subject.get_size():
@@ -107,7 +109,9 @@ static func process_cell(cell: Image, options: Dictionary = {}) -> Image:
 	return output
 
 
-static func detect_content_rect(image: Image, background_mask: PackedByteArray, alpha_threshold: float) -> Rect2i:
+static func detect_content_rect(
+	image: Image, background_mask: PackedByteArray, alpha_threshold: float
+) -> Rect2i:
 	var min_x := image.get_width()
 	var min_y := image.get_height()
 	var max_x := -1
@@ -130,7 +134,9 @@ static func detect_content_rect(image: Image, background_mask: PackedByteArray, 
 	return Rect2i(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
 
 
-static func get_cell_rect(image_size: Vector2i, columns: int, rows: int, column: int, row: int) -> Rect2i:
+static func get_cell_rect(
+	image_size: Vector2i, columns: int, rows: int, column: int, row: int
+) -> Rect2i:
 	var x0 := roundi(float(column) * float(image_size.x) / float(columns))
 	var x1 := roundi(float(column + 1) * float(image_size.x) / float(columns))
 	var y0 := roundi(float(row) * float(image_size.y) / float(rows))
@@ -237,10 +243,7 @@ static func _sample_background_color(image: Image) -> Color:
 
 
 static func _build_edge_background_mask(
-	image: Image,
-	background_color: Color,
-	tolerance: float,
-	alpha_threshold: float
+	image: Image, background_color: Color, tolerance: float, alpha_threshold: float
 ) -> PackedByteArray:
 	var width := image.get_width()
 	var height := image.get_height()
@@ -249,51 +252,41 @@ static func _build_edge_background_mask(
 	var queue: Array[Vector2i] = []
 
 	for x in width:
-		_try_enqueue_background(image, mask, queue, Vector2i(x, 0), background_color, tolerance, alpha_threshold)
-		_try_enqueue_background(image, mask, queue, Vector2i(x, height - 1), background_color, tolerance, alpha_threshold)
+		_try_enqueue_background(
+			image, mask, queue, Vector2i(x, 0), background_color, tolerance, alpha_threshold
+		)
+		_try_enqueue_background(
+			image,
+			mask,
+			queue,
+			Vector2i(x, height - 1),
+			background_color,
+			tolerance,
+			alpha_threshold
+		)
 	for y in height:
-		_try_enqueue_background(image, mask, queue, Vector2i(0, y), background_color, tolerance, alpha_threshold)
-		_try_enqueue_background(image, mask, queue, Vector2i(width - 1, y), background_color, tolerance, alpha_threshold)
+		_try_enqueue_background(
+			image, mask, queue, Vector2i(0, y), background_color, tolerance, alpha_threshold
+		)
+		_try_enqueue_background(
+			image, mask, queue, Vector2i(width - 1, y), background_color, tolerance, alpha_threshold
+		)
 
 	var read_index := 0
 	while read_index < queue.size():
 		var point := queue[read_index]
 		read_index += 1
 		_try_enqueue_background(
-			image,
-			mask,
-			queue,
-			point + Vector2i.LEFT,
-			background_color,
-			tolerance,
-			alpha_threshold
+			image, mask, queue, point + Vector2i.LEFT, background_color, tolerance, alpha_threshold
 		)
 		_try_enqueue_background(
-			image,
-			mask,
-			queue,
-			point + Vector2i.RIGHT,
-			background_color,
-			tolerance,
-			alpha_threshold
+			image, mask, queue, point + Vector2i.RIGHT, background_color, tolerance, alpha_threshold
 		)
 		_try_enqueue_background(
-			image,
-			mask,
-			queue,
-			point + Vector2i.UP,
-			background_color,
-			tolerance,
-			alpha_threshold
+			image, mask, queue, point + Vector2i.UP, background_color, tolerance, alpha_threshold
 		)
 		_try_enqueue_background(
-			image,
-			mask,
-			queue,
-			point + Vector2i.DOWN,
-			background_color,
-			tolerance,
-			alpha_threshold
+			image, mask, queue, point + Vector2i.DOWN, background_color, tolerance, alpha_threshold
 		)
 	return mask
 
@@ -326,7 +319,9 @@ static func _color_distance(a: Color, b: Color) -> float:
 	return sqrt(dr * dr + dg * dg + db * db)
 
 
-static func _apply_background_mask(image: Image, mask: PackedByteArray, make_transparent: bool) -> Image:
+static func _apply_background_mask(
+	image: Image, mask: PackedByteArray, make_transparent: bool
+) -> Image:
 	var cleaned := image.duplicate()
 	if not make_transparent:
 		return cleaned
@@ -341,34 +336,30 @@ static func _apply_background_mask(image: Image, mask: PackedByteArray, make_tra
 
 static func _fit_size(source_size: Vector2i, max_size: Vector2i, allow_upscale: bool) -> Vector2i:
 	var scale: float = minf(
-		float(max_size.x) / float(source_size.x),
-		float(max_size.y) / float(source_size.y)
+		float(max_size.x) / float(source_size.x), float(max_size.y) / float(source_size.y)
 	)
 	if not allow_upscale:
 		scale = minf(scale, 1.0)
 	return Vector2i(
-		maxi(roundi(float(source_size.x) * scale), 1),
-		maxi(roundi(float(source_size.y) * scale), 1)
+		maxi(roundi(float(source_size.x) * scale), 1), maxi(roundi(float(source_size.y) * scale), 1)
 	)
 
 
 static func _format_name(
-	pattern: String,
-	stem: String,
-	sprite_name: String,
-	index: int,
-	row: int,
-	column: int
+	pattern: String, stem: String, sprite_name: String, index: int, row: int, column: int
 ) -> String:
-	return pattern.format(
-		{
-			"stem": stem,
-			"name": sprite_name,
-			"index": "%02d" % [index + 1],
-			"index0": str(index),
-			"row": "%02d" % [row + 1],
-			"row0": str(row),
-			"col": "%02d" % [column + 1],
-			"col0": str(column),
-		}
+	return (
+		pattern
+		. format(
+			{
+				"stem": stem,
+				"name": sprite_name,
+				"index": "%02d" % [index + 1],
+				"index0": str(index),
+				"row": "%02d" % [row + 1],
+				"row0": str(row),
+				"col": "%02d" % [column + 1],
+				"col0": str(column),
+			}
+		)
 	)

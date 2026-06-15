@@ -15,4 +15,4 @@ New-Item -ItemType Directory -Force -Path $HooksDir | Out-Null
 Copy-Item -Path $SourceHook -Destination $TargetHook -Force
 
 Write-Host "Installed pre-commit hook -> .git/hooks/pre-commit"
-Write-Host "On master branch, commits will run tools/codecheck."
+Write-Host "On main/master branches, commits will run tools/codecheck."

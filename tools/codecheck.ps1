@@ -39,8 +39,13 @@ function Invoke-CheckedCommand {
 
 Write-Step "Lint (gdlint)"
 $Gdlint = Get-Command gdlint -ErrorAction SilentlyContinue
+$GdscriptPaths = @("scripts/", "tests/")
+$ToolScripts = Get-ChildItem -Path "tools" -Filter "*.gd" -ErrorAction SilentlyContinue
+foreach ($ToolScript in $ToolScripts) {
+    $GdscriptPaths += $ToolScript.FullName
+}
 if ($Gdlint) {
-    Invoke-CheckedCommand { & gdlint scripts/ tests/ tools/*.gd 2>&1 }
+    Invoke-CheckedCommand { & gdlint @GdscriptPaths 2>&1 }
 } else {
     Write-Host "SKIP: gdlint not found (pip install gdtoolkit)" -ForegroundColor Yellow
 }
@@ -48,7 +53,7 @@ if ($Gdlint) {
 Write-Step "Format check (gdformat)"
 $Gdformat = Get-Command gdformat -ErrorAction SilentlyContinue
 if ($Gdformat) {
-    Invoke-CheckedCommand { & gdformat --check scripts/ tests/ tools/*.gd 2>&1 }
+    Invoke-CheckedCommand { & gdformat --check @GdscriptPaths 2>&1 }
 } else {
     Write-Host "SKIP: gdformat not found (pip install gdtoolkit)" -ForegroundColor Yellow
 }
