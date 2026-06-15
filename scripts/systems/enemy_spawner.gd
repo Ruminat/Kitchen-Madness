@@ -17,13 +17,18 @@ func configure(definition: WaveDefinition, container: Node2D, bounds: Rect2) -> 
 	wave_definition = definition
 	enemy_container = container
 	arena_bounds = bounds
+	is_active = true
 	_elapsed_time = 0.0
 
-	_spawn_timer = Timer.new()
-	_spawn_timer.one_shot = true
+	if _spawn_timer == null:
+		_spawn_timer = Timer.new()
+		_spawn_timer.one_shot = true
+		_spawn_timer.timeout.connect(_spawn_enemy)
+		add_child(_spawn_timer)
+	else:
+		_spawn_timer.stop()
+
 	_spawn_timer.wait_time = _current_spawn_interval()
-	_spawn_timer.timeout.connect(_spawn_enemy)
-	add_child(_spawn_timer)
 	_spawn_timer.start()
 
 	_spawn_enemy()
@@ -86,14 +91,22 @@ func _count_alive_elites() -> int:
 
 	var count := 0
 	for child in enemy_container.get_children():
-		if not is_instance_valid(child) or not ("definition" in child):
+		if not is_instance_valid(child):
 			continue
 
-		var enemy_definition := child.definition as EnemyDefinition
+		var enemy_definition := _definition_for_enemy(child)
 		if enemy_definition and enemy_definition.is_elite:
 			count += 1
 
 	return count
+
+
+func _definition_for_enemy(enemy: Node) -> EnemyDefinition:
+	if "definition" in enemy:
+		return enemy.definition as EnemyDefinition
+	if enemy.has_meta("definition"):
+		return enemy.get_meta("definition") as EnemyDefinition
+	return null
 
 
 func _pick_non_elite_definition() -> EnemyDefinition:

@@ -1,11 +1,13 @@
 extends Node2D
 
 @export var wave_definition: WaveDefinition
+@export var wave_definitions: Array[WaveDefinition] = []
 @export var health_drop: DropDefinition
 
 var is_wave_complete := false
 var is_game_over := false
 var current_wave := 1
+var _arena_bounds := Rect2()
 
 @onready var arena: Arena = $Arena
 @onready var camera: Camera2D = $Camera2D
@@ -25,12 +27,10 @@ var current_wave := 1
 func _ready() -> void:
 	get_tree().paused = false
 
-	var bounds := arena.get_bounds()
-	var wave := wave_definition if wave_definition else WaveDefinition.new()
+	_arena_bounds = arena.get_bounds()
 
-	player.setup(bounds, projectile_container)
-	wave_manager.configure(wave)
-	enemy_spawner.configure(wave, enemy_container, bounds)
+	player.setup(_arena_bounds, projectile_container)
+	_configure_current_wave()
 	loot_spawner.configure(pickup_container, health_drop)
 	if level_up_manager.has_method("configure"):
 		level_up_manager.configure(player, ui, Callable(self, "is_run_active"))
@@ -74,10 +74,24 @@ func start_next_wave() -> void:
 	is_wave_complete = false
 	current_wave += 1
 	_clear_wave_entities()
-	wave_manager.reset()
-	enemy_spawner.reset()
 	EventBus.wave_index_changed.emit(current_wave)
+	_configure_current_wave()
 	get_tree().paused = false
+
+
+func get_current_wave_definition() -> WaveDefinition:
+	if not wave_definitions.is_empty():
+		var index := mini(current_wave - 1, wave_definitions.size() - 1)
+		return wave_definitions[index]
+	if wave_definition:
+		return wave_definition
+	return WaveDefinition.new()
+
+
+func _configure_current_wave() -> void:
+	var wave := get_current_wave_definition()
+	wave_manager.configure(wave)
+	enemy_spawner.configure(wave, enemy_container, _arena_bounds)
 
 
 func _clear_wave_entities() -> void:

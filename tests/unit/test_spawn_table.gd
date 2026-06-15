@@ -58,6 +58,27 @@ func test_spawner_scales_interval_with_wave_multiplier() -> void:
 	assert_float(spawner._current_spawn_interval()).is_equal(0.175)
 
 
+func test_spawner_reconfigure_reuses_spawn_timer() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	add_child(spawner)
+	var container: Node2D = auto_free(Node2D.new()) as Node2D
+	add_child(container)
+
+	var wave_one := WaveDefinition.new()
+	wave_one.spawn_interval = 2.0
+	wave_one.fallback_enemy_scene = preload("res://scenes/enemy/enemy.tscn")
+	var wave_two := WaveDefinition.new()
+	wave_two.spawn_interval = 1.0
+	wave_two.fallback_enemy_scene = preload("res://scenes/enemy/enemy.tscn")
+
+	spawner.configure(wave_one, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	var timer := spawner._spawn_timer
+	spawner.configure(wave_two, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+
+	assert_object(spawner._spawn_timer).is_same(timer)
+	assert_float(spawner._spawn_timer.wait_time).is_equal(1.0)
+
+
 func test_spawner_caps_elite_enemies_at_two() -> void:
 	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
 	add_child(spawner)

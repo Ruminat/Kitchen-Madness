@@ -21,7 +21,7 @@ pip install gdtoolkit
 Tests require Godot 4.5+ on PATH.
 
 ```powershell
-godot --headless --path . -s --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode
+godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode
 ```
 
 Test suites live in `tests/unit/` for logic and `tests/integration/` for scene boot and pause-on-end checks.

@@ -11,6 +11,8 @@ var is_paused := false
 
 func configure(definition: WaveDefinition) -> void:
 	wave_definition = definition
+	is_complete = false
+	is_paused = false
 	time_remaining = definition.duration if definition else 30.0
 	EventBus.wave_time_changed.emit(time_remaining)
 

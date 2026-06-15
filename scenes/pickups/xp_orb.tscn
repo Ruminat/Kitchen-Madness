@@ -1,12 +1,13 @@
 [gd_scene load_steps=3 format=3 uid="uid://pickup_xp_orb"]
 
 [ext_resource type="Script" path="res://scripts/pickups/base_pickup.gd" id="1_pickup"]
-[ext_resource type="Script" path="res://scripts/circle_visual.gd" id="2_visual"]
+[ext_resource type="Texture2D" path="res://assets/effects/xp_orb.png" id="2_orb"]
 
 [node name="XpOrb" type="Node2D"]
 script = ExtResource("1_pickup")
 
 [node name="Visual" type="Node2D" parent="."]
-script = ExtResource("2_visual")
-radius = 6.0
-color = Color(0.2, 0.85, 1, 1)
+
+[node name="Sprite" type="Sprite2D" parent="Visual"]
+texture = ExtResource("2_orb")
+scale = Vector2(0.26, 0.26)

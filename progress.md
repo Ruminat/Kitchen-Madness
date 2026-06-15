@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase.
 
-**Last updated:** Sprout selected as default player
+**Last updated:** Phase 3B sprite placeholders + wave ramp
 
 ---
 
@@ -87,7 +87,26 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ---
 
+## Phase 3B — Visual placeholders and wave ramp ✅
+
+| Task | Status | Notes |
+|---|---|---|
+| Projectile sprite | ✅ Done | `assets/effects/projectile_bolt.png` in `projectile.tscn` |
+| Pickup sprites | ✅ Done | XP gem + health cross replace circle placeholders |
+| Multiple waves | ✅ Done | `wave_01` → `wave_03`; later waves reuse final authored wave |
+| Wave reconfiguration | ✅ Done | `WaveManager` + `EnemySpawner` support new definitions between waves |
+| Tests | ✅ Done | Visual scene tests, wave sequence tests, spawner timer reuse |
+
+---
+
 ## Changelog
+
+### Phase 3B
+
+- **Visuals:** projectile, XP orb, and health pickup scenes now use transparent PNG sprites under `Visual/Sprite`
+- **Waves:** added `wave_02.tres` and `wave_03.tres` with faster spawn intervals, higher caps, and tougher enemy weights
+- **Loop:** starting the next wave reconfigures `WaveManager` and `EnemySpawner` with the current authored wave; beyond wave 3 keeps using wave 3
+- **Tests:** raw GdUnit suite fixed/expanded to cover new visuals, authored wave selection, spawner timer reuse, elite-cap metadata stubs, and current luck/XP math
 
 ### Visual art tooling
 
@@ -173,4 +192,4 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 4. Level up from XP orbs — picker still pauses mid-wave (free upgrades)
 5. Die — Game Over overlay with Restart (unchanged)
 6. Run `.\tools\codecheck.ps1` before handoff (Godot on PATH + optional `pip install gdtoolkit`)
-7. Run tests only: `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/`
+7. Run tests only: `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode`

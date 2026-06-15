@@ -1,12 +1,13 @@
 [gd_scene load_steps=3 format=3 uid="uid://pickup_health"]
 
 [ext_resource type="Script" path="res://scripts/pickups/health_pickup.gd" id="1_pickup"]
-[ext_resource type="Script" path="res://scripts/circle_visual.gd" id="2_visual"]
+[ext_resource type="Texture2D" path="res://assets/effects/health_pickup.png" id="2_health"]
 
 [node name="HealthPickup" type="Node2D"]
 script = ExtResource("1_pickup")
 
 [node name="Visual" type="Node2D" parent="."]
-script = ExtResource("2_visual")
-radius = 7.0
-color = Color(0.25, 0.95, 0.35, 1)
+
+[node name="Sprite" type="Sprite2D" parent="Visual"]
+texture = ExtResource("2_health")
+scale = Vector2(0.3, 0.3)

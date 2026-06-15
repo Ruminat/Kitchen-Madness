@@ -311,7 +311,7 @@ gdformat --check scripts/ tests/
 godot --headless --path . --quit-after 1
 
 # 4. Run tests via GdUnit4/GUT
-godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/
+godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode
 ```
 
 Add to `context.md`:

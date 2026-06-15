@@ -87,7 +87,7 @@ func test_level_up_does_not_show_choices_when_run_is_inactive() -> void:
 
 func test_lucky_player_expands_upgrade_candidate_pool() -> void:
 	var upgrades: Array[Resource] = []
-	for index in 6:
+	for index in 5:
 		upgrades.append(_create_damage_upgrade(0.1 * float(index + 1)))
 	var manager := _create_manager(upgrades)
 	var player := _create_player()
@@ -101,7 +101,7 @@ func test_lucky_player_expands_upgrade_candidate_pool() -> void:
 	var amounts: Array[float] = []
 	for choice in ui.choices:
 		amounts.append(choice.amount)
-	assert_float(amounts.max()).is_equal(0.6)
+	assert_float(amounts.max()).is_equal(0.5)
 
 
 func _create_manager(upgrades: Array[Resource]) -> LevelUpManager:

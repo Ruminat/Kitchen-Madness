@@ -6,6 +6,9 @@ const CHASER_SCENE := preload("res://scenes/enemy/enemy.tscn")
 const TANK_SCENE := preload("res://scenes/enemy/tank_enemy.tscn")
 const SPRINTER_SCENE := preload("res://scenes/enemy/sprinter_enemy.tscn")
 const ARENA_SCENE := preload("res://scenes/arena/arena.tscn")
+const PROJECTILE_SCENE := preload("res://scenes/projectiles/projectile.tscn")
+const XP_ORB_SCENE := preload("res://scenes/pickups/xp_orb.tscn")
+const HEALTH_PICKUP_SCENE := preload("res://scenes/pickups/health_pickup.tscn")
 const CHASER_DEF := preload("res://resources/enemies/chaser.tres")
 
 const MILO_TEXTURE := preload("res://assets/characters/player/milo.png")
@@ -21,6 +24,9 @@ const COCKROACH_TEXTURE := preload("res://assets/characters/enemies/cockroach.pn
 const RAT_TEXTURE := preload("res://assets/characters/enemies/rat.png")
 const FLY_TEXTURE := preload("res://assets/characters/enemies/fly.png")
 const FLOOR_TEXTURE := preload("res://assets/arena/dirty_kitchen_tile.png")
+const PROJECTILE_TEXTURE_PATH := "res://assets/effects/projectile_bolt.png"
+const XP_ORB_TEXTURE_PATH := "res://assets/effects/xp_orb.png"
+const HEALTH_PICKUP_TEXTURE_PATH := "res://assets/effects/health_pickup.png"
 
 
 func test_player_uses_sprout_sprite() -> void:
@@ -117,6 +123,21 @@ func test_arena_floor_tiles_scaled_five_times_smaller() -> void:
 	assert_float(background.offset_bottom).is_equal(1200.0)
 
 
+func test_projectile_uses_bolt_sprite() -> void:
+	var projectile: Area2D = auto_free(PROJECTILE_SCENE.instantiate()) as Area2D
+	add_child(projectile)
+	await _wait_ready(projectile)
+
+	var sprite: Sprite2D = projectile.get_node("Visual/Sprite") as Sprite2D
+	assert_object(sprite).is_not_null()
+	assert_str(sprite.texture.resource_path).is_equal(PROJECTILE_TEXTURE_PATH)
+
+
+func test_pickups_use_sprite_assets() -> void:
+	await _assert_pickup_sprite(XP_ORB_SCENE, XP_ORB_TEXTURE_PATH)
+	await _assert_pickup_sprite(HEALTH_PICKUP_SCENE, HEALTH_PICKUP_TEXTURE_PATH)
+
+
 func _assert_enemy_sprite(scene: PackedScene, expected_texture: Texture2D) -> void:
 	var enemy: BaseEnemy = auto_free(scene.instantiate()) as BaseEnemy
 	add_child(enemy)
@@ -125,6 +146,16 @@ func _assert_enemy_sprite(scene: PackedScene, expected_texture: Texture2D) -> vo
 	var sprite: Sprite2D = enemy.get_node("Visual/Sprite") as Sprite2D
 	assert_object(sprite).is_not_null()
 	assert_object(sprite.texture).is_same(expected_texture)
+
+
+func _assert_pickup_sprite(scene: PackedScene, expected_texture_path: String) -> void:
+	var pickup: Node2D = auto_free(scene.instantiate()) as Node2D
+	add_child(pickup)
+	await _wait_ready(pickup)
+
+	var sprite: Sprite2D = pickup.get_node("Visual/Sprite") as Sprite2D
+	assert_object(sprite).is_not_null()
+	assert_str(sprite.texture.resource_path).is_equal(expected_texture_path)
 
 
 func _wait_ready(node: Node) -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://game001"]
+[gd_scene load_steps=17 format=3 uid="uid://game001"]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="PackedScene" uid="uid://arena001" path="res://scenes/arena/arena.tscn" id="2_arena"]
@@ -13,10 +13,13 @@
 [ext_resource type="Script" path="res://scripts/systems/level_up_manager.gd" id="11_level"]
 [ext_resource type="Script" path="res://scripts/systems/gold_system.gd" id="12_gold"]
 [ext_resource type="Script" path="res://scripts/systems/shop_manager.gd" id="13_shop"]
+[ext_resource type="Resource" uid="uid://wavedef_02" path="res://resources/waves/wave_02.tres" id="14_wave_02"]
+[ext_resource type="Resource" uid="uid://wavedef_03" path="res://resources/waves/wave_03.tres" id="15_wave_03"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
 wave_definition = ExtResource("7_wave")
+wave_definitions = [ExtResource("7_wave"), ExtResource("14_wave_02"), ExtResource("15_wave_03")]
 health_drop = ExtResource("9_health")
 
 [node name="Camera2D" type="Camera2D" parent="."]

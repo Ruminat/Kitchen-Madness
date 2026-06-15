@@ -4,9 +4,9 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 ## Current status
 
-**Phase 3A done** — gold on kill, between-wave shop, multi-wave loop, 8-stat upgrades (HP/armor/damage/attack speed/move speed/luck/pickup range/XP), elite cap (max 2 tanks alive), dual mouse+keyboard UI.
+**Phase 3B done** — projectile/pickup sprites replaced remaining circle placeholders; wave 1-3 resources now ramp spawn pace, caps, and enemy weights; later waves reuse the final authored wave.
 
-**Visual pass (ongoing):** Sprites for player (Sprout), enemies, arena floor. Projectiles/pickups still circle placeholders. Player roster + grid splitter in `tools/` — see `docs/sprite-grid-splitter.md`.
+**Visual pass:** Sprites for player (Sprout), enemies, arena floor, projectiles, XP orbs, and health pickups. Player roster + grid splitter in `tools/` — see `docs/sprite-grid-splitter.md`.
 
 **Loop:** 60s waves → shop → next wave. Pauses on level-up, shop, death. Spawns ramp 2×–8×; XP thresholds tuned slow.
 
@@ -83,8 +83,8 @@ Integration tests: assert synchronously after `EventBus` emits — don't `await`
 
 ## Next work
 
-1. Sprite placeholders (projectiles, pickups) + transparent PNG exports
-2. Per-wave difficulty / multiple `WaveDefinition` resources
+1. Capture/review visuals after the sprite + wave-ramp pass
+2. Tune wave 2/3 difficulty from playtest screenshots
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 
