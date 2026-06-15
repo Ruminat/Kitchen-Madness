@@ -17,6 +17,7 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 1. Zero parser/scene errors · **F5** smoke test
 2. `.\tools\codecheck.ps1` must pass
 3. Update [progress.md](progress.md) after a phase/slice
+4. For large visual/gameplay iterations, run `.\tools\capture-visuals.ps1` and inspect `visual-tests/screenshots/`
 
 **Godot 4.6+** on PATH. Optional: `pip install gdtoolkit`. **Never commit `.vscode/`** — local editor settings only (see `.gitignore`).
 
