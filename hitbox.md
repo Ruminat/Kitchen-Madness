@@ -1,4 +1,4 @@
-# Hitbox guide — complex sprites like Bobby
+# Hitbox guide — complex player sprites
 
 How to handle collision and damage for characters whose **visual silhouette** does not match a simple circle or rectangle.
 
@@ -12,19 +12,19 @@ Those two shapes should be related but not identical. A tall hat, wide frying pa
 
 This project already follows that split:
 
-| Layer | What it does | Bobby today |
+| Layer | What it does | Sprout today |
 |---|---|---|
-| **Visual** | `Visual/Sprite` in `player.tscn` — rotates, flickers on i-frames | Full 256×256 chef sprite, scaled down |
+| **Visual** | `Visual/Sprite` in `player.tscn` — rotates, flickers on i-frames | 256×256 roster sprite, scaled down |
 | **Wall collision** | `CollisionShape2D` circle, radius 14 | Same circle as before |
 | **Contact damage** | Distance check in `player.gd` using `BODY_RADIUS` (14) | Same circle as before |
 
-Nothing in gameplay needs to match the frying pan or chef hat.
+Nothing in gameplay needs to match decorative parts that extend beyond the body.
 
 ---
 
-## Why Bobby is awkward
+## Why complex sprites are awkward
 
-Bobby’s silhouette has three parts that fight a one-size-fits-all box:
+Some player silhouettes have parts that fight a one-size-fits-all box:
 
 ```
         ┌─────────────┐
@@ -59,7 +59,7 @@ Bobby’s silhouette has three parts that fight a one-size-fits-all box:
 
 **When to use:** First real sprite swap, survivor-likes, anything with fast enemies and distance-based contact damage.
 
-**Tuning Bobby:**
+**Tuning the player sprite:**
 
 - Pivot the sprite so **feet / shadow** align with the `Player` node `(0, 0)` — done via `Sprite2D.offset`.
 - Scale so the **torso** is roughly 28–32 px wide (≈ `2 × BODY_RADIUS`), even if the hat and pan extend further.
@@ -108,7 +108,7 @@ Player (CharacterBody2D)
 
 **When to use:** Melee-focused characters, chef melee upgrades, slap-stick pan attacks.
 
-**Not needed yet** — Bobby still uses pistol / shotgun / orbit blades from `WeaponController`.
+**Not needed yet** — the player still uses pistol / shotgun / orbit blades from `WeaponController`.
 
 ---
 
@@ -129,7 +129,7 @@ Player (CharacterBody2D)
 | Decision | Choice |
 |---|---|
 | **Player hurtbox** | Keep **circle, radius 14**, centered on body/feet |
-| **Sprite** | Full Bobby art; scale + offset so feet are at node origin |
+| **Sprite** | Full player art; scale + offset so body/feet sit near node origin |
 | **Hat / pan** | **Cosmetic only** until playtesting says otherwise |
 | **Contact damage** | Keep distance check in `player.gd` — do **not** switch to `Area2D body_entered` (phantom hits were a known bug; see `context.md`) |
 | **Future pan melee** | Add a separate `Area2D` attack box on the pan, not expand the hurtbox |
@@ -143,7 +143,7 @@ Player (CharacterBody2D)
 3. **Scale** — torso width ≈ `2 ×` collision radius; hat and pan may extend past.
 4. **Debug draw** — Debug → Visible Collision Shapes; verify circle vs sprite.
 5. **Playtest** — if hits feel early/late, nudge **radius** (gameplay), not the art (visual).
-6. **Art pass** — export PNG with **transparent** background (Bobby’s current file has a solid black backdrop, which will show as a rotating square in-game until the art is keyed).
+6. **Art pass** — export PNG with **transparent** background so oversized source canvases do not show as squares in-game.
 
 ### If contact feels wrong after swapping art
 
@@ -167,4 +167,4 @@ Enemies still use `circle_visual.gd` placeholders with per-type radius in their 
 
 ## Summary
 
-For Bobby (and most survivor-style characters): **draw the whole character, collide with a small circle on the body.** Defer compound shapes and weapon boxes until a feature needs them. Tune fairness with `BODY_RADIUS`, not by chasing the outer pixels of the hat or pan.
+For Sprout and most survivor-style characters: **draw the whole character, collide with a small circle on the body.** Defer compound shapes and weapon boxes until a feature needs them. Tune fairness with `BODY_RADIUS`, not by chasing the outer pixels of hats, weapons, antennas, or accessories.

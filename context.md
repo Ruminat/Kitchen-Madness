@@ -4,11 +4,11 @@ Handoff doc for new chat sessions. See [progress.md](progress.md) for task-level
 
 ## Current status (as of last session)
 
-**Phase 2A complete.** **Phase 2B complete.** **Phase 2C complete.** **Phase 2D complete** (level-up picker + upgrades). **Phase 2E complete** (GdUnit4 + codecheck + pre-commit hook).
+**Phase 2A complete.** **Phase 2B complete.** **Phase 2C complete.** **Phase 2D complete** (level-up picker + upgrades). **Phase 2E complete** (GdUnit4 + codecheck + pre-commit hook). **Phase 3A complete** (gold + between-wave shop + multi-wave loop).
 
-**Visual art pass (in progress):** Player, enemies, and arena floor use real sprites. Projectiles and pickups still use `circle_visual.gd` placeholders.
+**Visual art pass (in progress):** Player, enemies, and arena floor use real sprites. Projectiles and pickups still use `circle_visual.gd` placeholders. The generated 9-player grid is split into a named roster in `assets/characters/player/`; **Sprout** is the current main player. Generated character grids can be split with `tools/split_grid_sprites.gd`; usage notes live in `docs/sprite-grid-splitter.md`.
 
-Playable loop: 60s wave, 3 enemy types, pistol + shotgun + orbit blades, XP orbs + health drops, floating damage/pickup text, XP bar, level-up picker, compact HUD, win/lose overlay. Enemy spawning ramps from 2x to 8x over the wave; XP thresholds are 10x slower than the early prototype. Game **pauses** on level-up choices, death, or wave complete.
+Playable loop: multi-wave runs with 60s waves, 3 enemy types, pistol + shotgun + orbit blades, XP orbs + health drops, floating damage/pickup text, XP bar, level-up picker, **gold HUD + between-wave shop**, compact HUD, win/lose overlay. Enemy spawning ramps from 2x to 8x over the wave; XP thresholds are 10x slower than the early prototype. Game **pauses** on level-up choices, **shop between waves**, death.
 
 Local branch has Phase 2D/progression tuning + visual sprite work; not pushed.
 
@@ -33,8 +33,8 @@ Local branch has Phase 2D/progression tuning + visual sprite work; not pushed.
 
 Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 
-- **Done:** Arena, player, weighted enemy spawns, pistol/shotgun/orbit blades, wave timer, HUD + XP bar, level-up picker, floating combat text, win/lose + pause, XP orbs + health drops, **sprite art for player/enemies/floor**
-- **Next (plans):** Phase 3 planning — shop using the same upgrade/stat system; finish remaining placeholders (projectiles, pickups, guns, transparent PNG exports)
+- **Done:** Arena, player, weighted enemy spawns, pistol/shotgun/orbit blades, wave timer, HUD + XP bar, level-up picker, floating combat text, win/lose + pause, XP orbs + health drops, **sprite art for player/enemies/floor**, **gold + between-wave shop + multi-wave loop**
+- **Next (plans):** Finish remaining placeholders (projectiles, pickups, guns, transparent PNG exports); wave scaling / multiple wave definitions
 - **Long-term:** Shop, multiple maps, Steam
 
 ## Main scene
@@ -54,6 +54,8 @@ Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 | **SpawnTable** | `scripts/systems/spawn_table.gd` | Weighted enemy pick (unit-tested). |
 | **XpSystem** | `scripts/systems/xp_system.gd` | Listens to `pickup_collected`; emits `xp_changed` / `level_up`. |
 | **LevelUpManager** | `scripts/systems/level_up_manager.gd` | Queues level-ups, pauses for 1 of 3 upgrades, applies `UpgradeDefinition` resources. |
+| **GoldSystem** | `scripts/systems/gold_system.gd` | Awards gold on kill from `EnemyDefinition.gold_reward`; emits `gold_changed`. |
+| **ShopManager** | `scripts/systems/shop_manager.gd` | Opens shop on wave complete; spends gold on `UpgradeDefinition.gold_cost`; Continue starts next wave. |
 | **FloatingTextManager** | `scripts/ui/floating_text_manager.gd` | Damage + pickup feedback via EventBus. |
 | **Resource definitions** | `scripts/data/*.gd` + `resources/` | Add content via `.tres`, not by editing spawner logic. |
 
@@ -71,7 +73,7 @@ Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 
 | Entity | Sprite | Scene |
 |---|---|---|
-| Player (Bobby) | `assets/characters/player/bobby.png` | `scenes/player/player.tscn` |
+| Player (Sprout) | `assets/characters/player/sprout.png` | `scenes/player/player.tscn` |
 | Chaser (cockroach) | `assets/characters/enemies/cockroach.png` | `scenes/enemy/enemy.tscn` |
 | Tank (rat) | `assets/characters/enemies/rat.png` | `scenes/enemy/tank_enemy.tscn` |
 | Sprinter (fly) | `assets/characters/enemies/fly.png` | `scenes/enemy/sprinter_enemy.tscn` |
@@ -95,7 +97,7 @@ Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 assets/
   arena/               dirty_kitchen_tile.png (floor), sand_tile.jpg (unused legacy)
   characters/
-    player/            bobby.png
+    player/            bobby.png, milo/nova/sprout/pickle/brutus/thorn/stitch/granite/rusty roster
     enemies/           cockroach.png, rat.png, fly.png
 scenes/
   main/game.tscn
@@ -110,7 +112,7 @@ scripts/
   data/              enemy/weapon/drop/wave/upgrade definitions
   enemies/           base_enemy.gd, chaser_enemy.gd, sprinter_enemy.gd
   pickups/           base_pickup.gd, health_pickup.gd
-  systems/           wave_manager.gd, enemy_spawner.gd, spawn_table.gd, loot_spawner.gd, xp_system.gd, level_up_manager.gd
+  systems/           wave_manager.gd, enemy_spawner.gd, spawn_table.gd, loot_spawner.gd, xp_system.gd, level_up_manager.gd, gold_system.gd, shop_manager.gd
   ui/                floating_text.gd, floating_text_manager.gd, stat_bar.gd
   weapons/           weapon_controller.gd, base_weapon.gd, projectile_weapon.gd, orbit_weapon.gd
   game.gd, player.gd, projectile.gd, game_ui.gd, circle_visual.gd, arena.gd
@@ -127,8 +129,9 @@ addons/gdUnit4/      test framework
 tools/
   codecheck.ps1, codecheck.sh
   install-git-hooks.ps1, install-git-hooks.sh
+  split_grid_sprites.gd, grid_sprite_splitter.gd
 .githooks/pre-commit   runs codecheck on master only
-docs/                  adding-visuals guide
+docs/                  adding-visuals guide, sprite-grid-splitter guide, player roster
 hitbox.md              hurtbox vs sprite guidance for complex characters
 progress.md            task checklist
 plans.md               full roadmap
@@ -148,7 +151,7 @@ plans.md               full roadmap
 ## Dev workflow
 
 ```powershell
-# Full check (lint if gdtoolkit installed + headless boot + 49 tests)
+# Full check (lint if gdtoolkit installed + headless boot + 60 tests)
 .\tools\codecheck.ps1
 
 # Tests only
@@ -158,7 +161,7 @@ godot --headless --path . -s --remote-debug tcp://127.0.0.1:0 res://addons/gdUni
 .\tools\install-git-hooks.ps1
 ```
 
-**Tests:** 49 cases, 12 suites. Integration tests must not `await` timers after pausing the tree — assert synchronously after `EventBus` emits.
+**Tests:** 60 cases, 15 suites. Integration tests must not `await` timers after pausing the tree — assert synchronously after `EventBus` emits.
 
 **Strict typing:** Godot 4.6 + GdUnit4 treat inference warnings as errors. Use explicit types on `auto_free()` results and typed arrays.
 
@@ -166,7 +169,8 @@ godot --headless --path . -s --remote-debug tcp://127.0.0.1:0 res://addons/gdUni
 
 ## Recommended next work (from plans.md)
 
-1. **Phase 3:** Shop / between-wave upgrade flow using existing `UpgradeDefinition` resources
+1. **Visual placeholders:** projectiles, pickups, transparent PNG exports for character sprites
+2. **Wave scaling:** per-wave `WaveDefinition` resources or difficulty ramp across waves
 
 Vertical slices: each step playable + `codecheck` green + update `progress.md`.
 

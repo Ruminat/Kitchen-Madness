@@ -24,10 +24,10 @@ run_or_skip() {
 }
 
 step "Lint (gdlint)"
-run_or_skip gdlint gdlint scripts/ tests/
+run_or_skip gdlint gdlint scripts/ tests/ tools/*.gd
 
 step "Format check (gdformat)"
-run_or_skip gdformat gdformat --check scripts/ tests/
+run_or_skip gdformat gdformat --check scripts/ tests/ tools/*.gd
 
 step "Headless boot smoke"
 if command -v godot >/dev/null 2>&1; then

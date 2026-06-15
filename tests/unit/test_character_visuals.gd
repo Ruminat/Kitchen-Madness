@@ -8,21 +8,47 @@ const SPRINTER_SCENE := preload("res://scenes/enemy/sprinter_enemy.tscn")
 const ARENA_SCENE := preload("res://scenes/arena/arena.tscn")
 const CHASER_DEF := preload("res://resources/enemies/chaser.tres")
 
-const BOBBY_TEXTURE := preload("res://assets/characters/player/bobby.png")
+const MILO_TEXTURE := preload("res://assets/characters/player/milo.png")
+const NOVA_TEXTURE := preload("res://assets/characters/player/nova.png")
+const SPROUT_TEXTURE := preload("res://assets/characters/player/sprout.png")
+const PICKLE_TEXTURE := preload("res://assets/characters/player/pickle.png")
+const BRUTUS_TEXTURE := preload("res://assets/characters/player/brutus.png")
+const THORN_TEXTURE := preload("res://assets/characters/player/thorn.png")
+const STITCH_TEXTURE := preload("res://assets/characters/player/stitch.png")
+const GRANITE_TEXTURE := preload("res://assets/characters/player/granite.png")
+const RUSTY_TEXTURE := preload("res://assets/characters/player/rusty.png")
 const COCKROACH_TEXTURE := preload("res://assets/characters/enemies/cockroach.png")
 const RAT_TEXTURE := preload("res://assets/characters/enemies/rat.png")
 const FLY_TEXTURE := preload("res://assets/characters/enemies/fly.png")
 const FLOOR_TEXTURE := preload("res://assets/arena/dirty_kitchen_tile.png")
 
 
-func test_player_uses_bobby_sprite() -> void:
+func test_player_uses_sprout_sprite() -> void:
 	var player: CharacterBody2D = auto_free(PLAYER_SCENE.instantiate()) as CharacterBody2D
 	add_child(player)
 	await _wait_ready(player)
 
 	var sprite: Sprite2D = player.get_node("Visual/Sprite") as Sprite2D
 	assert_object(sprite).is_not_null()
-	assert_object(sprite.texture).is_same(BOBBY_TEXTURE)
+	assert_object(sprite.texture).is_same(SPROUT_TEXTURE)
+	assert_vector(sprite.scale).is_equal(Vector2(0.175, 0.175))
+
+
+func test_player_roster_textures_are_available() -> void:
+	var roster: Array[Texture2D] = [
+		MILO_TEXTURE,
+		NOVA_TEXTURE,
+		SPROUT_TEXTURE,
+		PICKLE_TEXTURE,
+		BRUTUS_TEXTURE,
+		THORN_TEXTURE,
+		STITCH_TEXTURE,
+		GRANITE_TEXTURE,
+		RUSTY_TEXTURE,
+	]
+
+	for texture in roster:
+		assert_object(texture).is_not_null()
 
 
 func test_player_visual_stays_unrotated_during_physics() -> void:

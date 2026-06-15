@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase.
 
-**Last updated:** Phase 2D complete
+**Last updated:** Sprout selected as default player
 
 ---
 
@@ -73,7 +73,39 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ---
 
+## Phase 3A — Gold and between-wave shop ✅
+
+| Task | Status | Notes |
+|---|---|---|
+| Gold on enemy kill | ✅ Done | `EnemyDefinition.gold_reward`; chaser 1 / sprinter 2 / tank 3 |
+| `GoldSystem` | ✅ Done | Tracks balance, emits `gold_changed` |
+| Shop overlay | ✅ Done | Buy upgrades with gold after wave complete |
+| `ShopManager` | ✅ Done | Reuses `UpgradeDefinition` + `gold_cost` |
+| Multi-wave loop | ✅ Done | Continue clears arena and starts next wave |
+| Gold HUD | ✅ Done | Gold label + wave prefix on timer (`W1 · 45s`) |
+| Unit tests | ✅ Done | `test_gold_system.gd`, `test_shop_manager.gd` |
+
+---
+
 ## Changelog
+
+### Visual art tooling
+
+- Split the generated 3x3 player grid into named sprites: Milo, Nova, Sprout, Pickle, Brutus, Thorn, Stitch, Granite, Rusty
+- Set **Sprout** as the current main player in `scenes/player/player.tscn` and halved the player sprite scale
+- Added a reusable Godot grid splitter for generated character sheets (`tools/grid_sprite_splitter.gd`)
+- Added a CLI wrapper (`tools/split_grid_sprites.gd`) with grid size, output size, padding, naming, background tolerance, and transparency options
+- Added `docs/sprite-grid-splitter.md`, `docs/player-roster.md`, and GdUnit coverage for centering, uneven grids, roster loading, and edge-connected background removal
+
+---
+
+### Phase 3A
+
+- **Gold:** enemies award gold on kill (data-driven via `EnemyDefinition.gold_reward`)
+- **Shop:** wave complete opens a shop instead of a restart screen; buy upgrades with gold, then Continue to the next wave
+- **Multi-wave:** `game.gd` tracks wave number, clears leftover entities, resets `WaveManager` + `EnemySpawner`
+- **Upgrades:** `UpgradeDefinition.gold_cost` added (level-up picks remain free)
+- **HUD:** gold counter in top panel; timer shows `W{n} · {seconds}s`
 
 ### Phase 2D
 
@@ -129,8 +161,9 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 ## How to try it
 
 1. Open project in Godot 4.6+ and press **F5**
-2. Kill enemies — damage numbers pop, XP orbs fill the bottom bar, health pickups show `+15 HP`
-3. Watch tanks for overhead HP bars; timer pulses orange under 10s
-4. Level up by collecting enough orbs — XP bar flashes
-5. Run `.\tools\codecheck.ps1` before handoff (Godot on PATH + optional `pip install gdtoolkit`)
-6. Run tests only: `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/`
+2. Kill enemies — gold accumulates in the HUD (1/2/3 per enemy type)
+3. Survive the wave — shop opens; spend gold on upgrades, click **Continue** for wave 2
+4. Level up from XP orbs — picker still pauses mid-wave (free upgrades)
+5. Die — Game Over overlay with Restart (unchanged)
+6. Run `.\tools\codecheck.ps1` before handoff (Godot on PATH + optional `pip install gdtoolkit`)
+7. Run tests only: `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --addons -a tests/`
