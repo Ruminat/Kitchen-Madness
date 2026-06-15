@@ -1,6 +1,6 @@
-# Development plan: Phase 2 and beyond
+# Kitchen Madness — development plan
 
-A roadmap grounded in the Phase 1 prototype — flat scripts, one enemy, one gun, direct UI wiring, and `game.gd` doing too much. The goal is to grow content (enemies, guns, drops, maps) without the codebase turning into spaghetti.
+Roadmap for **Kitchen Madness**, a top-down arena survivor roguelite in Godot 4. Grounded in the Phase 1 prototype — flat scripts, one enemy, one gun, direct UI wiring, and `game.gd` doing too much. The goal is to grow content (enemies, guns, drops, maps) without the codebase turning into spaghetti.
 
 See also: [context.md](context.md) for iteration rules and current project state.
 
@@ -86,7 +86,7 @@ flowchart TB
 ## Proposed folder structure
 
 ```
-brotato-clone/
+kitchen-madness/
 ├── context.md
 ├── plans.md
 ├── project.godot

@@ -53,7 +53,7 @@ Some player silhouettes have parts that fight a one-size-fits-all box:
 
 **What:** Keep `BODY_RADIUS = 14` centered on the feet/torso. Sprite can be larger and offset so feet sit on the node origin.
 
-**Pros:** Matches current code (`player.gd`, `ArenaClamp`, enemy contact checks). Fast, predictable, easy to tune. Same approach Brotato-style games use for blob/potato characters.
+**Pros:** Matches current code (`player.gd`, `ArenaClamp`, enemy contact checks). Fast, predictable, easy to tune. Same approach many top-down arena survivors use for simple blob characters.
 
 **Cons:** Hat and pan stick out past the circle — purely visual; no gameplay effect.
 

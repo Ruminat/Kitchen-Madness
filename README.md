@@ -1,10 +1,10 @@
-# Brotato Clone
+# Kitchen Madness
 
-A lightweight top-down arena survivor roguelite built in **Godot 4** with **GDScript**. Survive waves of enemies, auto-attack with weapons, and stay inside the arena.
+A top-down arena survivor roguelite built in **Godot 4** with **GDScript**. Fight through kitchen-themed waves, collect upgrades, spend gold between rounds, and survive the madness.
 
-Inspired by [Brotato](https://store.steampowered.com/app/1942280/Brotato/) (also made in Godot), but this is an original project — placeholder art, incremental features, eventual cross-platform / Steam release.
+Genre kin to games like [Brotato](https://store.steampowered.com/app/1942280/Brotato/) — original project, own art and mechanics, targeting eventual cross-platform / Steam release.
 
-**Current status:** Phase 2A foundation complete; Phase 2B in progress — 3 enemy types, data-driven weapons/waves. See [progress.md](progress.md).
+**Current status:** Phase 3A complete (gold, shop, multi-wave loop, 8-stat upgrades). See [progress.md](progress.md) and [context.md](context.md).
 
 ---
 
@@ -28,7 +28,10 @@ That's it — the game starts immediately (no main menu yet).
 | Input | Action |
 |---|---|
 | **WASD** / **Arrow keys** | Move |
-| **R** or **Restart** button | Restart after Game Over or Wave Complete |
+| **W/S** or **↑/↓** | Navigate level-up / shop menus |
+| **1–3** / **Enter** | Pick level-up upgrade |
+| **1–8** / **Enter** | Buy in shop · Enter to continue |
+| **R** or **Restart** | Restart after Game Over |
 
 ---
 
@@ -59,7 +62,7 @@ This gives you GDScript syntax highlighting, `@onready` / signal snippets, and s
 
 ### 3. Point Cursor at your Godot binary
 
-This repo includes `.vscode/settings.json`. Update the Godot path if needed:
+Create `.vscode/settings.json` locally (this folder is **gitignored** — never commit it):
 
 ```json
 {
@@ -138,18 +141,13 @@ plans.md               Roadmap for Phase 2+
 
 - **Commit** `.uid` files alongside scripts — Godot 4.4+ uses them for stable resource references.
 - **Ignore** `.godot/` — editor cache (already in `.gitignore`).
+- **Never commit** `.vscode/` — local editor settings only.
 
 ---
 
 ## Roadmap
 
-See [plans.md](plans.md) for the full development plan:
-
-- Phase 2A: Architecture refactor (EventBus, components, data-driven content)
-- Phase 2B: Multiple enemies, weapons, and drops
-- Phase 2C: UI polish (damage numbers, XP bar, etc.)
-- Phase 2D: XP and level-ups
-- Phase 2E: Tests and `codecheck` command
+See [plans.md](plans.md) for the full development plan (Phases 2A–3A complete; wave scaling and art pass next).
 
 ---
 

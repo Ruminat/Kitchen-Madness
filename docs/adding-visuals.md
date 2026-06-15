@@ -75,7 +75,7 @@ These numbers match the current arena and collision sizes:
 
 **Style tips:**
 
-- Top-down view — draw characters as if seen from above (Brotato-style potato/blob shapes work well).
+- Top-down view — draw characters as if seen from above (simple blob/silhouette shapes work well for arena survivors).
 - Use a limited palette (8–16 colors) so everything feels cohesive.
 - Leave a little transparent padding around sprites so rotation does not clip corners.
 - Pixel art: set import **Filter** to **Nearest** (see below).

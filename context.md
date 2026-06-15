@@ -1,6 +1,6 @@
-# Project context
+# Kitchen Madness — project context
 
-Handoff doc for new chat sessions. Details: [progress.md](progress.md), roadmap: [plans.md](plans.md).
+Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena survivor roguelite (Godot 4). Details: [progress.md](progress.md), roadmap: [plans.md](plans.md).
 
 ## Current status
 
@@ -18,7 +18,7 @@ Handoff doc for new chat sessions. Details: [progress.md](progress.md), roadmap:
 2. `.\tools\codecheck.ps1` must pass
 3. Update [progress.md](progress.md) after a phase/slice
 
-**Godot 4.6+** on PATH. Optional: `pip install gdtoolkit`. `.vscode/settings.json` is local-only (gitignored).
+**Godot 4.6+** on PATH. Optional: `pip install gdtoolkit`. **Never commit `.vscode/`** — local editor settings only (see `.gitignore`).
 
 ---
 

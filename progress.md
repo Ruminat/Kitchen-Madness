@@ -1,4 +1,4 @@
-# Development progress
+# Kitchen Madness — development progress
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase.
 

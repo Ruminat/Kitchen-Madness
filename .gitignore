@@ -3,6 +3,7 @@
 /android/
 reports/
 
-.vscode
+# Editor config — never commit (local Godot path, personal settings)
+.vscode/
 
 ignored
