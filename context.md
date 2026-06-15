@@ -6,9 +6,11 @@ Handoff doc for new chat sessions. See [progress.md](progress.md) for task-level
 
 **Phase 2A complete.** **Phase 2B complete.** **Phase 2C complete.** **Phase 2D complete** (level-up picker + upgrades). **Phase 2E complete** (GdUnit4 + codecheck + pre-commit hook).
 
+**Visual art pass (in progress):** Player, enemies, and arena floor use real sprites. Projectiles and pickups still use `circle_visual.gd` placeholders.
+
 Playable loop: 60s wave, 3 enemy types, pistol + shotgun + orbit blades, XP orbs + health drops, floating damage/pickup text, XP bar, level-up picker, compact HUD, win/lose overlay. Enemy spawning ramps from 2x to 8x over the wave; XP thresholds are 10x slower than the early prototype. Game **pauses** on level-up choices, death, or wave complete.
 
-Local branch has Phase 2D/progression tuning work; not pushed.
+Local branch has Phase 2D/progression tuning + visual sprite work; not pushed.
 
 ---
 
@@ -31,8 +33,8 @@ Local branch has Phase 2D/progression tuning work; not pushed.
 
 Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 
-- **Done:** Arena, player, weighted enemy spawns, pistol/shotgun/orbit blades, wave timer, HUD + XP bar, level-up picker, floating combat text, win/lose + pause, XP orbs + health drops
-- **Next (plans):** Phase 3 planning — shop using the same upgrade/stat system
+- **Done:** Arena, player, weighted enemy spawns, pistol/shotgun/orbit blades, wave timer, HUD + XP bar, level-up picker, floating combat text, win/lose + pause, XP orbs + health drops, **sprite art for player/enemies/floor**
+- **Next (plans):** Phase 3 planning — shop using the same upgrade/stat system; finish remaining placeholders (projectiles, pickups, guns, transparent PNG exports)
 - **Long-term:** Shop, multiple maps, Steam
 
 ## Main scene
@@ -63,7 +65,18 @@ Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 
 **Camera:** `game.gd` zooms to fit arena on viewport resize.
 
-**Arena visual:** floor uses `assets/arena/sand_tile.jpg` in `scenes/arena/arena.tscn`.
+**Arena visual:** tiled dirty kitchen floor — `assets/arena/dirty_kitchen_tile.png` in `scenes/arena/arena.tscn`. `FloorTiles` node scales tiles **5× smaller** (`scale = 0.2`) with a 5× larger `TextureRect` so the 880×480 play area still fills correctly (`stretch_mode = Tile`).
+
+**Character visuals:** Player and enemies use `Visual` → `Sprite2D` (keep the `Visual` node name — scripts modulate it for hit flash / i-frames). Sprites are **static** (no rotation toward movement). Circle **hurtboxes** unchanged; see [hitbox.md](hitbox.md).
+
+| Entity | Sprite | Scene |
+|---|---|---|
+| Player (Bobby) | `assets/characters/player/bobby.png` | `scenes/player/player.tscn` |
+| Chaser (cockroach) | `assets/characters/enemies/cockroach.png` | `scenes/enemy/enemy.tscn` |
+| Tank (rat) | `assets/characters/enemies/rat.png` | `scenes/enemy/tank_enemy.tscn` |
+| Sprinter (fly) | `assets/characters/enemies/fly.png` | `scenes/enemy/sprinter_enemy.tscn` |
+
+**Art note:** Current PNGs have solid black backgrounds — re-export with transparency when possible. Commit image files + `.import` sidecars; `.godot/` stays gitignored.
 
 ---
 
@@ -79,6 +92,11 @@ Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
 ## Project layout
 
 ```
+assets/
+  arena/               dirty_kitchen_tile.png (floor), sand_tile.jpg (unused legacy)
+  characters/
+    player/            bobby.png
+    enemies/           cockroach.png, rat.png, fly.png
 scenes/
   main/game.tscn
   arena/arena.tscn
@@ -111,6 +129,7 @@ tools/
   install-git-hooks.ps1, install-git-hooks.sh
 .githooks/pre-commit   runs codecheck on master only
 docs/                  adding-visuals guide
+hitbox.md              hurtbox vs sprite guidance for complex characters
 progress.md            task checklist
 plans.md               full roadmap
 ```
@@ -129,7 +148,7 @@ plans.md               full roadmap
 ## Dev workflow
 
 ```powershell
-# Full check (lint if gdtoolkit installed + headless boot + 33 tests)
+# Full check (lint if gdtoolkit installed + headless boot + 49 tests)
 .\tools\codecheck.ps1
 
 # Tests only
@@ -139,7 +158,7 @@ godot --headless --path . -s --remote-debug tcp://127.0.0.1:0 res://addons/gdUni
 .\tools\install-git-hooks.ps1
 ```
 
-**Tests:** 41 cases, 11 suites. Integration tests must not `await` timers after pausing the tree — assert synchronously after `EventBus` emits.
+**Tests:** 49 cases, 12 suites. Integration tests must not `await` timers after pausing the tree — assert synchronously after `EventBus` emits.
 
 **Strict typing:** Godot 4.6 + GdUnit4 treat inference warnings as errors. Use explicit types on `auto_free()` results and typed arrays.
 
@@ -163,6 +182,7 @@ Shop, multiple maps, save/meta, main menu, Steam, sound/music.
 
 1. [plans.md](plans.md) — roadmap
 2. [progress.md](progress.md) — what's done
-3. `scripts/game.gd` — run lifecycle, pause on end
-4. `scripts/autoload/event_bus.gd` — signal contracts
-5. `resources/waves/wave_01.tres` — current wave/enemy weights
+3. [hitbox.md](hitbox.md) — sprite vs collision guidance
+4. `scripts/game.gd` — run lifecycle, pause on end
+5. `scripts/autoload/event_bus.gd` — signal contracts
+6. `resources/waves/wave_01.tres` — current wave/enemy weights

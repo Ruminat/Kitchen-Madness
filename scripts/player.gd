@@ -39,9 +39,6 @@ func _physics_process(_delta: float) -> void:
 	_clamp_to_arena()
 	_check_contact_damage()
 
-	if input_dir.length_squared() > 0.01:
-		visual.rotation = input_dir.angle()
-
 	if health_component.is_invincible():
 		visual.modulate.a = 0.55 + 0.45 * abs(sin(Time.get_ticks_msec() * 0.04))
 	else:

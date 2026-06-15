@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://arena001"]
 
 [ext_resource type="Script" path="res://scripts/arena.gd" id="1_arena"]
-[ext_resource type="Texture2D" path="res://assets/arena/sand_tile.jpg" id="2_sand"]
+[ext_resource type="Texture2D" uid="uid://bwjt8cwrl1vdc" path="res://assets/arena/dirty_kitchen_tile.png" id="2_floor"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_top"]
 size = Vector2(920, 24)
@@ -18,13 +18,16 @@ size = Vector2(24, 528)
 [node name="Arena" type="Node2D"]
 script = ExtResource("1_arena")
 
-[node name="Background" type="TextureRect" parent="."]
-offset_left = -440.0
-offset_top = -240.0
-offset_right = 440.0
-offset_bottom = 240.0
+[node name="FloorTiles" type="Node2D" parent="."]
+scale = Vector2(0.2, 0.2)
+
+[node name="Background" type="TextureRect" parent="FloorTiles"]
+offset_left = -2200.0
+offset_top = -1200.0
+offset_right = 2200.0
+offset_bottom = 1200.0
 mouse_filter = 2
-texture = ExtResource("2_sand")
+texture = ExtResource("2_floor")
 stretch_mode = 1
 
 [node name="Walls" type="Node2D" parent="."]

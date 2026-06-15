@@ -93,9 +93,6 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	global_position = ArenaClamp.clamp_position(global_position, arena_bounds, _get_radius())
 
-	if direction.length_squared() > 0.01:
-		visual.rotation = direction.angle()
-
 
 func _get_move_direction(player: Node2D, _delta: float) -> Vector2:
 	return (player.global_position - global_position).normalized()
