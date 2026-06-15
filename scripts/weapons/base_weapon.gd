@@ -5,6 +5,7 @@ var definition: WeaponDefinition
 var arena_bounds := Rect2()
 var _projectile_container: Node2D
 var _damage_multiplier := 1.0
+var _fire_rate_multiplier := 1.0
 
 
 func setup(
@@ -34,6 +35,17 @@ func increase_damage_percent(percent: float) -> void:
 		return
 
 	_damage_multiplier *= 1.0 + percent
+
+
+func increase_fire_rate_percent(percent: float) -> void:
+	if percent <= 0.0:
+		return
+
+	_fire_rate_multiplier *= 1.0 + percent
+
+
+func get_fire_rate_multiplier() -> float:
+	return maxf(_fire_rate_multiplier, 0.1)
 
 
 func get_damage() -> int:

@@ -7,5 +7,7 @@ extends Resource
 @export var move_speed: float = 90.0
 @export var contact_damage: int = 10
 @export var xp_drop: DropDefinition
+@export var gold_reward: int = 1
+@export var is_elite: bool = false
 @export var color: Color = Color.RED
 @export var radius: float = 12.0

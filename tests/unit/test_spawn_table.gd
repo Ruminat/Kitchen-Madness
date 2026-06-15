@@ -56,3 +56,43 @@ func test_spawner_scales_interval_with_wave_multiplier() -> void:
 
 	spawner._elapsed_time = 60.0
 	assert_float(spawner._current_spawn_interval()).is_equal(0.175)
+
+
+func test_spawner_caps_elite_enemies_at_two() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	add_child(spawner)
+	var container: Node2D = auto_free(Node2D.new()) as Node2D
+	add_child(container)
+
+	var chaser := EnemyDefinition.new()
+	chaser.id = "chaser"
+	var tank := EnemyDefinition.new()
+	tank.id = "tank"
+	tank.is_elite = true
+
+	var chaser_entry := EnemySpawnEntry.new()
+	chaser_entry.definition = chaser
+	chaser_entry.weight = 1
+	var tank_entry := EnemySpawnEntry.new()
+	tank_entry.definition = tank
+	tank_entry.weight = 99
+
+	var wave := WaveDefinition.new()
+	wave.enemy_weights = [chaser_entry, tank_entry]
+	wave.fallback_enemy_scene = preload("res://scenes/enemy/enemy.tscn")
+
+	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	_add_elite_stub(container, tank)
+	_add_elite_stub(container, tank)
+
+	for _attempt in 20:
+		var picked := spawner._pick_spawn_definition()
+		assert_object(picked).is_not_null()
+		assert_bool(picked.is_elite).is_false()
+
+
+func _add_elite_stub(container: Node2D, definition: EnemyDefinition) -> void:
+	var stub := Node2D.new()
+	stub.set_meta("definition", definition)
+	stub.set("definition", definition)
+	container.add_child(stub)

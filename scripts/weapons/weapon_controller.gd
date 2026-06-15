@@ -47,7 +47,6 @@ func increase_damage_percent(percent: float) -> void:
 		weapon.increase_damage_percent(percent)
 
 
-func increase_orbit_blades(amount: int) -> void:
+func increase_fire_rate_percent(percent: float) -> void:
 	for weapon in _weapons:
-		if weapon.definition and weapon.definition.id == "orbit_blade":
-			weapon.increase_pellet_count(amount)
+		weapon.increase_fire_rate_percent(percent)

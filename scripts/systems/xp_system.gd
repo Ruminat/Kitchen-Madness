@@ -30,7 +30,14 @@ func _on_pickup_collected(type: StringName, _world_pos: Vector2, value: int) -> 
 	if type == &"health":
 		return
 	if type.begins_with(&"xp") or value > 0:
-		add_xp(value)
+		add_xp(_scale_xp(value))
+
+
+func _scale_xp(amount: int) -> int:
+	var player := get_tree().get_first_node_in_group("player")
+	if player and player.has_method("get_xp_multiplier"):
+		return maxi(roundi(float(amount) * player.get_xp_multiplier()), 1)
+	return amount
 
 
 func _xp_required_for_level(next_level: int) -> int:

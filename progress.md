@@ -99,6 +99,13 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ---
 
+### Phase 3A (tuning)
+
+- **Elite cap:** max 2 elite (tank) enemies alive at once; spawner falls back to non-elite picks when cap is hit
+- **Keyboard UI:** level-up `1`/`2`/`3`, shop `1`–`8` + `Enter`, game over `R`/`Enter`; dual-input rule added to `plans.md` and `context.md`
+- **WASD ↔ arrows:** documented as fully interchangeable; movement always via input actions
+- **Upgrade overhaul:** HP, armor, damage, attack speed, move speed, luck, pickup range, XP gain (orbit blade upgrade removed)
+
 ### Phase 3A
 
 - **Gold:** enemies award gold on kill (data-driven via `EnemyDefinition.gold_reward`)

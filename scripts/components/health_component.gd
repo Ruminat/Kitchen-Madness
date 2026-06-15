@@ -8,6 +8,7 @@ signal died
 @export var invincibility_time: float = 0.0
 
 var current_health: int = 0
+var armor := 0
 
 var _invincible := false
 
@@ -29,7 +30,11 @@ func take_damage(amount: int) -> void:
 	if _invincible or current_health <= 0:
 		return
 
-	current_health = maxi(current_health - amount, 0)
+	var final_amount := amount
+	if amount > 0:
+		final_amount = maxi(amount - armor, 1)
+
+	current_health = maxi(current_health - final_amount, 0)
 	health_changed.emit(current_health, max_health)
 
 	if invincibility_time > 0.0:
@@ -54,6 +59,13 @@ func increase_max_health(amount: int, heal_amount: int = 0) -> void:
 	max_health += amount
 	current_health = mini(current_health + maxi(heal_amount, 0), max_health)
 	health_changed.emit(current_health, max_health)
+
+
+func increase_armor(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	armor += amount
 
 
 func _start_invincibility() -> void:

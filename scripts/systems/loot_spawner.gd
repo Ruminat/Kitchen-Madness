@@ -2,6 +2,7 @@ class_name LootSpawner
 extends Node
 
 const HEALTH_DROP_CHANCE := 0.05
+const MAX_HEALTH_DROP_CHANCE := 0.22
 
 var pickup_container: Node2D
 var health_drop: DropDefinition
@@ -25,9 +26,17 @@ func _on_enemy_killed(enemy: Node, _killer: Node) -> void:
 	if enemy_definition and enemy_definition.xp_drop:
 		_spawn_drop(enemy_definition.xp_drop, spawn_pos)
 
-	if health_drop and randf() < HEALTH_DROP_CHANCE:
+	if health_drop and randf() < _health_drop_chance():
 		var offset := Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
 		_spawn_drop(health_drop, spawn_pos + offset)
+
+
+func _health_drop_chance() -> float:
+	var chance := HEALTH_DROP_CHANCE
+	var player := get_tree().get_first_node_in_group("player")
+	if player and player.has_method("get_health_drop_chance_bonus"):
+		chance += player.get_health_drop_chance_bonus()
+	return minf(chance, MAX_HEALTH_DROP_CHANCE)
 
 
 func _spawn_drop(drop: DropDefinition, position: Vector2) -> void:

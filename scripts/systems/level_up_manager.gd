@@ -2,10 +2,14 @@ class_name LevelUpManager
 extends Node
 
 const DEFAULT_UPGRADE_PATHS: Array[String] = [
-	"res://resources/upgrades/damage_boost.tres",
-	"res://resources/upgrades/speed_boost.tres",
 	"res://resources/upgrades/max_health.tres",
-	"res://resources/upgrades/orbit_blade.tres",
+	"res://resources/upgrades/armor.tres",
+	"res://resources/upgrades/damage_boost.tres",
+	"res://resources/upgrades/attack_speed.tres",
+	"res://resources/upgrades/speed_boost.tres",
+	"res://resources/upgrades/luck.tres",
+	"res://resources/upgrades/pickup_range.tres",
+	"res://resources/upgrades/xp_gain.tres",
 ]
 
 @export var upgrades: Array[Resource] = []
@@ -80,11 +84,21 @@ func _pick_choices() -> Array[Resource]:
 	var pool := upgrades.duplicate()
 	pool.shuffle()
 
-	var choices: Array[Resource] = []
-	var count := mini(choice_count, pool.size())
-	for index in count:
-		choices.append(pool[index])
-	return choices
+	var candidate_count := choice_count
+	if _player and _player.has_method("get_luck"):
+		candidate_count += mini(_player.get_luck() / 10, 2)
+	candidate_count = mini(candidate_count, pool.size())
+
+	var candidates: Array[Resource] = []
+	for index in candidate_count:
+		candidates.append(pool[index])
+
+	candidates.sort_custom(_sort_upgrades_by_amount_desc)
+	return candidates.slice(0, choice_count)
+
+
+func _sort_upgrades_by_amount_desc(a: Resource, b: Resource) -> bool:
+	return float(a.get("amount")) > float(b.get("amount"))
 
 
 func _can_resume_run() -> bool:

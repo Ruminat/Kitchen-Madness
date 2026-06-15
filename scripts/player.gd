@@ -10,6 +10,10 @@ const CONTACT_FORGIVENESS := 2.0
 
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var move_speed := BASE_MOVE_SPEED
+var luck := 0
+var pickup_range_bonus := 0.0
+
+var _xp_gain_multiplier := 1.0
 
 @onready var visual: Node2D = $Visual
 @onready var health_component: HealthComponent = $HealthComponent
@@ -73,6 +77,10 @@ func increase_weapon_damage_percent(percent: float) -> void:
 	weapon_controller.increase_damage_percent(percent)
 
 
+func increase_attack_speed_percent(percent: float) -> void:
+	weapon_controller.increase_fire_rate_percent(percent)
+
+
 func increase_move_speed_percent(percent: float) -> void:
 	if percent <= 0.0:
 		return
@@ -84,8 +92,49 @@ func increase_max_health(amount: int) -> void:
 	health_component.increase_max_health(amount, amount)
 
 
-func increase_orbit_blades(amount: int) -> void:
-	weapon_controller.increase_orbit_blades(amount)
+func increase_armor(amount: int) -> void:
+	health_component.increase_armor(amount)
+
+
+func increase_luck(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	luck += amount
+
+
+func increase_pickup_range(amount: float) -> void:
+	if amount <= 0.0:
+		return
+
+	pickup_range_bonus += amount
+
+
+func increase_xp_gain_percent(percent: float) -> void:
+	if percent <= 0.0:
+		return
+
+	_xp_gain_multiplier *= 1.0 + percent
+
+
+func get_luck() -> int:
+	return luck
+
+
+func get_pickup_range_bonus() -> float:
+	return pickup_range_bonus
+
+
+func get_gold_multiplier() -> float:
+	return 1.0 + float(luck) * 0.01
+
+
+func get_xp_multiplier() -> float:
+	return _xp_gain_multiplier * (1.0 + float(luck) * 0.01)
+
+
+func get_health_drop_chance_bonus() -> float:
+	return float(luck) * 0.0015
 
 
 func _emit_initial_health() -> void:

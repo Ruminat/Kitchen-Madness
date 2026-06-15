@@ -20,7 +20,7 @@ script = ExtResource("2_floating")
 [node name="HudPanel" type="PanelContainer" parent="."]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 236.0
+offset_right = 320.0
 offset_bottom = 96.0
 
 [node name="MarginContainer" type="MarginContainer" parent="HudPanel"]
@@ -66,6 +66,11 @@ text = "30s"
 [node name="KillLabel" type="Label" parent="HudPanel/MarginContainer/VBox/StatsRow"]
 layout_mode = 2
 text = "0 kills"
+horizontal_alignment = 2
+
+[node name="GoldLabel" type="Label" parent="HudPanel/MarginContainer/VBox/StatsRow"]
+layout_mode = 2
+text = "0 gold"
 horizontal_alignment = 2
 
 [node name="XpPanel" type="PanelContainer" parent="."]
@@ -133,7 +138,7 @@ horizontal_alignment = 1
 [node name="RestartHint" type="Label" parent="Overlay/CenterContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "Press R to restart"
+text = "Press R or Enter to restart"
 horizontal_alignment = 1
 
 [node name="RestartButton" type="Button" parent="Overlay/CenterContainer/VBox"]
@@ -159,43 +164,155 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="LevelUpOverlay/CenterContainer"]
-custom_minimum_size = Vector2(520, 0)
+custom_minimum_size = Vector2(640, 0)
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="LevelUpOverlay/CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 26
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 26
+
+[node name="VBox" type="VBoxContainer" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TitleLabel" type="Label" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "⭐  Level Up!"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.62, 0.66, 0.74, 1)
+text = "Pick one upgrade to power up your run"
+horizontal_alignment = 1
+
+[node name="HeaderSeparator" type="HSeparator" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="UpgradeChoices" type="VBoxContainer" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="UpgradeButton1" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeChoices"]
+custom_minimum_size = Vector2(0, 78)
+layout_mode = 2
+text = "Upgrade 1"
+
+[node name="UpgradeButton2" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeChoices"]
+custom_minimum_size = Vector2(0, 78)
+layout_mode = 2
+text = "Upgrade 2"
+
+[node name="UpgradeButton3" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/UpgradeChoices"]
+custom_minimum_size = Vector2(0, 78)
+layout_mode = 2
+text = "Upgrade 3"
+
+[node name="FooterSeparator" type="HSeparator" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="HintLabel" type="Label" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "W/S or ↑/↓ navigate  ·  1/2/3 or Enter pick  ·  Click to choose"
+horizontal_alignment = 1
+
+[node name="ShopOverlay" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.62)
+
+[node name="CenterContainer" type="CenterContainer" parent="ShopOverlay"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="ShopOverlay/CenterContainer"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ShopOverlay/CenterContainer/PanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 22
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="VBox" type="VBoxContainer" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer"]
+[node name="VBox" type="VBoxContainer" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TitleLabel" type="Label" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+[node name="TitleLabel" type="Label" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
-text = "Level Up!"
+text = "Wave Complete — Shop"
 horizontal_alignment = 1
 
-[node name="HintLabel" type="Label" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+[node name="GoldLabel" type="Label" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "0 gold available"
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "Choose one upgrade"
+text = "W/S or ↑/↓ navigate  ·  1–8 or Enter buy  ·  Enter continue"
 horizontal_alignment = 1
 
-[node name="UpgradeButton1" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 64)
+[node name="ShopButton1" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
-text = "Upgrade 1"
+text = "Shop Item 1"
 
-[node name="UpgradeButton2" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 64)
+[node name="ShopButton2" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
-text = "Upgrade 2"
+text = "Shop Item 2"
 
-[node name="UpgradeButton3" type="Button" parent="LevelUpOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 64)
+[node name="ShopButton3" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
-text = "Upgrade 3"
+text = "Shop Item 3"
+
+[node name="ShopButton4" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Shop Item 4"
+
+[node name="ShopButton5" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Shop Item 5"
+
+[node name="ShopButton6" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Shop Item 6"
+
+[node name="ShopButton7" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Shop Item 7"
+
+[node name="ShopButton8" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Shop Item 8"
+
+[node name="ContinueButton" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Continue"

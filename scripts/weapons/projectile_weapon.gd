@@ -21,7 +21,8 @@ func _process(delta: float) -> void:
 		return
 
 	_fire_at(target)
-	_cooldown = definition.fire_rate if definition else 0.45
+	var fire_rate := definition.fire_rate if definition else 0.45
+	_cooldown = fire_rate / get_fire_rate_multiplier()
 
 
 func _find_nearest_enemy() -> Node2D:

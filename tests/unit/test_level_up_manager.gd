@@ -6,9 +6,13 @@ class MockPlayer:
 	extends Node
 
 	var damage_percent := 0.0
+	var luck := 0
 
 	func increase_weapon_damage_percent(percent: float) -> void:
 		damage_percent += percent
+
+	func get_luck() -> int:
+		return luck
 
 
 class MockUpgradeUi:
@@ -79,6 +83,25 @@ func test_level_up_does_not_show_choices_when_run_is_inactive() -> void:
 
 	assert_bool(ui.shown).is_false()
 	assert_bool(get_tree().paused).is_false()
+
+
+func test_lucky_player_expands_upgrade_candidate_pool() -> void:
+	var upgrades: Array[Resource] = []
+	for index in 6:
+		upgrades.append(_create_damage_upgrade(0.1 * float(index + 1)))
+	var manager := _create_manager(upgrades)
+	var player := _create_player()
+	player.luck = 20
+	var ui := _create_ui()
+	manager.configure(player, ui, func() -> bool: return true)
+
+	EventBus.level_up.emit(2)
+
+	assert_int(ui.choices.size()).is_equal(3)
+	var amounts: Array[float] = []
+	for choice in ui.choices:
+		amounts.append(choice.amount)
+	assert_float(amounts.max()).is_equal(0.6)
 
 
 func _create_manager(upgrades: Array[Resource]) -> LevelUpManager:

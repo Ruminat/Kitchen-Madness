@@ -16,7 +16,7 @@ func _process(delta: float) -> void:
 	if health_component and not health_component.is_alive():
 		return
 
-	var orbit_speed := definition.orbit_speed if definition else 4.0
+	var orbit_speed := (definition.orbit_speed if definition else 4.0) * get_fire_rate_multiplier()
 	_angle += orbit_speed * delta
 	_prune_hit_cooldowns()
 	_damage_enemies_at_blades(player)

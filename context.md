@@ -1,192 +1,94 @@
 # Project context
 
-Handoff doc for new chat sessions. See [progress.md](progress.md) for task-level status and [plans.md](plans.md) for the full roadmap.
+Handoff doc for new chat sessions. Details: [progress.md](progress.md), roadmap: [plans.md](plans.md).
 
-## Current status (as of last session)
+## Current status
 
-**Phase 2A complete.** **Phase 2B complete.** **Phase 2C complete.** **Phase 2D complete** (level-up picker + upgrades). **Phase 2E complete** (GdUnit4 + codecheck + pre-commit hook). **Phase 3A complete** (gold + between-wave shop + multi-wave loop).
+**Phase 3A done** — gold on kill, between-wave shop, multi-wave loop, 8-stat upgrades (HP/armor/damage/attack speed/move speed/luck/pickup range/XP), elite cap (max 2 tanks alive), dual mouse+keyboard UI.
 
-**Visual art pass (in progress):** Player, enemies, and arena floor use real sprites. Projectiles and pickups still use `circle_visual.gd` placeholders. The generated 9-player grid is split into a named roster in `assets/characters/player/`; **Sprout** is the current main player. Generated character grids can be split with `tools/split_grid_sprites.gd`; usage notes live in `docs/sprite-grid-splitter.md`.
+**Visual pass (ongoing):** Sprites for player (Sprout), enemies, arena floor. Projectiles/pickups still circle placeholders. Player roster + grid splitter in `tools/` — see `docs/sprite-grid-splitter.md`.
 
-Playable loop: multi-wave runs with 60s waves, 3 enemy types, pistol + shotgun + orbit blades, XP orbs + health drops, floating damage/pickup text, XP bar, level-up picker, **gold HUD + between-wave shop**, compact HUD, win/lose overlay. Enemy spawning ramps from 2x to 8x over the wave; XP thresholds are 10x slower than the early prototype. Game **pauses** on level-up choices, **shop between waves**, death.
-
-Local branch has Phase 2D/progression tuning + visual sprite work; not pushed.
+**Loop:** 60s waves → shop → next wave. Pauses on level-up, shop, death. Spawns ramp 2×–8×; XP thresholds tuned slow.
 
 ---
 
 ## Iteration rule
 
-**Make sure there are no errors before finishing an iteration.**
+1. Zero parser/scene errors · **F5** smoke test
+2. `.\tools\codecheck.ps1` must pass
+3. Update [progress.md](progress.md) after a phase/slice
 
-1. Fix all parser/script/scene errors
-2. Press **F5** — game starts, movement/shooting/enemies work, end screens freeze gameplay
-3. Run `./tools/codecheck.ps1` (Windows) or `./tools/codecheck.sh` (macOS/Linux) — must pass
-4. Update [progress.md](progress.md) if you finish a phase or meaningful slice
-
-**Godot 4.6+** required. **Godot must be on PATH** (`godot` — user has 4.6.3). Optional: `pip install gdtoolkit` for lint/format in codecheck.
-
-**Local editor:** `.vscode/settings.json` is gitignored — set `godotTools.editorPath.godot4` to your Godot binary locally.
+**Godot 4.6+** on PATH. Optional: `pip install gdtoolkit`. `.vscode/settings.json` is local-only (gitignored).
 
 ---
 
-## Game overview
+## Architecture (keep these patterns)
 
-Brotato-style top-down arena survivor roguelite in **Godot 4** (GDScript).
-
-- **Done:** Arena, player, weighted enemy spawns, pistol/shotgun/orbit blades, wave timer, HUD + XP bar, level-up picker, floating combat text, win/lose + pause, XP orbs + health drops, **sprite art for player/enemies/floor**, **gold + between-wave shop + multi-wave loop**
-- **Next (plans):** Finish remaining placeholders (projectiles, pickups, guns, transparent PNG exports); wave scaling / multiple wave definitions
-- **Long-term:** Shop, multiple maps, Steam
-
-## Main scene
-
-`res://scenes/main/game.tscn`
-
----
-
-## Architecture (important patterns)
-
-| Pattern | Where | Notes |
-|---|---|---|
-| **EventBus** autoload | `scripts/autoload/event_bus.gd` | Gameplay emits; UI listens. No direct `ui.update_*()` from gameplay. |
-| **HealthComponent** | player + enemies | Shared HP, i-frames. Player i-frames: **0.1s**. |
-| **WaveManager / EnemySpawner** | `scripts/systems/` | Wave timer + weighted spawns from `WaveDefinition`. |
-| **WeaponController** | on player | Loads weapons from `WeaponDefinition` `.tres`. |
-| **SpawnTable** | `scripts/systems/spawn_table.gd` | Weighted enemy pick (unit-tested). |
-| **XpSystem** | `scripts/systems/xp_system.gd` | Listens to `pickup_collected`; emits `xp_changed` / `level_up`. |
-| **LevelUpManager** | `scripts/systems/level_up_manager.gd` | Queues level-ups, pauses for 1 of 3 upgrades, applies `UpgradeDefinition` resources. |
-| **GoldSystem** | `scripts/systems/gold_system.gd` | Awards gold on kill from `EnemyDefinition.gold_reward`; emits `gold_changed`. |
-| **ShopManager** | `scripts/systems/shop_manager.gd` | Opens shop on wave complete; spends gold on `UpgradeDefinition.gold_cost`; Continue starts next wave. |
-| **FloatingTextManager** | `scripts/ui/floating_text_manager.gd` | Damage + pickup feedback via EventBus. |
-| **Resource definitions** | `scripts/data/*.gd` + `resources/` | Add content via `.tres`, not by editing spawner logic. |
-
-**Run end:** `game.gd` sets `get_tree().paused = true`. UI uses `PROCESS_MODE_ALWAYS` so Restart/R still work. Do **not** set `PROCESS_MODE_WHEN_PAUSED` on the Game root (breaks normal play).
-
-**Contact damage:** Distance-based overlap in `player.gd` (not Area2D `body_entered` — caused phantom hits).
-
-**Window:** `WindowSetup` autoload — borderless full monitor on boot. Skipped in headless (tests/CI).
-
-**Camera:** `game.gd` zooms to fit arena on viewport resize.
-
-**Arena visual:** tiled dirty kitchen floor — `assets/arena/dirty_kitchen_tile.png` in `scenes/arena/arena.tscn`. `FloorTiles` node scales tiles **5× smaller** (`scale = 0.2`) with a 5× larger `TextureRect` so the 880×480 play area still fills correctly (`stretch_mode = Tile`).
-
-**Character visuals:** Player and enemies use `Visual` → `Sprite2D` (keep the `Visual` node name — scripts modulate it for hit flash / i-frames). Sprites are **static** (no rotation toward movement). Circle **hurtboxes** unchanged; see [hitbox.md](hitbox.md).
-
-| Entity | Sprite | Scene |
-|---|---|---|
-| Player (Sprout) | `assets/characters/player/sprout.png` | `scenes/player/player.tscn` |
-| Chaser (cockroach) | `assets/characters/enemies/cockroach.png` | `scenes/enemy/enemy.tscn` |
-| Tank (rat) | `assets/characters/enemies/rat.png` | `scenes/enemy/tank_enemy.tscn` |
-| Sprinter (fly) | `assets/characters/enemies/fly.png` | `scenes/enemy/sprinter_enemy.tscn` |
-
-**Art note:** Current PNGs have solid black backgrounds — re-export with transparency when possible. Commit image files + `.import` sidecars; `.godot/` stays gitignored.
-
----
-
-## Autoloads
-
-| Name | Script |
+| Pattern | Where |
 |---|---|
-| EventBus | `scripts/autoload/event_bus.gd` |
-| WindowSetup | `scripts/autoload/window_setup.gd` |
+| **EventBus** | `scripts/autoload/event_bus.gd` — gameplay emits, UI listens |
+| **HealthComponent** | Shared HP + armor + i-frames (player: 0.1s) |
+| **WaveManager / EnemySpawner** | Timer, weighted spawns, elite cap |
+| **GoldSystem / ShopManager** | Kill gold → shop → `start_next_wave()` |
+| **LevelUpManager** | 1-of-3 free upgrades from `UpgradeDefinition` |
+| **Resource `.tres`** | Enemies, weapons, drops, waves, upgrades — add content without editing spawners |
+
+**Main scene:** `res://scenes/main/game.tscn`
+
+**Gotchas:** Contact damage = distance check in `player.gd` (not Area2D). UI = `PROCESS_MODE_ALWAYS`; don't set `WHEN_PAUSED` on Game root. `WindowSetup` skipped headless.
 
 ---
 
-## Project layout
+## Controls (mouse OR keyboard — always both)
+
+| Context | Keyboard |
+|---|---|
+| Move | **WASD or arrows** (input actions, not raw keycodes) |
+| Level-up | W/S or ↑/↓ · 1/2/3 or Enter |
+| Shop | W/S or ↑/↓ · 1–8 or Enter buy · Enter continue |
+| Game over | R or Enter |
+
+`ui_up/down` also bind WASD in `project.godot`. Upgrade cards: emoji + accent via `scripts/ui/upgrade_display.gd`.
+
+**Luck (balanced):** +1% gold/XP per point, +0.15% health drop chance (cap 22%), slightly better level-up rolls.
+
+---
+
+## Key paths
 
 ```
-assets/
-  arena/               dirty_kitchen_tile.png (floor), sand_tile.jpg (unused legacy)
-  characters/
-    player/            bobby.png, milo/nova/sprout/pickle/brutus/thorn/stitch/granite/rusty roster
-    enemies/           cockroach.png, rat.png, fly.png
-scenes/
-  main/game.tscn
-  arena/arena.tscn
-  player/player.tscn
-  enemy/enemy.tscn, tank_enemy.tscn, sprinter_enemy.tscn
-  projectiles/projectile.tscn
-  ui/game_ui.tscn
-scripts/
-  autoload/          event_bus.gd, window_setup.gd
-  components/        health_component.gd, arena_clamp.gd, enemy_health_bar.gd
-  data/              enemy/weapon/drop/wave/upgrade definitions
-  enemies/           base_enemy.gd, chaser_enemy.gd, sprinter_enemy.gd
-  pickups/           base_pickup.gd, health_pickup.gd
-  systems/           wave_manager.gd, enemy_spawner.gd, spawn_table.gd, loot_spawner.gd, xp_system.gd, level_up_manager.gd, gold_system.gd, shop_manager.gd
-  ui/                floating_text.gd, floating_text_manager.gd, stat_bar.gd
-  weapons/           weapon_controller.gd, base_weapon.gd, projectile_weapon.gd, orbit_weapon.gd
-  game.gd, player.gd, projectile.gd, game_ui.gd, circle_visual.gd, arena.gd
-resources/
-  enemies/           chaser, tank, sprinter + spawn entries
-  weapons/           pistol.tres, shotgun.tres, orbit_blade.tres
-  drops/             xp_orb_small.tres, xp_orb_large.tres, health_pickup.tres
-  upgrades/          damage_boost, speed_boost, max_health, orbit_blade
-  waves/             wave_01.tres
-tests/
-  unit/              health, wave, spawn, arena, xp
-  integration/       game boot + pause-on-end
-addons/gdUnit4/      test framework
-tools/
-  codecheck.ps1, codecheck.sh
-  install-git-hooks.ps1, install-git-hooks.sh
-  split_grid_sprites.gd, grid_sprite_splitter.gd
-.githooks/pre-commit   runs codecheck on master only
-docs/                  adding-visuals guide, sprite-grid-splitter guide, player roster
-hitbox.md              hurtbox vs sprite guidance for complex characters
-progress.md            task checklist
-plans.md               full roadmap
+scripts/systems/   wave_manager, enemy_spawner, gold_system, shop_manager, level_up_manager, xp_system
+scripts/ui/        game_ui.gd, upgrade_display.gd, floating_text_manager.gd
+resources/upgrades/  max_health, armor, damage_boost, attack_speed, speed_boost, luck, pickup_range, xp_gain
+resources/waves/   wave_01.tres
+tests/             unit + integration (GdUnit4)
+tools/codecheck.ps1
 ```
 
----
-
-## Controls
-
-| Input | Action |
-|---|---|
-| WASD / Arrow keys | Move |
-| R or Restart button | Restart after Game Over or Wave Complete |
+Sprites / hurtboxes: [hitbox.md](hitbox.md)
 
 ---
 
 ## Dev workflow
 
 ```powershell
-# Full check (lint if gdtoolkit installed + headless boot + 60 tests)
 .\tools\codecheck.ps1
-
-# Tests only
-godot --headless --path . -s --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode
-
-# Install git hook (once per clone) — runs codecheck before commits on master
-.\tools\install-git-hooks.ps1
+godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode
 ```
 
-**Tests:** 60 cases, 15 suites. Integration tests must not `await` timers after pausing the tree — assert synchronously after `EventBus` emits.
-
-**Strict typing:** Godot 4.6 + GdUnit4 treat inference warnings as errors. Use explicit types on `auto_free()` results and typed arrays.
+Integration tests: assert synchronously after `EventBus` emits — don't `await` timers after pausing the tree.
 
 ---
 
-## Recommended next work (from plans.md)
+## Next work
 
-1. **Visual placeholders:** projectiles, pickups, transparent PNG exports for character sprites
-2. **Wave scaling:** per-wave `WaveDefinition` resources or difficulty ramp across waves
+1. Sprite placeholders (projectiles, pickups) + transparent PNG exports
+2. Per-wave difficulty / multiple `WaveDefinition` resources
 
-Vertical slices: each step playable + `codecheck` green + update `progress.md`.
-
----
-
-## Not in scope yet
-
-Shop, multiple maps, save/meta, main menu, Steam, sound/music.
+**Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 
 ---
 
-## Key files to read first in a new chat
+## Read first in a new chat
 
-1. [plans.md](plans.md) — roadmap
-2. [progress.md](progress.md) — what's done
-3. [hitbox.md](hitbox.md) — sprite vs collision guidance
-4. `scripts/game.gd` — run lifecycle, pause on end
-5. `scripts/autoload/event_bus.gd` — signal contracts
-6. `resources/waves/wave_01.tres` — current wave/enemy weights
+1. [progress.md](progress.md) · 2. [plans.md](plans.md) · 3. `scripts/game.gd` · 4. `event_bus.gd` · 5. `wave_01.tres`

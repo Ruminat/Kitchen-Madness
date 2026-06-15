@@ -12,5 +12,6 @@ max_health = 15
 move_speed = 160.0
 contact_damage = 8
 xp_drop = ExtResource("3")
+gold_reward = 2
 color = Color(1, 0.55, 0.1, 1)
 radius = 9.0

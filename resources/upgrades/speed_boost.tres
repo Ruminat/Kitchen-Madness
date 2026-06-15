@@ -6,6 +6,7 @@
 script = ExtResource("1")
 id = "speed_boost"
 title = "Quick Feet"
-description = "+10% move speed"
+description = "+8% move speed"
 effect = &"move_speed_percent"
-amount = 0.1
+amount = 0.08
+gold_cost = 15

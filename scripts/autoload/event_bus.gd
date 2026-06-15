@@ -10,3 +10,5 @@ signal level_up(level: int)
 signal pickup_collected(type: StringName, world_pos: Vector2, value: int)
 signal wave_time_changed(seconds_remaining: float)
 signal wave_completed
+signal gold_changed(gold: int)
+signal wave_index_changed(wave: int)

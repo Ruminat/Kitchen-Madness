@@ -5,7 +5,8 @@
 [resource]
 script = ExtResource("1")
 id = "max_health"
-title = "Thick Skin"
-description = "+20 max HP and heal 20"
+title = "Vitality"
+description = "+15 max HP and heal 15"
 effect = &"max_health_flat"
-amount = 20.0
+amount = 15.0
+gold_cost = 18

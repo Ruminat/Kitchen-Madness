@@ -23,6 +23,8 @@ func _physics_process(delta: float) -> void:
 
 	var distance := global_position.distance_to(player.global_position)
 	var magnet_radius := definition.magnet_radius if definition else 48.0
+	if player.has_method("get_pickup_range_bonus"):
+		magnet_radius += player.get_pickup_range_bonus()
 
 	if distance < COLLECT_DISTANCE:
 		_collect(player)

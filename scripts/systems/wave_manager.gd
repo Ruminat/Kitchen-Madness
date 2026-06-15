@@ -30,6 +30,13 @@ func pause() -> void:
 	is_paused = true
 
 
+func reset() -> void:
+	is_complete = false
+	is_paused = false
+	time_remaining = wave_definition.duration if wave_definition else 30.0
+	EventBus.wave_time_changed.emit(time_remaining)
+
+
 func _complete_wave() -> void:
 	is_complete = true
 	EventBus.wave_completed.emit()

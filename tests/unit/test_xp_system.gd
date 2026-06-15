@@ -76,6 +76,26 @@ func test_xp_to_next_increases_after_level_up() -> void:
 	assert_int(xp_system.xp_to_next).is_equal(250)
 
 
+func test_player_luck_and_xp_gain_boost_pickup_xp() -> void:
+	var xp_system: XpSystem = auto_free(XpSystem.new()) as XpSystem
+	add_child(xp_system)
+	await _wait_ready(xp_system)
+
+	var player: Node = auto_free(_MockXpPlayer.new()) as Node
+	player.add_to_group("player")
+	add_child(player)
+
+	EventBus.pickup_collected.emit(&"xp_small", Vector2.ZERO, 10)
+	assert_int(xp_system.current_xp).is_equal(12)
+
+
+class _MockXpPlayer:
+	extends Node
+
+	func get_xp_multiplier() -> float:
+		return 1.2
+
+
 func _wait_ready(node: Node) -> void:
 	if not node.is_node_ready():
 		await node.ready

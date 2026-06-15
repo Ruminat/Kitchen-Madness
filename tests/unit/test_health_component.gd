@@ -50,6 +50,16 @@ func test_heal_caps_at_max_health() -> void:
 	assert_int(health.current_health).is_equal(100)
 
 
+func test_armor_reduces_damage_with_one_minimum() -> void:
+	var health := _create_health_component(100, 0.0)
+	await _wait_ready(health)
+	health.increase_armor(3)
+	health.take_damage(10)
+	assert_int(health.current_health).is_equal(93)
+	health.take_damage(2)
+	assert_int(health.current_health).is_equal(92)
+
+
 func _create_health_component(max_health: int, invincibility: float) -> HealthComponent:
 	var host: Node = auto_free(Node.new())
 	add_child(host)

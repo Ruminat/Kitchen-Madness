@@ -42,6 +42,23 @@ func test_pause_stops_timer() -> void:
 	assert_bool(manager.is_complete).is_false()
 
 
+func test_reset_restores_timer_and_unpauses() -> void:
+	var manager: WaveManager = auto_free(WaveManager.new()) as WaveManager
+	add_child(manager)
+	var wave := WaveDefinition.new()
+	wave.duration = 30.0
+	manager.configure(wave)
+	manager._process(12.0)
+	manager.pause()
+	manager.is_complete = true
+
+	manager.reset()
+
+	assert_bool(manager.is_complete).is_false()
+	assert_bool(manager.is_paused).is_false()
+	assert_float(manager.time_remaining).is_equal(30.0)
+
+
 func test_wave_spawn_multiplier_ramps_with_curve() -> void:
 	var wave := WaveDefinition.new()
 	wave.spawn_multiplier_start = 2.0

@@ -2,6 +2,7 @@ class_name EnemySpawner
 extends Node
 
 const EDGE_MARGIN := 20.0
+const MAX_ELITE_ALIVE := 2
 
 var wave_definition: WaveDefinition
 var enemy_container: Node2D
@@ -34,6 +35,14 @@ func stop() -> void:
 		_spawn_timer.stop()
 
 
+func reset() -> void:
+	is_active = true
+	_elapsed_time = 0.0
+	if _spawn_timer:
+		_spawn_timer.wait_time = _current_spawn_interval()
+		_spawn_timer.start()
+
+
 func _spawn_enemy() -> void:
 	if not is_active or enemy_container == null:
 		return
@@ -43,7 +52,7 @@ func _spawn_enemy() -> void:
 		_schedule_next_spawn()
 		return
 
-	var definition: EnemyDefinition = SpawnTable.pick_weighted(wave_definition.enemy_weights)
+	var definition := _pick_spawn_definition()
 	var scene := _scene_for_definition(definition)
 	if scene == null:
 		_schedule_next_spawn()
@@ -58,6 +67,48 @@ func _spawn_enemy() -> void:
 		enemy.configure(definition)
 
 	_schedule_next_spawn()
+
+
+func _pick_spawn_definition() -> EnemyDefinition:
+	var definition: EnemyDefinition = SpawnTable.pick_weighted(wave_definition.enemy_weights)
+	if definition == null:
+		return null
+
+	if definition.is_elite and _count_alive_elites() >= MAX_ELITE_ALIVE:
+		definition = _pick_non_elite_definition()
+
+	return definition
+
+
+func _count_alive_elites() -> int:
+	if enemy_container == null:
+		return 0
+
+	var count := 0
+	for child in enemy_container.get_children():
+		if not is_instance_valid(child) or not ("definition" in child):
+			continue
+
+		var enemy_definition := child.definition as EnemyDefinition
+		if enemy_definition and enemy_definition.is_elite:
+			count += 1
+
+	return count
+
+
+func _pick_non_elite_definition() -> EnemyDefinition:
+	if wave_definition == null:
+		return null
+
+	var non_elite_entries: Array = []
+	for entry in wave_definition.enemy_weights:
+		if entry is EnemySpawnEntry and entry.definition and not entry.definition.is_elite:
+			non_elite_entries.append(entry)
+
+	if non_elite_entries.is_empty():
+		return null
+
+	return SpawnTable.pick_weighted(non_elite_entries)
 
 
 func _scene_for_definition(definition: EnemyDefinition) -> PackedScene:

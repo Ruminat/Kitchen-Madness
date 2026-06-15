@@ -10,6 +10,10 @@ See also: [context.md](context.md) for iteration rules and current project state
 
 **Data-driven content, thin scenes, testable logic.**
 
+**Dual input:** every player-facing action (menus, shop, level-up, restart) must be completable with **mouse or keyboard**. Document shortcuts on overlay hint labels; new UI features must ship with both paths.
+
+**Movement keys:** WASD and arrow keys are **always interchangeable**. Register both on every movement input action in `project.godot`; read movement via `Input.get_axis()`, never raw key codes.
+
 Designers (future you) add enemies/weapons/drops by creating `.tres` resources and scenes — not by editing core game code. Agents and CI can run `codecheck` before every handoff. Every iteration ends with zero parser errors and passing tests.
 
 ---
@@ -404,6 +408,27 @@ These let you add `sprinter.tres` by duplicating a file in the editor — no new
 
 ---
 
+## Input accessibility (required)
+
+All player-facing UI must support **mouse and keyboard** from day one — not as a later polish pass.
+
+| Overlay | Mouse | Keyboard |
+|---|---|---|
+| Level-up picker | Click button | `W`/`S` or ↑/↓ navigate · `1`/`2`/`3` or Enter pick |
+| Between-wave shop | Click item / Continue | `W`/`S` or ↑/↓ navigate · `1`–`8` or Enter buy · Enter continue |
+| Game Over | Click Restart | `R` or `Enter` |
+| **Movement** | — | **WASD or Arrow keys** (both bound on each `move_*` action) |
+
+Implementation notes:
+
+- `game_ui.gd` handles overlay keyboard input in `_unhandled_input` while paused (`PROCESS_MODE_ALWAYS`)
+- Buttons show `[n]` prefix in label text matching number keys
+- Overlays call `grab_focus()` on the primary action when opened
+- New overlays (main menu, settings, etc.) must follow the same pattern
+- **Never** read `KEY_W` / `KEY_A` / arrow keycodes for movement — use `Input.get_axis("move_left", "move_right")` etc.
+
+---
+
 ## What to defer (Phase 3+)
 
 - Shop between waves (reuse stat/weapon upgrade system)
@@ -423,7 +448,8 @@ From [context.md](context.md), expanded:
 2. **`codecheck` passes** — lint, format, headless boot, tests green
 3. **New content is data-driven** — adding enemy #4 = new `.tres` + optional behavior script, not editing spawner logic
 4. **UI reacts via EventBus** — no new `ui.update_*()` calls from gameplay code
-5. **Brief changelog** — what was added, how to try it, new controls if any
+5. **Dual input on all UI** — mouse click and keyboard shortcuts for every overlay action (level-up, shop, restart); hint text on screen
+6. **Brief changelog** — what was added, how to try it, new controls if any
 
 ---
 
