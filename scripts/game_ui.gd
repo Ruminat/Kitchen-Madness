@@ -127,11 +127,29 @@ var _character_choices: Array[CharacterDefinition] = []
 	)
 	as GridContainer
 )
+@onready var character_preview_panel: PanelContainer = (
+	get_node(
+		(
+			"CharacterSelectOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/PreviewRow/PreviewPanel"
+		)
+	)
+	as PanelContainer
+)
+@onready var character_preview: TextureRect = (
+	get_node(
+		(
+			"CharacterSelectOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/PreviewRow/PreviewPanel/PreviewMargin/CharacterPreview"
+		)
+	)
+	as TextureRect
+)
 @onready var character_detail_label: Label = (
 	get_node(
 		(
 			"CharacterSelectOverlay/CenterContainer/PanelContainer/"
-			+ "MarginContainer/VBox/DetailLabel"
+			+ "MarginContainer/VBox/PreviewRow/DetailLabel"
 		)
 	)
 	as Label
@@ -191,6 +209,15 @@ func _apply_hud_theme() -> void:
 	character_select_panel.add_theme_stylebox_override(
 		"panel", _make_overlay_panel_style(COLOR_CHARACTER_ACCENT)
 	)
+	var preview_style := StyleBoxFlat.new()
+	preview_style.bg_color = Color(0.1, 0.11, 0.14, 1.0)
+	preview_style.border_width_left = 2
+	preview_style.border_width_top = 2
+	preview_style.border_width_right = 2
+	preview_style.border_width_bottom = 2
+	preview_style.border_color = COLOR_CHARACTER_ACCENT.darkened(0.25)
+	preview_style.set_corner_radius_all(10)
+	character_preview_panel.add_theme_stylebox_override("panel", preview_style)
 
 	hp_bar.set_script(STAT_BAR_SCRIPT)
 	hp_bar.setup_bar(COLOR_BAR_BG, COLOR_BAR_FILL, 8.0)
@@ -545,6 +572,7 @@ func request_character_selection(characters: Array[CharacterDefinition]) -> Char
 	_build_character_buttons(characters)
 	character_select_overlay.visible = true
 	character_detail_label.text = "Pick a kitchen creature to start your run."
+	_clear_character_preview()
 	_focus_first_visible_button(_character_buttons)
 	_update_character_detail_from_focus()
 	return await character_selected
@@ -553,6 +581,7 @@ func request_character_selection(characters: Array[CharacterDefinition]) -> Char
 func hide_character_select() -> void:
 	character_select_overlay.visible = false
 	_character_choices.clear()
+	_clear_character_preview()
 	for button in _character_buttons:
 		button.queue_free()
 	_character_buttons.clear()
@@ -586,6 +615,21 @@ func _on_character_button_focus(index: int) -> void:
 
 	var character := _character_choices[index]
 	character_detail_label.text = _format_character_detail(character)
+	_update_character_preview(character)
+
+
+func _update_character_preview(character: CharacterDefinition) -> void:
+	if character == null or character.sprite == null:
+		_clear_character_preview()
+		return
+
+	character_preview.texture = character.sprite
+	character_preview.modulate = Color.WHITE
+
+
+func _clear_character_preview() -> void:
+	character_preview.texture = null
+	character_preview.modulate = Color(1.0, 1.0, 1.0, 0.35)
 
 
 func _update_character_detail_from_focus() -> void:

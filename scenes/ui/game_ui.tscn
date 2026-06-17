@@ -361,18 +361,40 @@ theme_override_colors/font_color = Color(0.62, 0.66, 0.74, 1)
 text = "W/S or ↑/↓ navigate  ·  1–9 or Enter pick  ·  Click to choose"
 horizontal_alignment = 1
 
+[node name="PreviewRow" type="HBoxContainer" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="PreviewPanel" type="PanelContainer" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/PreviewRow"]
+custom_minimum_size = Vector2(148, 148)
+layout_mode = 2
+
+[node name="PreviewMargin" type="MarginContainer" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/PreviewRow/PreviewPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CharacterPreview" type="TextureRect" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/PreviewRow/PreviewPanel/PreviewMargin"]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailLabel" type="Label" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/PreviewRow"]
+custom_minimum_size = Vector2(0, 148)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.78, 0.82, 0.9, 1)
+text = "Pick a kitchen creature to start your run."
+vertical_alignment = 1
+autowrap_mode = 3
+
 [node name="CharacterGrid" type="GridContainer" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 3
-
-[node name="DetailLabel" type="Label" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.78, 0.82, 0.9, 1)
-text = "Pick a kitchen creature to start your run."
-horizontal_alignment = 1
-autowrap_mode = 3
 
