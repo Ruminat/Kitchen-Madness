@@ -96,11 +96,46 @@ func test_spawner_picks_positions_outside_camera_view() -> void:
 	spawner.configure(WaveDefinition.new(), container, bounds)
 	var camera_rect := Rect2(target.global_position - view_size * 0.5, view_size)
 	var inner_bounds := bounds.grow(-EnemySpawner.EDGE_MARGIN)
+	var margin := EnemySpawner.SPAWN_OFFSCREEN_MARGIN
 
 	for _attempt in 20:
 		var spawn_position: Vector2 = spawner._random_offscreen_position()
 		assert_bool(inner_bounds.has_point(spawn_position)).is_true()
 		assert_bool(camera_rect.has_point(spawn_position)).is_false()
+		(
+			assert_bool(_distance_outside_camera_rect(spawn_position, camera_rect) >= margin - 0.01)
+			. is_true()
+		)
+
+
+func test_spawner_builds_four_spawn_bands_at_map_center() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	var bounds := Rect2(-1320.0, -720.0, 2640.0, 1440.0)
+	var view_size := Vector2(880.0, 480.0)
+	var camera_rect := Rect2(-view_size * 0.5, view_size)
+	var inner_bounds := bounds.grow(-EnemySpawner.EDGE_MARGIN)
+
+	var bands: Array[Dictionary] = spawner._build_spawn_bands(camera_rect, inner_bounds)
+	assert_int(bands.size()).is_equal(4)
+
+
+func _distance_outside_camera_rect(position: Vector2, camera_rect: Rect2) -> float:
+	if camera_rect.has_point(position):
+		return 0.0
+
+	var dx := 0.0
+	if position.x < camera_rect.position.x:
+		dx = camera_rect.position.x - position.x
+	elif position.x > camera_rect.end.x:
+		dx = position.x - camera_rect.end.x
+
+	var dy := 0.0
+	if position.y < camera_rect.position.y:
+		dy = camera_rect.position.y - position.y
+	elif position.y > camera_rect.end.y:
+		dy = position.y - camera_rect.end.y
+
+	return maxf(dx, dy)
 
 
 func test_spawner_falls_back_to_arena_edge_without_camera_target() -> void:

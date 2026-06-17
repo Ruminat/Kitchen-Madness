@@ -4,7 +4,7 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 ## Current status
 
-**Phase 3C done** — arena is 3x larger, camera keeps the old 1x view and follows/clamps to the player, enemies spawn just outside the camera view.
+**Phase 3D done** — visual review pass + spawn tuning for the larger map. Off-camera margin 100px; wave caps/intervals reduced so camera-ring spawns don't overcrowd.
 
 **Visual pass:** Sprites for player (Chef default), enemies, arena floor, projectiles, XP orbs, and health pickups. 9-player roster from `assets/characters/Players.png` via grid splitter — see `docs/sprite-grid-splitter.md`, `docs/player-roster.md`.
 
@@ -84,8 +84,7 @@ Integration tests: assert synchronously after `EventBus` emits — don't `await`
 
 ## Next work
 
-1. Capture/review visuals after the larger-map + off-camera-spawn pass
-2. Tune enemy spawn margin/density from playtest screenshots
+Playtest wave pacing on the 3x map; add content (enemies, weapons, wave variety) via `.tres` resources.
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 

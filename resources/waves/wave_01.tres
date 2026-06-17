@@ -9,8 +9,8 @@
 [resource]
 script = ExtResource("1")
 duration = 60.0
-spawn_interval = 1.4
-max_enemies = 160
+spawn_interval = 1.5
+max_enemies = 130
 spawn_multiplier_start = 2.0
 spawn_multiplier_end = 8.0
 spawn_multiplier_curve = 2.0

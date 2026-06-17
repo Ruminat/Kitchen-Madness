@@ -33,6 +33,7 @@ func _run() -> void:
 		return
 
 	await _capture_player_surrounded(output_path)
+	await _capture_off_camera_spawns(output_path)
 	await _capture_upgrade_menu(output_path)
 	await _capture_dead_screen(output_path)
 
@@ -52,6 +53,55 @@ func _capture_player_surrounded(output_path: String) -> void:
 	_spawn_enemy_ring(game, 18)
 	await _save_screenshot(output_path.path_join("player_surrounded.png"))
 	await _unload_game(game)
+
+
+func _capture_off_camera_spawns(output_path: String) -> void:
+	var game := await _load_game()
+	await _prepare_game_scene(game)
+
+	var player := game.get_node("Player") as Node2D
+	var arena := game.get_node("Arena")
+	var offset := Vector2(880.0, 320.0)
+	player.global_position = offset
+
+	var camera := game.get_node("Camera2D") as Camera2D
+	camera.global_position = offset
+	camera.make_current()
+	await process_frame
+
+	_spawn_off_camera_enemies(game, arena.get_bounds(), camera)
+	await _save_screenshot(output_path.path_join("off_camera_spawns.png"))
+	await _unload_game(game)
+
+
+func _spawn_off_camera_enemies(game: Node, bounds: Rect2, camera: Camera2D) -> void:
+	var container := game.get_node("EnemyContainer")
+	var player := game.get_node("Player") as Node2D
+	var definitions := [
+		load(CHASER_DEFINITION_PATH) as EnemyDefinition,
+		load(SPRINTER_DEFINITION_PATH) as EnemyDefinition,
+		load(TANK_DEFINITION_PATH) as EnemyDefinition,
+	]
+	var view_size := Vector2(
+		float(VIEWPORT_SIZE.x) / maxf(camera.zoom.x, 0.01),
+		float(VIEWPORT_SIZE.y) / maxf(camera.zoom.y, 0.01)
+	)
+
+	var spawner := game.get_node("EnemySpawner") as EnemySpawner
+	spawner.set_camera_spawn_target(player, view_size)
+	spawner.arena_bounds = bounds
+
+	for index in 24:
+		var definition: EnemyDefinition = definitions[index % definitions.size()]
+		var enemy := definition.scene.instantiate() as CharacterBody2D
+		container.add_child(enemy)
+		var spawn_position := spawner._random_offscreen_position()
+		enemy.global_position = spawn_position.move_toward(player.global_position, 55.0)
+		if enemy.has_method("set_arena_bounds"):
+			enemy.set_arena_bounds(bounds)
+		if enemy.has_method("configure"):
+			enemy.configure(definition)
+		enemy.set_physics_process(false)
 
 
 func _capture_upgrade_menu(output_path: String) -> void:

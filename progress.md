@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase.
 
-**Last updated:** gdtoolkit lint/format config
+**Last updated:** Phase 3D spawn tuning + visual review
 
 ---
 
@@ -110,7 +110,25 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ---
 
+## Phase 3D — Visual review and spawn tuning ✅
+
+| Task | Status | Notes |
+|---|---|---|
+| Visual screenshot pass | ✅ Done | `.\tools\capture-visuals.ps1` — includes `off_camera_spawns.png` |
+| Off-camera spawn margin | ✅ Done | `SPAWN_OFFSCREEN_MARGIN` 80 → 100 |
+| Wave density retune | ✅ Done | Lower `max_enemies` + slightly slower intervals (camera-ring spawns concentrate enemies) |
+| Tests | ✅ Done | Spawn margin distance, four-band layout, updated off-camera position checks |
+
+---
+
 ## Changelog
+
+### Phase 3D
+
+- **Visuals:** added `off_camera_spawns.png` capture with player offset on the 3x map; enemies peek in at screen edges
+- **Spawns:** increased off-camera margin to 100px so enemies walk in rather than pop at the border
+- **Waves:** wave 1–3 caps 130/155/180 and intervals 1.5/1.3/1.1 to offset denser camera-ring spawning
+- **Tests:** spawn positions must sit at least one margin outside the camera rect; four spawn bands at map center
 
 ### Tooling
 

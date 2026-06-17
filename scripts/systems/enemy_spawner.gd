@@ -3,7 +3,7 @@ extends Node
 
 const EDGE_MARGIN := 20.0
 const MAX_ELITE_ALIVE := 2
-const SPAWN_OFFSCREEN_MARGIN := 80.0
+const SPAWN_OFFSCREEN_MARGIN := 100.0
 
 var wave_definition: WaveDefinition
 var enemy_container: Node2D
