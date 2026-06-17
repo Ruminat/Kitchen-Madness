@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cm0qd04ie3ckx"
-path="res://.godot/imported/pickle.png-a77c8bfadc6c21370e7146d9a0c04a1c.ctex"
+uid="uid://cl32jd4vpdqro"
+path="res://.godot/imported/onion.png-09c914b114bf976bdb5e22989e26f680.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/player/pickle.png"
-dest_files=["res://.godot/imported/pickle.png-a77c8bfadc6c21370e7146d9a0c04a1c.ctex"]
+source_file="res://assets/characters/player/onion.png"
+dest_files=["res://.godot/imported/onion.png-09c914b114bf976bdb5e22989e26f680.ctex"]
 
 [params]
 

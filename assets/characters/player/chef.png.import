@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2t5bbg11sfid"
-path="res://.godot/imported/sprout.png-b0aca5c850d8ab80abf537ca6953d24d.ctex"
+uid="uid://5wxtyk7gwa2u"
+path="res://.godot/imported/chef.png-4ef2615618fd2c44ae9e3a62d4614a1a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/player/sprout.png"
-dest_files=["res://.godot/imported/sprout.png-b0aca5c850d8ab80abf537ca6953d24d.ctex"]
+source_file="res://assets/characters/player/chef.png"
+dest_files=["res://.godot/imported/chef.png-4ef2615618fd2c44ae9e3a62d4614a1a.ctex"]
 
 [params]
 

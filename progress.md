@@ -135,8 +135,8 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ### Visual art tooling
 
-- Split the generated 3x3 player grid into named sprites: Milo, Nova, Sprout, Pickle, Brutus, Thorn, Stitch, Granite, Rusty
-- Set **Sprout** as the current main player in `scenes/player/player.tscn` and halved the player sprite scale
+- Split the 3x3 player grid into named sprites: Chef, Goblin, Onion, Cookie, Mushroom, Vampire, Witch, Dumpling, Snowman
+- Set **Chef** as the current main player in `scenes/player/player.tscn` and halved the player sprite scale
 - Added a reusable Godot grid splitter for generated character sheets (`tools/grid_sprite_splitter.gd`)
 - Added a CLI wrapper (`tools/split_grid_sprites.gd`) with grid size, output size, padding, naming, background tolerance, and transparency options
 - Added `docs/sprite-grid-splitter.md`, `docs/player-roster.md`, and GdUnit coverage for centering, uneven grids, roster loading, and edge-connected background removal

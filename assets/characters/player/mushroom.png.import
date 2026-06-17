@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwwvc5e2tfgjl"
-path="res://.godot/imported/granite.png-7d4a4a754c004d192a9162d3b20e870b.ctex"
+uid="uid://cdmgun7rnaq1e"
+path="res://.godot/imported/mushroom.png-107ddf73fc38dc6a6e846c78a2a53261.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/player/granite.png"
-dest_files=["res://.godot/imported/granite.png-7d4a4a754c004d192a9162d3b20e870b.ctex"]
+source_file="res://assets/characters/player/mushroom.png"
+dest_files=["res://.godot/imported/mushroom.png-107ddf73fc38dc6a6e846c78a2a53261.ctex"]
 
 [params]
 

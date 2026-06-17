@@ -21,6 +21,7 @@ Options:
   --output-size WxH             Output sprite size. Example: 256x256. A single N means NxN.
   --padding N                   Empty pixels kept around the centered subject. Default: 8.
   --background-color HEX        Override sampled corner background. Example: #000000.
+  --background-colors CSV       Comma-separated background colors for checkerboard sheets.
   --background-tolerance N      Background color tolerance from 0.0 to 1.732. Default: 0.08.
   --alpha-threshold N           Pixels at or below this alpha are background. Default: 0.04.
   --keep-background             Keep the original cell background instead of making it transparent.
@@ -104,6 +105,11 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 			"--background-color":
 				index += 1
 				parsed["background_color"] = Color.html(_read_value(args, index, arg))
+			"--background-colors":
+				index += 1
+				parsed["background_colors"] = _parse_background_colors(
+					_read_value(args, index, arg)
+				)
 			"--background-tolerance":
 				index += 1
 				parsed["background_tolerance"] = _read_value(args, index, arg).to_float()
@@ -145,6 +151,15 @@ func _parse_names(value: String) -> PackedStringArray:
 	return names
 
 
+func _parse_background_colors(value: String) -> Array[Color]:
+	var colors: Array[Color] = []
+	for raw_color in value.split(","):
+		var cleaned_color := raw_color.strip_edges()
+		if not cleaned_color.is_empty():
+			colors.append(Color.html(cleaned_color))
+	return colors
+
+
 func _validate_args(parsed: Dictionary) -> String:
 	if not parsed.has("input") or parsed["input"].is_empty():
 		return "Missing --input."
@@ -161,6 +176,7 @@ func _build_split_options(parsed: Dictionary) -> Dictionary:
 		"output_size",
 		"padding",
 		"background_color",
+		"background_colors",
 		"background_tolerance",
 		"alpha_threshold",
 		"make_background_transparent",

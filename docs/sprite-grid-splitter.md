@@ -31,6 +31,7 @@ godot --headless --path . -s res://tools/split_grid_sprites.gd -- --input "C:\pa
 - `--pattern PATTERN`: Output file naming. Tokens are `{stem}`, `{index}`, `{index0}`, `{row}`, `{row0}`, `{col}`, `{col0}`.
 - `--names CSV`: Optional comma-separated names in grid order. Use with `{name}` in `--pattern`.
 - `--background-color #RRGGBB`: Override automatic corner sampling. Useful when cell corners contain noise.
+- `--background-colors #RRGGBB,#RRGGBB`: Multiple background colors for checkerboard transparency sheets.
 - `--background-tolerance N`: Increase if background remnants remain; decrease if outlines get eaten. Start around `0.05` to `0.12`.
 - `--keep-background`: Keep each cell background instead of exporting transparency.
 - `--no-upscale`: Keep small characters at original scale.
@@ -47,5 +48,5 @@ godot --headless --path . -s res://tools/split_grid_sprites.gd -- --input "C:\pa
 For named player rosters:
 
 ```powershell
-godot --headless --path . -s res://tools/split_grid_sprites.gd -- --input "C:\path\to\players.png" --output-dir "assets\characters\player" --grid 3x3 --output-size 256x256 --padding 18 --names "milo,nova,sprout,pickle,brutus,thorn,stitch,granite,rusty" --pattern "{name}.png"
+godot --headless --path . -s res://tools/split_grid_sprites.gd -- --input "C:\path\to\players.png" --output-dir "assets\characters\player" --grid 3x3 --output-size 256x256 --padding 18 --names "chef,goblin,onion,cookie,mushroom,vampire,witch,dumpling,snowman" --pattern "{name}.png"
 ```

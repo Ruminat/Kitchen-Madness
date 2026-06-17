@@ -77,14 +77,12 @@ static func process_cell(cell: Image, options: Dictionary = {}) -> Image:
 	var background_tolerance: float = options.get(
 		"background_tolerance", DEFAULT_BACKGROUND_TOLERANCE
 	)
-	var background_color: Color = options.get(
-		"background_color", _sample_background_color(cell_rgba)
-	)
+	var background_colors: Array[Color] = _resolve_background_colors(cell_rgba, options)
 	var make_transparent: bool = options.get("make_background_transparent", true)
 	var allow_upscale: bool = options.get("allow_upscale", true)
 
 	var background_mask := _build_edge_background_mask(
-		cell_rgba, background_color, background_tolerance, alpha_threshold
+		cell_rgba, background_colors, background_tolerance, alpha_threshold
 	)
 	var content_rect := detect_content_rect(cell_rgba, background_mask, alpha_threshold)
 	var output := Image.create(output_size.x, output_size.y, false, Image.FORMAT_RGBA8)
@@ -227,23 +225,40 @@ static func _copy_region(source: Image, rect: Rect2i) -> Image:
 	return region
 
 
-static func _sample_background_color(image: Image) -> Color:
+static func _resolve_background_colors(cell: Image, options: Dictionary) -> Array[Color]:
+	if options.has("background_colors"):
+		return options["background_colors"]
+	if options.has("background_color"):
+		return [options["background_color"]]
+	return _sample_background_colors(cell)
+
+
+static func _sample_background_colors(image: Image) -> Array[Color]:
+	var colors: Array[Color] = []
+	const MERGE_TOLERANCE := 0.04
 	var last_x := image.get_width() - 1
 	var last_y := image.get_height() - 1
-	var samples: Array[Color] = [
-		image.get_pixel(0, 0),
-		image.get_pixel(last_x, 0),
-		image.get_pixel(0, last_y),
-		image.get_pixel(last_x, last_y),
-	]
-	var color := Color.BLACK
-	for sample in samples:
-		color += sample
-	return color / float(samples.size())
+
+	for x in image.get_width():
+		_add_unique_background_color(colors, image.get_pixel(x, 0), MERGE_TOLERANCE)
+		_add_unique_background_color(colors, image.get_pixel(x, last_y), MERGE_TOLERANCE)
+	for y in image.get_height():
+		_add_unique_background_color(colors, image.get_pixel(0, y), MERGE_TOLERANCE)
+		_add_unique_background_color(colors, image.get_pixel(last_x, y), MERGE_TOLERANCE)
+	return colors
+
+
+static func _add_unique_background_color(
+	colors: Array[Color], sample: Color, merge_tolerance: float
+) -> void:
+	for existing in colors:
+		if _color_distance(sample, existing) <= merge_tolerance:
+			return
+	colors.append(sample)
 
 
 static func _build_edge_background_mask(
-	image: Image, background_color: Color, tolerance: float, alpha_threshold: float
+	image: Image, background_colors: Array[Color], tolerance: float, alpha_threshold: float
 ) -> PackedByteArray:
 	var width := image.get_width()
 	var height := image.get_height()
@@ -253,23 +268,29 @@ static func _build_edge_background_mask(
 
 	for x in width:
 		_try_enqueue_background(
-			image, mask, queue, Vector2i(x, 0), background_color, tolerance, alpha_threshold
+			image, mask, queue, Vector2i(x, 0), background_colors, tolerance, alpha_threshold
 		)
 		_try_enqueue_background(
 			image,
 			mask,
 			queue,
 			Vector2i(x, height - 1),
-			background_color,
+			background_colors,
 			tolerance,
 			alpha_threshold
 		)
 	for y in height:
 		_try_enqueue_background(
-			image, mask, queue, Vector2i(0, y), background_color, tolerance, alpha_threshold
+			image, mask, queue, Vector2i(0, y), background_colors, tolerance, alpha_threshold
 		)
 		_try_enqueue_background(
-			image, mask, queue, Vector2i(width - 1, y), background_color, tolerance, alpha_threshold
+			image,
+			mask,
+			queue,
+			Vector2i(width - 1, y),
+			background_colors,
+			tolerance,
+			alpha_threshold
 		)
 
 	var read_index := 0
@@ -277,16 +298,22 @@ static func _build_edge_background_mask(
 		var point := queue[read_index]
 		read_index += 1
 		_try_enqueue_background(
-			image, mask, queue, point + Vector2i.LEFT, background_color, tolerance, alpha_threshold
+			image, mask, queue, point + Vector2i.LEFT, background_colors, tolerance, alpha_threshold
 		)
 		_try_enqueue_background(
-			image, mask, queue, point + Vector2i.RIGHT, background_color, tolerance, alpha_threshold
+			image,
+			mask,
+			queue,
+			point + Vector2i.RIGHT,
+			background_colors,
+			tolerance,
+			alpha_threshold
 		)
 		_try_enqueue_background(
-			image, mask, queue, point + Vector2i.UP, background_color, tolerance, alpha_threshold
+			image, mask, queue, point + Vector2i.UP, background_colors, tolerance, alpha_threshold
 		)
 		_try_enqueue_background(
-			image, mask, queue, point + Vector2i.DOWN, background_color, tolerance, alpha_threshold
+			image, mask, queue, point + Vector2i.DOWN, background_colors, tolerance, alpha_threshold
 		)
 	return mask
 
@@ -296,7 +323,7 @@ static func _try_enqueue_background(
 	mask: PackedByteArray,
 	queue: Array[Vector2i],
 	point: Vector2i,
-	background_color: Color,
+	background_colors: Array[Color],
 	tolerance: float,
 	alpha_threshold: float
 ) -> void:
@@ -306,10 +333,22 @@ static func _try_enqueue_background(
 	if mask[index] == 1:
 		return
 	var color := image.get_pixel(point.x, point.y)
-	if color.a > alpha_threshold and _color_distance(color, background_color) > tolerance:
+	if (
+		color.a > alpha_threshold
+		and not _matches_any_background(color, background_colors, tolerance)
+	):
 		return
 	mask[index] = 1
 	queue.append(point)
+
+
+static func _matches_any_background(
+	color: Color, background_colors: Array[Color], tolerance: float
+) -> bool:
+	for background_color in background_colors:
+		if _color_distance(color, background_color) <= tolerance:
+			return true
+	return false
 
 
 static func _color_distance(a: Color, b: Color) -> float:

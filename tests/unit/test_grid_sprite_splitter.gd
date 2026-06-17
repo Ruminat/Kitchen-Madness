@@ -72,6 +72,34 @@ func test_split_image_removes_only_edge_connected_background() -> void:
 	assert_that(sprite.get_pixel(15, 15)).is_equal(Color.BLACK)
 
 
+func test_split_image_removes_checkerboard_background() -> void:
+	var grid := _create_grid_image(Vector2i(30, 30), Color.WHITE)
+	for y in grid.get_height():
+		for x in grid.get_width():
+			if (x + y) % 2 == 1:
+				grid.set_pixel(x, y, Color(0.75, 0.75, 0.75))
+	_paint_rect(grid, Rect2i(8, 8, 14, 14), Color(0.9, 0.3, 0.1))
+
+	var sprites: Array[Image] = (
+		Splitter
+		. split_image(
+			grid,
+			1,
+			1,
+			{
+				"output_size": Vector2i(30, 30),
+				"padding": 0,
+				"background_tolerance": 0.08,
+				"allow_upscale": false,
+			}
+		)
+	)
+	var sprite: Image = sprites[0]
+
+	assert_float(sprite.get_pixel(0, 0).a).is_equal(0.0)
+	assert_float(sprite.get_pixel(15, 15).a).is_equal(1.0)
+
+
 func test_get_cell_rect_covers_uneven_image_without_gaps() -> void:
 	var image_size := Vector2i(101, 89)
 	var covered_area := 0

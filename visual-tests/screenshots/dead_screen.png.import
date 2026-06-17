@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b2nx17osryt7i"
-path="res://.godot/imported/stitch.png-7ac3dade42d14d4fe7dac9d09c407bf4.ctex"
+uid="uid://da03bcgr75w5r"
+path="res://.godot/imported/dead_screen.png-ba278daec93f9eb0cd2997ff0e554bf7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/player/stitch.png"
-dest_files=["res://.godot/imported/stitch.png-7ac3dade42d14d4fe7dac9d09c407bf4.ctex"]
+source_file="res://visual-tests/screenshots/dead_screen.png"
+dest_files=["res://.godot/imported/dead_screen.png-ba278daec93f9eb0cd2997ff0e554bf7.ctex"]
 
 [params]
 

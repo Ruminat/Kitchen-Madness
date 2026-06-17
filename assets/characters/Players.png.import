@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://f3588ugluj2f"
-path="res://.godot/imported/thorn.png-4dbd217e5758c2400813eef2b0a438e1.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://o7od8gan6gcy"
+valid=false
 
 [deps]
 
-source_file="res://assets/characters/player/thorn.png"
-dest_files=["res://.godot/imported/thorn.png-4dbd217e5758c2400813eef2b0a438e1.ctex"]
+source_file="res://assets/characters/Players.png"
 
 [params]
 

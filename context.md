@@ -6,7 +6,7 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 **Phase 3C done** — arena is 3x larger, camera keeps the old 1x view and follows/clamps to the player, enemies spawn just outside the camera view.
 
-**Visual pass:** Sprites for player (Sprout), enemies, arena floor, projectiles, XP orbs, and health pickups. Player roster + grid splitter in `tools/` — see `docs/sprite-grid-splitter.md`.
+**Visual pass:** Sprites for player (Chef default), enemies, arena floor, projectiles, XP orbs, and health pickups. 9-player roster from `assets/characters/Players.png` via grid splitter — see `docs/sprite-grid-splitter.md`, `docs/player-roster.md`.
 
 **Loop:** 60s waves → shop → next wave. Pauses on level-up, shop, death. Spawns ramp 2×–8×; XP thresholds tuned slow.
 **Map/camera:** Arena bounds are `2640x1440`; camera view targets old `880x480` play area and follows the player.

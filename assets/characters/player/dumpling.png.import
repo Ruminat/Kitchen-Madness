@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cpvy0xh7tql6a"
-path="res://.godot/imported/bobby.png-0d5a64a0b6f71dc2fc5c69bf5d09b85a.ctex"
+uid="uid://clqdvqfvmsig0"
+path="res://.godot/imported/dumpling.png-939053066c8e2b16e403bb3faca1ea5e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/player/bobby.png"
-dest_files=["res://.godot/imported/bobby.png-0d5a64a0b6f71dc2fc5c69bf5d09b85a.ctex"]
+source_file="res://assets/characters/player/dumpling.png"
+dest_files=["res://.godot/imported/dumpling.png-939053066c8e2b16e403bb3faca1ea5e.ctex"]
 
 [params]
 

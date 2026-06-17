@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bngfjbj2jsl07"
-path="res://.godot/imported/milo.png-989bf4e84b69b8f0fad77dc013eef843.ctex"
+uid="uid://r2twarg57ayj"
+path="res://.godot/imported/cookie.png-d213799c4b12b9cb7fd3cb6c73493ad0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/player/milo.png"
-dest_files=["res://.godot/imported/milo.png-989bf4e84b69b8f0fad77dc013eef843.ctex"]
+source_file="res://assets/characters/player/cookie.png"
+dest_files=["res://.godot/imported/cookie.png-d213799c4b12b9cb7fd3cb6c73493ad0.ctex"]
 
 [params]
 

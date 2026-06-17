@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dd68t7kd24btb"
-path="res://.godot/imported/rusty.png-1090a6fd155a188f76d4113d8b68c09a.ctex"
+uid="uid://c4j4vi855hoc2"
+path="res://.godot/imported/snowman.png-76c5a51e19b2018f8651882d5c12da09.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/player/rusty.png"
-dest_files=["res://.godot/imported/rusty.png-1090a6fd155a188f76d4113d8b68c09a.ctex"]
+source_file="res://assets/characters/player/snowman.png"
+dest_files=["res://.godot/imported/snowman.png-76c5a51e19b2018f8651882d5c12da09.ctex"]
 
 [params]
 

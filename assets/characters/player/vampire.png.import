@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crf2xi2lv87un"
-path="res://.godot/imported/nova.png-044bcf8692547798d668f36f17828790.ctex"
+uid="uid://bp4oo8ixpdccg"
+path="res://.godot/imported/vampire.png-1181e5e90114a117d5b314ee298f9bf3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/player/nova.png"
-dest_files=["res://.godot/imported/nova.png-044bcf8692547798d668f36f17828790.ctex"]
+source_file="res://assets/characters/player/vampire.png"
+dest_files=["res://.godot/imported/vampire.png-1181e5e90114a117d5b314ee298f9bf3.ctex"]
 
 [params]
 

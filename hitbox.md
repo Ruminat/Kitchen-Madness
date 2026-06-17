@@ -12,7 +12,7 @@ Those two shapes should be related but not identical. A tall hat, wide frying pa
 
 This project already follows that split:
 
-| Layer | What it does | Sprout today |
+| Layer | What it does | Chef today |
 |---|---|---|
 | **Visual** | `Visual/Sprite` in `player.tscn` — rotates, flickers on i-frames | 256×256 roster sprite, scaled down |
 | **Wall collision** | `CollisionShape2D` circle, radius 14 | Same circle as before |
@@ -167,4 +167,4 @@ Enemies still use `circle_visual.gd` placeholders with per-type radius in their 
 
 ## Summary
 
-For Sprout and most survivor-style characters: **draw the whole character, collide with a small circle on the body.** Defer compound shapes and weapon boxes until a feature needs them. Tune fairness with `BODY_RADIUS`, not by chasing the outer pixels of hats, weapons, antennas, or accessories.
+For Chef and most survivor-style characters: **draw the whole character, collide with a small circle on the body.** Defer compound shapes and weapon boxes until a feature needs them. Tune fairness with `BODY_RADIUS`, not by chasing the outer pixels of hats, weapons, antennas, or accessories.
