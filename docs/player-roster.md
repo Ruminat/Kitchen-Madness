@@ -14,6 +14,8 @@ The 3x3 player grid from `assets/characters/Players.png` is split into named spr
 | Bottom center | Dumpling | `assets/characters/player/dumpling.png` |
 | Bottom right | Snowman | `assets/characters/player/snowman.png` |
 
-Current main player: **Chef** (top-left) — `scenes/player/player.tscn`.
+Current main player: **Chef** (top-left) — default when headless or tests run; chosen at pre-run select in normal play.
+
+Character resources: `resources/characters/*.tres` (see `CharacterDefinition` in `scripts/data/character_definition.gd`).
 
 Source sheet: `assets/characters/Players.png` (3×3 grid, split via `tools/split_grid_sprites.gd`).

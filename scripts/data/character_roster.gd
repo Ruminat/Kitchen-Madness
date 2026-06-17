@@ -1,0 +1,29 @@
+class_name CharacterRoster
+extends RefCounted
+
+const CHARACTER_PATHS: PackedStringArray = [
+	"res://resources/characters/chef.tres",
+	"res://resources/characters/goblin.tres",
+	"res://resources/characters/onion.tres",
+	"res://resources/characters/cookie.tres",
+	"res://resources/characters/mushroom.tres",
+	"res://resources/characters/vampire.tres",
+	"res://resources/characters/witch.tres",
+	"res://resources/characters/dumpling.tres",
+	"res://resources/characters/snowman.tres",
+]
+
+const DEFAULT_CHARACTER_PATH := "res://resources/characters/chef.tres"
+
+
+static func load_roster() -> Array[CharacterDefinition]:
+	var roster: Array[CharacterDefinition] = []
+	for path in CHARACTER_PATHS:
+		var character := load(path) as CharacterDefinition
+		if character:
+			roster.append(character)
+	return roster
+
+
+static func get_default() -> CharacterDefinition:
+	return load(DEFAULT_CHARACTER_PATH) as CharacterDefinition

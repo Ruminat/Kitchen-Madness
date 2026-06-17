@@ -3,6 +3,7 @@ extends CanvasLayer
 signal upgrade_selected(upgrade: Resource)
 signal shop_purchase_requested(upgrade: Resource)
 signal shop_continue_requested
+signal character_selected(definition: CharacterDefinition)
 
 const COLOR_TEXT := Color(0.92, 0.94, 0.97, 1.0)
 const COLOR_MUTED := Color(0.62, 0.66, 0.74, 1.0)
@@ -14,6 +15,7 @@ const COLOR_BAR_FILL_LOW := Color(0.95, 0.42, 0.18, 1.0)
 const COLOR_XP_FILL := Color(0.28, 0.62, 0.95, 1.0)
 const COLOR_XP_FLASH := Color(0.55, 0.88, 1.0, 1.0)
 const COLOR_LEVEL_UP_ACCENT := Color(0.55, 0.88, 1.0, 1.0)
+const COLOR_CHARACTER_ACCENT := Color(0.95, 0.72, 0.28, 1.0)
 const STAT_BAR_SCRIPT := preload("res://scripts/ui/stat_bar.gd")
 
 var _kills := 0
@@ -25,6 +27,8 @@ var _upgrade_buttons: Array[Button] = []
 var _upgrade_choices: Array[Resource] = []
 var _shop_buttons: Array[Button] = []
 var _shop_upgrades: Array[Resource] = []
+var _character_buttons: Array[Button] = []
+var _character_choices: Array[CharacterDefinition] = []
 
 @onready var hp_bar: ProgressBar = $HudPanel/MarginContainer/VBox/HPRow/HPBar
 @onready var hp_value_label: Label = $HudPanel/MarginContainer/VBox/HPRow/HPValue
@@ -98,6 +102,40 @@ var _shop_upgrades: Array[Resource] = []
 	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ContinueButton")
 	as Button
 )
+@onready var character_select_overlay: ColorRect = $CharacterSelectOverlay
+@onready var character_select_panel: PanelContainer = (
+	$CharacterSelectOverlay/CenterContainer/PanelContainer as PanelContainer
+)
+@onready var character_select_title_label: Label = (
+	get_node(
+		"CharacterSelectOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/TitleLabel"
+	)
+	as Label
+)
+@onready var character_select_hint_label: Label = (
+	get_node(
+		"CharacterSelectOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/HintLabel"
+	)
+	as Label
+)
+@onready var character_grid: GridContainer = (
+	get_node(
+		(
+			"CharacterSelectOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/CharacterGrid"
+		)
+	)
+	as GridContainer
+)
+@onready var character_detail_label: Label = (
+	get_node(
+		(
+			"CharacterSelectOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/DetailLabel"
+		)
+	)
+	as Label
+)
 
 
 func _shop_button_path(index: int) -> String:
@@ -123,6 +161,7 @@ func _ready() -> void:
 	overlay.visible = false
 	level_up_overlay.visible = false
 	shop_overlay.visible = false
+	character_select_overlay.visible = false
 	restart_button.pressed.connect(_on_restart_pressed)
 	shop_continue_button.pressed.connect(_on_shop_continue_pressed)
 	for index in _upgrade_buttons.size():
@@ -149,6 +188,9 @@ func _apply_hud_theme() -> void:
 		"panel", _make_overlay_panel_style(COLOR_LEVEL_UP_ACCENT)
 	)
 	shop_panel.add_theme_stylebox_override("panel", panel_style)
+	character_select_panel.add_theme_stylebox_override(
+		"panel", _make_overlay_panel_style(COLOR_CHARACTER_ACCENT)
+	)
 
 	hp_bar.set_script(STAT_BAR_SCRIPT)
 	hp_bar.setup_bar(COLOR_BAR_BG, COLOR_BAR_FILL, 8.0)
@@ -176,6 +218,10 @@ func _apply_hud_theme() -> void:
 	level_up_title_label.add_theme_color_override("font_color", COLOR_LEVEL_UP_ACCENT)
 	level_up_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
 	level_up_hint_label.add_theme_font_size_override("font_size", 14)
+	character_select_title_label.add_theme_color_override("font_color", COLOR_CHARACTER_ACCENT)
+	character_select_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
+	character_select_hint_label.add_theme_font_size_override("font_size", 14)
+	character_detail_label.add_theme_color_override("font_color", COLOR_TEXT)
 
 
 func _make_overlay_panel_style(accent: Color) -> StyleBoxFlat:
@@ -216,6 +262,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			_mark_input_handled()
 		return
 
+	if character_select_overlay.visible:
+		if _handle_character_select_keyboard(event as InputEventKey):
+			_mark_input_handled()
+		return
+
 	if not overlay.visible:
 		return
 
@@ -231,7 +282,7 @@ func _mark_input_handled() -> void:
 
 
 func _handle_level_up_keyboard(event: InputEventKey) -> bool:
-	var index := _number_key_index(event)
+	var index := _number_key_index(event, 3)
 	if index >= 0 and index < _upgrade_choices.size():
 		_on_upgrade_button_pressed(index)
 		return true
@@ -253,8 +304,33 @@ func _handle_level_up_keyboard(event: InputEventKey) -> bool:
 	return false
 
 
+func _handle_character_select_keyboard(event: InputEventKey) -> bool:
+	var index := _number_key_index(event, 9)
+	if index >= 0 and index < _character_choices.size():
+		_on_character_button_pressed(index)
+		return true
+
+	if event.is_action_pressed("move_up") or event.is_action_pressed("ui_up"):
+		_navigate_button_focus(_character_buttons, -1)
+		_update_character_detail_from_focus()
+		return true
+
+	if event.is_action_pressed("move_down") or event.is_action_pressed("ui_down"):
+		_navigate_button_focus(_character_buttons, 1)
+		_update_character_detail_from_focus()
+		return true
+
+	if event.is_action_pressed("ui_accept"):
+		var focused_index := _focused_button_index(_character_buttons)
+		if focused_index >= 0:
+			_on_character_button_pressed(focused_index)
+			return true
+
+	return false
+
+
 func _handle_shop_keyboard(event: InputEventKey) -> bool:
-	var index := _number_key_index(event)
+	var index := _number_key_index(event, 8)
 	if index >= 0:
 		return _try_press_shop_button(index)
 
@@ -319,17 +395,8 @@ func _focused_button_index(buttons: Array[Button]) -> int:
 	return -1
 
 
-func _number_key_index(event: InputEventKey) -> int:
-	var number_keys := [
-		KEY_1,
-		KEY_2,
-		KEY_3,
-		KEY_4,
-		KEY_5,
-		KEY_6,
-		KEY_7,
-		KEY_8,
-	]
+func _number_key_index(event: InputEventKey, max_keys: int = 8) -> int:
+	var number_keys := [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9]
 	var keypad_keys := [
 		KEY_KP_1,
 		KEY_KP_2,
@@ -339,10 +406,13 @@ func _number_key_index(event: InputEventKey) -> int:
 		KEY_KP_6,
 		KEY_KP_7,
 		KEY_KP_8,
+		KEY_KP_9,
 	]
 	var index := number_keys.find(event.keycode)
 	if index < 0:
 		index = keypad_keys.find(event.keycode)
+	if index >= max_keys:
+		return -1
 	return index
 
 
@@ -468,6 +538,84 @@ func update_shop_gold(gold: int) -> void:
 func hide_shop() -> void:
 	shop_overlay.visible = false
 	_shop_upgrades.clear()
+
+
+func request_character_selection(characters: Array[CharacterDefinition]) -> CharacterDefinition:
+	_character_choices = characters
+	_build_character_buttons(characters)
+	character_select_overlay.visible = true
+	character_detail_label.text = "Pick a kitchen creature to start your run."
+	_focus_first_visible_button(_character_buttons)
+	_update_character_detail_from_focus()
+	return await character_selected
+
+
+func hide_character_select() -> void:
+	character_select_overlay.visible = false
+	_character_choices.clear()
+	for button in _character_buttons:
+		button.queue_free()
+	_character_buttons.clear()
+
+
+func _build_character_buttons(characters: Array[CharacterDefinition]) -> void:
+	for button in _character_buttons:
+		button.queue_free()
+	_character_buttons.clear()
+
+	for child in character_grid.get_children():
+		child.queue_free()
+
+	for index in characters.size():
+		var character := characters[index]
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(220, 72)
+		button.text = "[%d] %s" % [index + 1, character.display_name]
+		button.focus_mode = Control.FOCUS_ALL
+		button.pressed.connect(_on_character_button_pressed.bind(index))
+		button.focus_entered.connect(_on_character_button_focus.bind(index))
+		button.mouse_entered.connect(_on_character_button_focus.bind(index))
+		button.add_theme_font_size_override("font_size", 17)
+		character_grid.add_child(button)
+		_character_buttons.append(button)
+
+
+func _on_character_button_focus(index: int) -> void:
+	if index < 0 or index >= _character_choices.size():
+		return
+
+	var character := _character_choices[index]
+	character_detail_label.text = _format_character_detail(character)
+
+
+func _update_character_detail_from_focus() -> void:
+	var focused_index := _focused_button_index(_character_buttons)
+	if focused_index >= 0:
+		_on_character_button_focus(focused_index)
+
+
+func _format_character_detail(character: CharacterDefinition) -> String:
+	var weapon_name := character.starting_weapon.id if character.starting_weapon else "none"
+	return (
+		"%s — %s\nHP %d  ·  Speed %.0f  ·  Luck %d  ·  Starts with %s"
+		% [
+			character.display_name,
+			character.description,
+			character.max_health,
+			character.move_speed,
+			character.luck,
+			weapon_name,
+		]
+	)
+
+
+func _on_character_button_pressed(index: int) -> void:
+	if index < 0 or index >= _character_choices.size():
+		return
+
+	var selected := _character_choices[index]
+	hide_character_select()
+	character_selected.emit(selected)
 
 
 func _update_shop_buttons() -> void:

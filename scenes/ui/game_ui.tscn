@@ -316,3 +316,63 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Continue"
+
+[node name="CharacterSelectOverlay" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.72)
+
+[node name="CenterContainer" type="CenterContainer" parent="CharacterSelectOverlay"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CharacterSelectOverlay/CenterContainer"]
+custom_minimum_size = Vector2(760, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CharacterSelectOverlay/CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Choose Your Fighter"
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.62, 0.66, 0.74, 1)
+text = "W/S or ↑/↓ navigate  ·  1–9 or Enter pick  ·  Click to choose"
+horizontal_alignment = 1
+
+[node name="CharacterGrid" type="GridContainer" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 3
+
+[node name="DetailLabel" type="Label" parent="CharacterSelectOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.78, 0.82, 0.9, 1)
+text = "Pick a kitchen creature to start your run."
+horizontal_alignment = 1
+autowrap_mode = 3
+

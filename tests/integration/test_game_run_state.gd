@@ -6,6 +6,8 @@ const GAME_SCRIPT := preload("res://scripts/game.gd")
 const WAVE_01 := preload("res://resources/waves/wave_01.tres")
 const WAVE_02 := preload("res://resources/waves/wave_02.tres")
 const WAVE_03 := preload("res://resources/waves/wave_03.tres")
+const CHEF_DEF := preload("res://resources/characters/chef.tres")
+const GOBLIN_DEF := preload("res://resources/characters/goblin.tres")
 
 
 func before() -> void:
@@ -23,6 +25,28 @@ func test_game_scene_instantiates() -> void:
 	assert_object(game).is_not_null()
 	assert_bool(game.is_run_active()).is_true()
 	assert_bool(get_tree().paused).is_false()
+
+
+func test_game_auto_applies_default_character_in_headless() -> void:
+	var game: Node2D = auto_free(GAME_SCENE.instantiate()) as Node2D
+	add_child(game)
+	await _wait_ready(game)
+
+	var player: CharacterBody2D = game.get_node("Player") as CharacterBody2D
+	assert_object(player.get_character()).is_same(CHEF_DEF)
+	assert_int(player.get_max_health()).is_equal(CHEF_DEF.max_health)
+
+
+func test_game_applies_exported_starting_character() -> void:
+	var game: Node2D = auto_free(GAME_SCENE.instantiate()) as Node2D
+	game.starting_character = GOBLIN_DEF
+	add_child(game)
+	await _wait_ready(game)
+
+	var player: CharacterBody2D = game.get_node("Player") as CharacterBody2D
+	assert_object(player.get_character()).is_same(GOBLIN_DEF)
+	assert_float(player.move_speed).is_equal(GOBLIN_DEF.move_speed)
+	assert_int(player.get_luck()).is_equal(GOBLIN_DEF.luck)
 
 
 func test_game_pauses_on_player_death() -> void:

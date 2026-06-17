@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Roadmap refresh after Phase 3D
+**Last updated:** Phase 4A playable character roster
 
 ---
 
@@ -44,23 +44,13 @@ Done. Arena bounds expanded to `2640x1440`, the camera follows the player while 
 
 Done. Visual screenshots were captured, off-camera margin increased to 100px, wave caps/intervals were lowered for camera-ring spawning, and spawn position tests were updated.
 
+### Phase 4A - Playable character roster
+
+Done. Added `CharacterDefinition` resources for all 9 roster characters, a pre-run character select overlay (keyboard + mouse), `player.configure()` for sprite/stats/starting weapon, and tests for roster loading and configuration. Headless runs auto-select Chef.
+
 ---
 
 ## Active tasks
-
-### Phase 4A - Playable character roster
-
-**Goal:** Let players choose different characters, each with a unique starting weapon.
-
-| Task | Status | Notes |
-|---|---|---|
-| Add `CharacterDefinition` resource | Planned | Include id, display name, sprite, base stats, starting weapon, description |
-| Create character select UI | Planned | Must support mouse and keyboard |
-| Apply selected character at run start | Planned | Sprite, stats, and starting weapon should come from selected data |
-| Assign one starting weapon per character | Planned | Reuse the 9-character roster as the first pass |
-| Add tests | Planned | Cover default selection and starting weapon assignment |
-
----
 
 ### Phase 4B - Kitchen weapon roster
 

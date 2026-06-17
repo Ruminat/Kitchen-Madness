@@ -3,6 +3,8 @@ extends Node2D
 @export var wave_definition: WaveDefinition
 @export var wave_definitions: Array[WaveDefinition] = []
 @export var health_drop: DropDefinition
+@export var starting_character: CharacterDefinition
+@export var skip_character_select := false
 
 var is_wave_complete := false
 var is_game_over := false
@@ -28,7 +30,7 @@ func _ready() -> void:
 	get_tree().paused = false
 
 	_arena_bounds = arena.get_bounds()
-
+	await _apply_starting_character()
 	player.setup(_arena_bounds, projectile_container)
 	_fit_camera_to_play_area()
 	_follow_player_camera()
@@ -101,6 +103,22 @@ func _get_camera_world_view_size() -> Vector2:
 
 func is_run_active() -> bool:
 	return not is_game_over and not is_wave_complete
+
+
+func _apply_starting_character() -> void:
+	var character := starting_character
+	if character == null and not _should_auto_start_character():
+		get_tree().paused = true
+		character = await ui.request_character_selection(CharacterRoster.load_roster())
+	if character == null:
+		character = CharacterRoster.get_default()
+	player.configure(character)
+	if get_tree().paused and not is_game_over and not is_wave_complete:
+		get_tree().paused = false
+
+
+func _should_auto_start_character() -> bool:
+	return skip_character_select or DisplayServer.get_name() == "headless"
 
 
 func _end_run() -> void:

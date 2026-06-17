@@ -14,8 +14,10 @@ var luck := 0
 var pickup_range_bonus := 0.0
 
 var _xp_gain_multiplier := 1.0
+var _character: CharacterDefinition
 
 @onready var visual: Node2D = $Visual
+@onready var sprite: Sprite2D = $Visual/Sprite
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var weapon_controller: WeaponController = $WeaponController
 
@@ -64,6 +66,25 @@ func setup(bounds: Rect2, projectile_container: Node2D) -> void:
 	arena_bounds = bounds
 	_clamp_to_arena()
 	weapon_controller.setup(projectile_container, bounds)
+
+
+func configure(character: CharacterDefinition) -> void:
+	if character == null:
+		return
+
+	_character = character
+	move_speed = character.move_speed
+	luck = character.luck
+	health_component.max_health = character.max_health
+	health_component.current_health = character.max_health
+	if character.sprite:
+		sprite.texture = character.sprite
+	weapon_controller.configure_weapons(character.starting_weapon)
+	_emit_initial_health()
+
+
+func get_character() -> CharacterDefinition:
+	return _character
 
 
 func set_arena_bounds(bounds: Rect2) -> void:
