@@ -1,238 +1,152 @@
-# Kitchen Madness — development progress
+# Kitchen Madness - development progress
 
-Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase.
+Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 3D spawn tuning + visual review
+**Last updated:** Roadmap refresh after Phase 3D
 
 ---
 
-## Phase 2A — Foundation refactor ✅
+## Completed work summary
 
-**Goal:** Structure that supports many enemies/guns without rewriting `game.gd` every time. Phase 1 gameplay unchanged.
+### Phase 2A - Foundation refactor
+
+Done. The prototype was split into modular systems: `EventBus`, `HealthComponent`, `Arena`, `WaveManager`, `EnemySpawner`, `WeaponController`, and data resource types for enemies, weapons, drops, waves, and upgrades. `tools/codecheck.ps1` / `.sh` were added.
+
+### Phase 2B - Enemies, guns, drops
+
+Done. Added chaser, tank, and sprinter enemy archetypes; weighted wave spawning; data-driven pistol, shotgun, and orbit blade; XP orbs; health pickups; and loot spawning.
+
+### Phase 2C - UI polish
+
+Done. HUD reacts through `EventBus`, with floating damage text, XP bar, level label, improved HP bar, pickup feedback, timer pulse, and HP bars for tanky enemies.
+
+### Phase 2D - XP and progression loop
+
+Done. XP collection fills the bar, level-ups pause the run, and the player chooses one of three free stat upgrades.
+
+### Phase 2E - Tests and codecheck
+
+Done. GdUnit4 test coverage exists for core logic and integration boot/run state, and the full codecheck pipeline covers lint, format, headless boot, and tests when local tools are installed.
+
+### Phase 3A - Gold and between-wave shop
+
+Done. Enemies award data-driven gold, the HUD shows gold, wave completion opens a shop, purchases spend gold, and Continue starts the next wave.
+
+### Phase 3B - Visual placeholders and wave ramp
+
+Done. Projectile, pickup, and health sprites replaced placeholder circles; `wave_01` through `wave_03` were authored; and wave/spawner systems can reconfigure between waves.
+
+### Phase 3C - Larger map and off-camera spawns
+
+Done. Arena bounds expanded to `2640x1440`, the camera follows the player while preserving the original view size, and enemies spawn just outside the visible camera rectangle.
+
+### Phase 3D - Visual review and spawn tuning
+
+Done. Visual screenshots were captured, off-camera margin increased to 100px, wave caps/intervals were lowered for camera-ring spawning, and spawn position tests were updated.
+
+---
+
+## Active tasks
+
+### Phase 4A - Playable character roster
+
+**Goal:** Let players choose different characters, each with a unique starting weapon.
 
 | Task | Status | Notes |
 |---|---|---|
-| EventBus autoload | ✅ Done | `scripts/autoload/event_bus.gd` |
-| HealthComponent | ✅ Done | Player + all enemies |
-| Arena scene | ✅ Done | `scenes/arena/arena.tscn` with `get_bounds()` |
-| Split `game.gd` | ✅ Done | `WaveManager` + `EnemySpawner` |
-| WeaponController | ✅ Done | Pistol from `WeaponDefinition` |
-| Resource types | ✅ Done | Enemy/Weapon/Drop/Wave + starter `.tres` |
-| `tools/codecheck.ps1` | ✅ Done | Lint/format/boot/tests (skips if tools missing) |
-
-**Definition of done:** Phase 1 gameplay works; no visible behavior change; `codecheck` passes.
+| Add `CharacterDefinition` resource | Planned | Include id, display name, sprite, base stats, starting weapon, description |
+| Create character select UI | Planned | Must support mouse and keyboard |
+| Apply selected character at run start | Planned | Sprite, stats, and starting weapon should come from selected data |
+| Assign one starting weapon per character | Planned | Reuse the 9-character roster as the first pass |
+| Add tests | Planned | Cover default selection and starting weapon assignment |
 
 ---
 
-## Phase 2B — Enemies, guns, drops ✅
+### Phase 4B - Kitchen weapon roster
+
+**Goal:** Remove current generic weapons and replace them with kitchen-themed weapons from [game-setting.md](game-setting.md).
 
 | Task | Status | Notes |
 |---|---|---|
-| `base_enemy.gd` + 3 archetypes | ✅ Done | Chaser, Tank, Sprinter scenes + `.tres` |
-| `WaveDefinition` weighted spawns | ✅ Done | `wave_01.tres` — weights 5/2/3 |
-| Shotgun + orbit blade weapons | ✅ Done | Pellet spread + orbiting blades; player has all 3 |
-| XP orbs + `DropDefinition` | ✅ Done | Small/large XP + 5% health drop via `LootSpawner` |
-| Pistol migrated to data-driven | ✅ Done | Completed in 2A |
+| Audit current weapon references | Planned | Find pistol, shotgun, orbit blade resources, scenes, tests, UI, and loadouts |
+| Retire current generic weapons | Planned | Remove/replace pistol, shotgun, and orbit blade from playable content |
+| Add first kitchen weapon resources | Planned | Pepper grinder gun, boiling soup splash, onion ring blade, kitchen knife, frying pan, garlic bomb, ladle boomerang, toaster turret |
+| Implement required weapon behaviors | Planned | Reuse existing projectile/orbit patterns where they still fit |
+| Map starting weapons to characters | Planned | Every character gets one kitchen-themed starter |
+| Update tests | Planned | Weapon controller, projectile, shop, and character tests should use new ids |
 
 ---
 
-## Phase 2C — UI polish ✅
+### Phase 4C - Weapon-focused shop
+
+**Goal:** Between-wave shop offers weapons and weapon upgrades only; stat upgrades are level-up rewards only.
 
 | Task | Status | Notes |
 |---|---|---|
-| HUD listens to EventBus only | ✅ Done | Completed in 2A refactor |
-| Floating damage numbers | ✅ Done | `FloatingTextManager` on `damage_dealt` |
-| XP bar + level label | ✅ Done | Bottom bar + `XpSystem` tracks orbs |
-| Improved HP bar styling | ✅ Done | Smooth tween via `stat_bar.gd` |
-| Pickup feedback text | ✅ Done | `+N XP` / `+N HP` floating text on collect |
-| Wave timer pulse (<10s) | ✅ Done | Color + scale pulse |
-| Tank enemy HP bars | ✅ Done | Thin bar above enemies with 50+ HP |
+| Split upgrade pools | Planned | Separate level-up stat upgrades from shop weapon offers |
+| Define weapon shop offers | Planned | Add new weapon, upgrade owned weapon, or improve rarity/level |
+| Update shop UI copy | Planned | Make weapon-only purpose obvious |
+| Tune pricing and availability | Planned | Avoid unaffordable or unusable early offers |
+| Add tests | Planned | Assert stat upgrades never appear in shop |
 
 ---
 
-## Phase 2D — XP and progression loop ✅
+### Phase 4D - VFX pass
+
+**Goal:** Add satisfying visual effects so enemies and projectiles no longer feel flat or instant.
+
+Research summary:
+
+- Godot recommends `GPUParticles2D` for most 2D particle effects.
+- One-shot effects should use `restart()` on reuse and clean up or return to pool via `finished`.
+- Particle counts should stay low; use scale/color curves, alpha fades, and visibility rects for readability/performance.
+- Projectile trails may need global-space particles so trails stay behind fast-moving projectiles.
 
 | Task | Status | Notes |
 |---|---|---|
-| XP system | ✅ Done | `XpSystem` added in 2C (orbs → bar fill, level-up signal) |
-| Level-up picker | ✅ Done | Pauses after level-up, shows 1 of 3 upgrade choices |
-| Upgrade definitions | ✅ Done | Damage, speed, max HP, orbit blade resources |
+| Write VFX style guide | Planned | Kitchen-themed crumbs, sparks, smoke, pepper clouds, soup splashes |
+| Add enemy death effect | Planned | Enemies should burst/fade instead of instantly disappearing |
+| Improve projectile visuals | Planned | Add trails, impact sparks, and clearer silhouettes |
+| Add weapon-specific effects | Planned | Keep effects readable during swarms |
+| Add VFX spawner/pooling if needed | Planned | Pool frequent death/projectile effects once counts rise |
+| Capture visual tests | Planned | Compare surrounded player, projectiles, enemy death, and upgrade/shop views |
 
 ---
 
-## Phase 2E — Tests and codecheck
+### Phase 4E - Wave pacing and enemy density
+
+**Goal:** Start with short waves and ramp length/density while keeping enemies weaker and more numerous.
 
 | Task | Status | Notes |
 |---|---|---|
-| GdUnit4 addon | ✅ Done | `addons/gdUnit4` |
-| Unit tests (health, wave, spawn, arena) | ✅ Done | `tests/unit/` |
-| Integration test (game run state) | ✅ Done | `tests/integration/` |
-| `test_xp_system.gd` | ✅ Done | 7 cases |
-| Full `codecheck` pipeline | ✅ Done | Lint + format + boot + GdUnit4 tests |
-| Pre-commit hook (optional) | ✅ Done | `.githooks/pre-commit` on master via `install-git-hooks` |
+| Add wave duration progression | Planned | Wave 1 around 10-15 seconds, then about +5 seconds per wave initially |
+| Increase enemy density | Planned | More enemies on screen, with lower individual HP/damage as needed |
+| Retune enemy stats | Planned | Favor many simple pests over a few durable enemies |
+| Update wave resources | Planned | Apply pacing to `wave_01.tres` onward |
+| Add tests | Planned | Cover duration progression, spawn caps, and authored wave selection |
 
 ---
 
-## Phase 3A — Gold and between-wave shop ✅
+### Phase 4F - Balance metrics and tuning
+
+**Goal:** Begin balancing around measured DPS, XP, gold, and wave pressure.
 
 | Task | Status | Notes |
 |---|---|---|
-| Gold on enemy kill | ✅ Done | `EnemyDefinition.gold_reward`; chaser 1 / sprinter 2 / tank 3 |
-| `GoldSystem` | ✅ Done | Tracks balance, emits `gold_changed` |
-| Shop overlay | ✅ Done | Buy upgrades with gold after wave complete |
-| `ShopManager` | ✅ Done | Reuses `UpgradeDefinition` + `gold_cost` |
-| Multi-wave loop | ✅ Done | Continue clears arena and starts next wave |
-| Gold HUD | ✅ Done | Gold label + wave prefix on timer (`W1 · 45s`) |
-| Unit tests | ✅ Done | `test_gold_system.gd`, `test_shop_manager.gd` |
+| Create balance model doc | Planned | Track target DPS, XP/wave, gold/wave, enemy HP budget, and time-to-level |
+| Add runtime metrics | Planned | Kills, gold, XP, damage dealt, damage taken, weapon contribution |
+| Show end-of-wave debug summary | Planned | Use for playtest tuning before building final UI |
+| Estimate weapon DPS from data | Planned | Compare theoretical DPS to observed playtest metrics |
+| Compare characters/weapons | Planned | Check that starter choices are distinct but not obviously dominant |
+| Add deterministic balance tests | Planned | Cover DPS formulas, XP/gold budgets, and wave-duration targets |
 
 ---
-
-## Phase 3B — Visual placeholders and wave ramp ✅
-
-| Task | Status | Notes |
-|---|---|---|
-| Projectile sprite | ✅ Done | `assets/effects/projectile_bolt.png` in `projectile.tscn` |
-| Pickup sprites | ✅ Done | XP gem + health cross replace circle placeholders |
-| Multiple waves | ✅ Done | `wave_01` → `wave_03`; later waves reuse final authored wave |
-| Wave reconfiguration | ✅ Done | `WaveManager` + `EnemySpawner` support new definitions between waves |
-| Tests | ✅ Done | Visual scene tests, wave sequence tests, spawner timer reuse |
-
----
-
-## Phase 3C — Larger map and off-camera spawns ✅
-
-| Task | Status | Notes |
-|---|---|---|
-| 3x arena | ✅ Done | Arena bounds now `2640x1440` from `Arena.DEFAULT_VIEW_SIZE * 3` |
-| Following camera | ✅ Done | Camera keeps old 1x view, follows player, clamps to map edges |
-| Off-camera spawns | ✅ Done | Enemies pick spawn bands just outside the current camera rect |
-| Tests | ✅ Done | Arena size, off-camera spawn positions, fallback spawning |
-
----
-
-## Phase 3D — Visual review and spawn tuning ✅
-
-| Task | Status | Notes |
-|---|---|---|
-| Visual screenshot pass | ✅ Done | `.\tools\capture-visuals.ps1` — includes `off_camera_spawns.png` |
-| Off-camera spawn margin | ✅ Done | `SPAWN_OFFSCREEN_MARGIN` 80 → 100 |
-| Wave density retune | ✅ Done | Lower `max_enemies` + slightly slower intervals (camera-ring spawns concentrate enemies) |
-| Tests | ✅ Done | Spawn margin distance, four-band layout, updated off-camera position checks |
-
----
-
-## Changelog
-
-### Phase 3D
-
-- **Visuals:** added `off_camera_spawns.png` capture with player offset on the 3x map; enemies peek in at screen edges
-- **Spawns:** increased off-camera margin to 100px so enemies walk in rather than pop at the border
-- **Waves:** wave 1–3 caps 130/155/180 and intervals 1.5/1.3/1.1 to offset denser camera-ring spawning
-- **Tests:** spawn positions must sit at least one margin outside the camera rect; four spawn bands at map center
-
-### Tooling
-
-- Added root `.gdlintrc` and `.gdformatrc` so gdtoolkit uses consistent lint/format rules
-- Fixed `codecheck.ps1` and `codecheck.sh` to pass explicit GDScript paths instead of fragile globs
-- Updated the pre-commit hook to run on `main` as well as `master`
-- Ran `gdformat` across checked GDScript paths and fixed lint issues surfaced by gdtoolkit
-
-### Phase 3C
-
-- **Map:** expanded arena geometry, walls, and tiled floor to 3x the original play area
-- **Camera:** zoom now targets the original 1x view size and follows the player across the larger map
-- **Spawns:** `EnemySpawner` uses the player/camera view to place enemies just outside the visible area, falling back to arena edges when needed
-- **Tests:** added coverage for 3x arena bounds and off-camera spawn placement
-
-### Phase 3B
-
-- **Visuals:** projectile, XP orb, and health pickup scenes now use transparent PNG sprites under `Visual/Sprite`
-- **Waves:** added `wave_02.tres` and `wave_03.tres` with faster spawn intervals, higher caps, and tougher enemy weights
-- **Loop:** starting the next wave reconfigures `WaveManager` and `EnemySpawner` with the current authored wave; beyond wave 3 keeps using wave 3
-- **Tests:** raw GdUnit suite fixed/expanded to cover new visuals, authored wave selection, spawner timer reuse, elite-cap metadata stubs, and current luck/XP math
-
-### Visual art tooling
-
-- Split the 3x3 player grid into named sprites: Chef, Goblin, Onion, Cookie, Mushroom, Vampire, Witch, Dumpling, Snowman
-- Set **Chef** as the current main player in `scenes/player/player.tscn` and halved the player sprite scale
-- Added a reusable Godot grid splitter for generated character sheets (`tools/grid_sprite_splitter.gd`)
-- Added a CLI wrapper (`tools/split_grid_sprites.gd`) with grid size, output size, padding, naming, background tolerance, and transparency options
-- Added `docs/sprite-grid-splitter.md`, `docs/player-roster.md`, and GdUnit coverage for centering, uneven grids, roster loading, and edge-connected background removal
-
----
-
-### Phase 3A (tuning)
-
-- **Elite cap:** max 2 elite (tank) enemies alive at once; spawner falls back to non-elite picks when cap is hit
-- **Keyboard UI:** level-up `1`/`2`/`3`, shop `1`–`8` + `Enter`, game over `R`/`Enter`; dual-input rule added to `plans.md` and `context.md`
-- **WASD ↔ arrows:** documented as fully interchangeable; movement always via input actions
-- **Upgrade overhaul:** HP, armor, damage, attack speed, move speed, luck, pickup range, XP gain (orbit blade upgrade removed)
-
-### Phase 3A
-
-- **Gold:** enemies award gold on kill (data-driven via `EnemyDefinition.gold_reward`)
-- **Shop:** wave complete opens a shop instead of a restart screen; buy upgrades with gold, then Continue to the next wave
-- **Multi-wave:** `game.gd` tracks wave number, clears leftover entities, resets `WaveManager` + `EnemySpawner`
-- **Upgrades:** `UpgradeDefinition.gold_cost` added (level-up picks remain free)
-- **HUD:** gold counter in top panel; timer shows `W{n} · {seconds}s`
-
-### Phase 2D
-
-- **Level-up picker:** after XP fills the bar, gameplay pauses briefly and offers 3 upgrades
-- **Upgrade definitions:** data resources for +10% damage, +10% speed, +20 max HP, +1 orbit blade
-- `LevelUpManager` queues level-ups, applies selected upgrades, and resumes active runs
-- Runtime weapon definitions are duplicated before upgrades modify damage or orbit blade counts
-
-### Phase 2C
-
-- **Floating damage numbers** float up and fade on `damage_dealt`
-- **Pickup feedback** shows `+N XP` / `+N HP` at collect position
-- **XP bar** at bottom with level label; fills from orb pickups via `XpSystem`
-- **Level-up flash** on XP bar when threshold reached (`level_up` signal)
-- **HP bar** smooth tween + color shift at low health
-- **Timer pulse** when under 10 seconds remaining
-- **Tank HP bars** thin red bar above high-HP enemies
-- `pickup_collected` now includes `world_pos` and `value`
-
-### Phase 2B
-
-- **Shotgun:** 5 pellets, 32° spread, short range (data-driven via `WeaponDefinition`)
-- **Orbit blade:** 2 rotating blades around player with per-enemy hit cooldown
-- **Drops:** Cyan XP orbs (small +5, large +20 from tanks), green health pickups (+15 HP, 5% chance)
-- `LootSpawner` listens to `enemy_killed`, spawns drops from `EnemyDefinition.xp_drop`
-- `BasePickup` with magnet pull toward player; health pickup heals via `HealthComponent`
-
-### Phase 2E (started)
-
-- Added GdUnit4 test framework and unit/integration tests
-- Extracted `SpawnTable` for testable weighted enemy picks
-- `WindowSetup` skipped in headless mode for CI/tests
-
-- Fixed phantom contact damage (distance-based overlap check)
-- Polished HUD: compact panel, thin HP bar, consistent typography
-- Invulnerability reduced to 0.1s
-- Window fills usable screen area (windowed); 1920×1080 viewport with camera zoom
-- Borderless full-monitor window; pause tree when run ends (death / wave complete)
-
-- Added 3 enemy archetypes: Chaser (red), Tank (dark red, slow/tanky), Sprinter (orange, zigzag)
-- `wave_01.tres` spawns weighted mix of all three types
-- Per-enemy contact damage (Tank hits harder)
-
-### Phase 2A
-
-- Added `progress.md`, EventBus, HealthComponent, Arena scene
-- Split `game.gd` into WaveManager + EnemySpawner
-- WeaponController + data-driven pistol
-- Resource definition scripts and starter `.tres` files
-- UI wired through EventBus (no direct gameplay → UI calls)
-- `tools/codecheck.ps1` / `codecheck.sh`
 
 ## How to try it
 
-1. Open project in Godot 4.6+ and press **F5**
-2. Kill enemies — gold accumulates in the HUD (1/2/3 per enemy type)
-3. Survive the wave — shop opens; spend gold on upgrades, click **Continue** for wave 2
-4. Level up from XP orbs — picker still pauses mid-wave (free upgrades)
-5. Die — Game Over overlay with Restart (unchanged)
-6. Run `.\tools\codecheck.ps1` before handoff (Godot on PATH + optional `pip install gdtoolkit`)
-7. Run tests only: `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode`
+1. Open the project in Godot 4.6+ and press **F5**.
+2. Kill enemies to gain XP and gold.
+3. Survive the wave to open the shop, then continue to the next wave.
+4. Level up from XP orbs to choose free stat upgrades.
+5. Run `.\tools\codecheck.ps1` before handoff.
+6. Run tests only with `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode`.
