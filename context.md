@@ -4,7 +4,9 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 ## Current status
 
-**Phase 3D done** — visual review pass + spawn tuning for the larger map. Off-camera margin 100px; wave caps/intervals reduced so camera-ring spawns don't overcrowd.
+**Phase 4C done** — between-wave shop is weapon-only (add weapon, +damage, +attack speed, +pellet upgrades). Stat upgrades remain level-up rewards only.
+
+**Phase 4B done** — generic pistol/shotgun/orbit blade retired; 8 kitchen weapons via `.tres` + `WeaponRoster`.
 
 **Visual pass:** Sprites for player (Chef default), enemies, arena floor, projectiles, XP orbs, and health pickups. 9-player roster from `assets/characters/Players.png` via grid splitter — see `docs/sprite-grid-splitter.md`, `docs/player-roster.md`.
 
@@ -84,7 +86,7 @@ Integration tests: assert synchronously after `EventBus` emits — don't `await`
 
 ## Next work
 
-Playtest wave pacing on the 3x map; add content (enemies, weapons, wave variety) via `.tres` resources.
+Phase 4D — VFX pass (enemy death bursts, projectile trails, weapon impact effects). Playtest weapon shop pricing and offer variety.
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 

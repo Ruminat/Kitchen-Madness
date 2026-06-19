@@ -2,15 +2,15 @@
 
 [ext_resource type="Script" path="res://scripts/data/character_definition.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/characters/player/dumpling.png" id="2"]
-[ext_resource type="Resource" uid="uid://weapondef_shotgun" path="res://resources/weapons/shotgun.tres" id="3"]
+[ext_resource type="Resource" uid="uid://weapondef_ladle_boomerang" path="res://resources/weapons/ladle_boomerang.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
 id = "dumpling"
 display_name = "Dumpling"
-description = "Dumpling monk. Sturdy and close-quarters."
+description = "Dumpling monk. Sturdy and close-quarters with a returning ladle."
 sprite = ExtResource("2")
-max_health = 115
-move_speed = 205.0
-luck = 0
+max_health = 105
+move_speed = 210.0
+luck = 1
 starting_weapon = ExtResource("3")

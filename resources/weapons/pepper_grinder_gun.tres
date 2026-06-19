@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=4 format=3 uid="uid://weapondef_pistol"]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=4 format=3 uid="uid://weapondef_pepper_grinder"]
 
 [ext_resource type="Script" path="res://scripts/data/weapon_definition.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/weapons/projectile_weapon.gd" id="2"]
@@ -6,7 +6,9 @@
 
 [resource]
 script = ExtResource("1")
-id = "pistol"
+id = "pepper_grinder_gun"
+display_name = "Pepper Grinder Gun"
+description = "Steady pepper bursts at the nearest pest."
 weapon_script = ExtResource("2")
 damage = 15
 fire_rate = 0.45

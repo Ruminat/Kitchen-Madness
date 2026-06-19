@@ -2,13 +2,13 @@
 
 [ext_resource type="Script" path="res://scripts/data/character_definition.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/characters/player/chef.png" id="2"]
-[ext_resource type="Resource" uid="uid://weapondef_pistol" path="res://resources/weapons/pistol.tres" id="3"]
+[ext_resource type="Resource" uid="uid://weapondef_pepper_grinder" path="res://resources/weapons/pepper_grinder_gun.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
 id = "chef"
 display_name = "Chef"
-description = "Smug dough chef blob. Balanced stats and a trusty sidearm."
+description = "Smug dough chef blob. Balanced stats and a trusty pepper grinder."
 sprite = ExtResource("2")
 max_health = 100
 move_speed = 220.0

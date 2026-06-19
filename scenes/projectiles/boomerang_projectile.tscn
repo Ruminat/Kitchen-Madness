@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://boomerang_projectile"]
+
+[ext_resource type="Script" path="res://scripts/boomerang_projectile.gd" id="1_boomerang"]
+[ext_resource type="Texture2D" path="res://assets/effects/projectile_bolt.png" id="2_bolt"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_boomerang"]
+radius = 6.0
+
+[node name="BoomerangProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_boomerang")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Sprite" type="Sprite2D" parent="Visual"]
+texture = ExtResource("2_bolt")
+scale = Vector2(0.24, 0.24)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_boomerang")

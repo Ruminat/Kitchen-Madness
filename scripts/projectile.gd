@@ -27,7 +27,8 @@ func setup(
 	bounds: Rect2,
 	projectile_damage: int = 15,
 	projectile_speed: float = DEFAULT_SPEED,
-	projectile_lifetime: float = DEFAULT_LIFETIME
+	projectile_lifetime: float = DEFAULT_LIFETIME,
+	texture: Texture2D = null
 ) -> void:
 	direction = fire_direction.normalized()
 	damage = projectile_damage
@@ -35,6 +36,16 @@ func setup(
 	lifetime = projectile_lifetime
 	rotation = direction.angle()
 	arena_bounds = bounds
+	_apply_texture(texture)
+
+
+func _apply_texture(texture: Texture2D) -> void:
+	if texture == null:
+		return
+
+	var sprite := get_node_or_null("Visual/Sprite") as Sprite2D
+	if sprite:
+		sprite.texture = texture
 
 
 func _on_body_entered(body: Node2D) -> void:

@@ -2,15 +2,15 @@
 
 [ext_resource type="Script" path="res://scripts/data/character_definition.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/characters/player/vampire.png" id="2"]
-[ext_resource type="Resource" uid="uid://weapondef_orbit_blade" path="res://resources/weapons/orbit_blade.tres" id="3"]
+[ext_resource type="Resource" uid="uid://weapondef_onion_ring" path="res://resources/weapons/onion_ring_blade.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
 id = "vampire"
 display_name = "Vampire"
-description = "Tomato-sauce vampire. Glass cannon with spinning blades."
+description = "Tomato-sauce vampire. Glass cannon with spinning onion rings."
 sprite = ExtResource("2")
-max_health = 90
+max_health = 75
 move_speed = 225.0
 luck = 1
 starting_weapon = ExtResource("3")

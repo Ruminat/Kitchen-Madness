@@ -90,6 +90,10 @@ var _character_choices: Array[CharacterDefinition] = []
 	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/GoldLabel")
 	as Label
 )
+@onready var shop_hint_label: Label = (
+	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/HintLabel")
+	as Label
+)
 @onready var shop_button_1: Button = get_node(_shop_button_path(1)) as Button
 @onready var shop_button_2: Button = get_node(_shop_button_path(2)) as Button
 @onready var shop_button_3: Button = get_node(_shop_button_path(3)) as Button
@@ -505,7 +509,7 @@ func _on_gold_changed(gold: int) -> void:
 
 func _on_wave_index_changed(wave: int) -> void:
 	_current_wave = wave
-	shop_title_label.text = "Wave %d Complete — Shop" % wave
+	shop_title_label.text = "Wave %d Complete — Weapon Shop" % wave
 
 
 func show_wave_complete() -> void:
@@ -549,12 +553,20 @@ func hide_level_up_options() -> void:
 	_upgrade_choices.clear()
 
 
-func show_shop(upgrades: Array[Resource], gold: int) -> void:
-	_shop_upgrades = upgrades
+func show_shop(offers: Array[Resource], gold: int) -> void:
+	_shop_upgrades = offers
 	_current_gold = gold
 	shop_overlay.visible = true
+	shop_gold_label.text = "%d gold  ·  stat upgrades come from level-ups" % gold
+	shop_hint_label.text = "W/S or ↑/↓ navigate  ·  1–4 or Enter buy  ·  Enter continue"
 	_update_shop_buttons()
 	shop_continue_button.grab_focus()
+
+
+func refresh_shop(offers: Array[Resource], gold: int) -> void:
+	_shop_upgrades = offers
+	_current_gold = gold
+	_update_shop_buttons()
 
 
 func update_shop_gold(gold: int) -> void:
@@ -639,7 +651,11 @@ func _update_character_detail_from_focus() -> void:
 
 
 func _format_character_detail(character: CharacterDefinition) -> String:
-	var weapon_name := character.starting_weapon.id if character.starting_weapon else "none"
+	var weapon_name := (
+		character.starting_weapon.display_name
+		if character.starting_weapon and not character.starting_weapon.display_name.is_empty()
+		else character.starting_weapon.id if character.starting_weapon else "none"
+	)
 	return (
 		"%s — %s\nHP %d  ·  Speed %.0f  ·  Luck %d  ·  Starts with %s"
 		% [
@@ -663,22 +679,25 @@ func _on_character_button_pressed(index: int) -> void:
 
 
 func _update_shop_buttons() -> void:
-	shop_gold_label.text = "%d gold available" % _current_gold
+	shop_gold_label.text = "%d gold  ·  stat upgrades come from level-ups" % _current_gold
 
 	for index in _shop_buttons.size():
 		var button := _shop_buttons[index]
-		var has_upgrade := index < _shop_upgrades.size()
-		button.visible = has_upgrade
-		if not has_upgrade:
+		var has_offer := index < _shop_upgrades.size()
+		button.visible = has_offer
+		if not has_offer:
 			button.disabled = true
 			continue
 
-		var upgrade: Resource = _shop_upgrades[index]
-		var cost := int(upgrade.get("gold_cost"))
+		var offer: Resource = _shop_upgrades[index]
+		var cost := int(offer.get("gold_cost"))
 		var can_afford := _current_gold >= cost
 		button.disabled = not can_afford
-		button.text = UpgradeDisplay.format_card_text(upgrade, "— %d gold" % cost)
-		UpgradeDisplay.apply_card_style(button, upgrade)
+		var hotkey := "— %d gold" % cost
+		if index < 4:
+			hotkey = "— %d gold  ·  [%d]" % [cost, index + 1]
+		button.text = ShopDisplay.format_card_text(offer, hotkey)
+		ShopDisplay.apply_card_style(button, offer)
 
 
 func _on_shop_button_pressed(index: int) -> void:

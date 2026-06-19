@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/characters/player/chef.png" id="2_chef"]
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="3_health"]
 [ext_resource type="Script" path="res://scripts/weapons/weapon_controller.gd" id="4_weapon_ctrl"]
-[ext_resource type="Resource" uid="uid://weapondef_pistol" path="res://resources/weapons/pistol.tres" id="5_pistol"]
+[ext_resource type="Resource" uid="uid://weapondef_pepper_grinder" path="res://resources/weapons/pepper_grinder_gun.tres" id="5_pistol"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_player"]
 radius = 14.0

@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 4A playable character roster
+**Last updated:** Phase 4C weapon-focused shop
 
 ---
 
@@ -48,38 +48,17 @@ Done. Visual screenshots were captured, off-camera margin increased to 100px, wa
 
 Done. Added `CharacterDefinition` resources for all 9 roster characters, a pre-run character select overlay (keyboard + mouse), `player.configure()` for sprite/stats/starting weapon, and tests for roster loading and configuration. Headless runs auto-select Chef.
 
----
-
-## Active tasks
-
 ### Phase 4B - Kitchen weapon roster
 
-**Goal:** Remove current generic weapons and replace them with kitchen-themed weapons from [game-setting.md](game-setting.md).
-
-| Task | Status | Notes |
-|---|---|---|
-| Audit current weapon references | Planned | Find pistol, shotgun, orbit blade resources, scenes, tests, UI, and loadouts |
-| Retire current generic weapons | Planned | Remove/replace pistol, shotgun, and orbit blade from playable content |
-| Add first kitchen weapon resources | Planned | Pepper grinder gun, boiling soup splash, onion ring blade, kitchen knife, frying pan, garlic bomb, ladle boomerang, toaster turret |
-| Implement required weapon behaviors | Planned | Reuse existing projectile/orbit patterns where they still fit |
-| Map starting weapons to characters | Planned | Every character gets one kitchen-themed starter |
-| Update tests | Planned | Weapon controller, projectile, shop, and character tests should use new ids |
-
----
+Done. Retired pistol, shotgun, and orbit blade. Added 8 kitchen `WeaponDefinition` resources with `WeaponRoster`, burst/boomerang/turret behaviors, per-character starter mapping, and tests.
 
 ### Phase 4C - Weapon-focused shop
 
-**Goal:** Between-wave shop offers weapons and weapon upgrades only; stat upgrades are level-up rewards only.
-
-| Task | Status | Notes |
-|---|---|---|
-| Split upgrade pools | Planned | Separate level-up stat upgrades from shop weapon offers |
-| Define weapon shop offers | Planned | Add new weapon, upgrade owned weapon, or improve rarity/level |
-| Update shop UI copy | Planned | Make weapon-only purpose obvious |
-| Tune pricing and availability | Planned | Avoid unaffordable or unusable early offers |
-| Add tests | Planned | Assert stat upgrades never appear in shop |
+Done. Shop generates 4 dynamic weapon offers per wave (add weapon, sharpen, speed up, extra projectile). Stat `UpgradeDefinition` resources are level-up only. Added `WeaponShopOffer`, `ShopDisplay`, per-weapon upgrade APIs on `WeaponController`, and tests asserting stat upgrades never appear in shop.
 
 ---
+
+## Active tasks
 
 ### Phase 4D - VFX pass
 

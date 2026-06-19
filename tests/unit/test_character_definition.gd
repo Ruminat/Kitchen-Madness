@@ -5,9 +5,14 @@ const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const CHEF_DEF := preload("res://resources/characters/chef.tres")
 const GOBLIN_DEF := preload("res://resources/characters/goblin.tres")
 const ONION_DEF := preload("res://resources/characters/onion.tres")
-const PISTOL_DEF := preload("res://resources/weapons/pistol.tres")
-const SHOTGUN_DEF := preload("res://resources/weapons/shotgun.tres")
-const ORBIT_DEF := preload("res://resources/weapons/orbit_blade.tres")
+const PEPPER_DEF := preload("res://resources/weapons/pepper_grinder_gun.tres")
+const SOUP_DEF := preload("res://resources/weapons/boiling_soup_splash.tres")
+const ONION_RING_DEF := preload("res://resources/weapons/onion_ring_blade.tres")
+const KNIFE_DEF := preload("res://resources/weapons/kitchen_knife.tres")
+const PAN_DEF := preload("res://resources/weapons/frying_pan.tres")
+const GARLIC_DEF := preload("res://resources/weapons/garlic_bomb.tres")
+const LADLE_DEF := preload("res://resources/weapons/ladle_boomerang.tres")
+const TOASTER_DEF := preload("res://resources/weapons/toaster_turret.tres")
 
 
 func test_character_roster_loads_nine_characters() -> void:
@@ -37,7 +42,7 @@ func test_configure_applies_sprite_stats_and_starting_weapon() -> void:
 	var weapon_controller: WeaponController = (
 		player.get_node("WeaponController") as WeaponController
 	)
-	assert_object(weapon_controller.starting_weapon).is_same(SHOTGUN_DEF)
+	assert_object(weapon_controller.starting_weapon).is_same(SOUP_DEF)
 	assert_int(weapon_controller.extra_weapons.size()).is_equal(0)
 
 
@@ -56,7 +61,7 @@ func test_setup_adds_only_starting_weapon() -> void:
 	)
 	assert_int(weapon_controller.get_child_count()).is_equal(1)
 	var weapon: BaseWeapon = weapon_controller.get_child(0) as BaseWeapon
-	assert_str(weapon.definition.id).is_equal(PISTOL_DEF.id)
+	assert_str(weapon.definition.id).is_equal(PEPPER_DEF.id)
 
 
 func test_each_character_resource_has_required_fields() -> void:
@@ -72,15 +77,15 @@ func test_each_character_resource_has_required_fields() -> void:
 
 func test_character_starting_weapon_assignments() -> void:
 	var expected_weapons := {
-		"chef": PISTOL_DEF,
-		"cookie": PISTOL_DEF,
-		"witch": PISTOL_DEF,
-		"goblin": SHOTGUN_DEF,
-		"mushroom": SHOTGUN_DEF,
-		"dumpling": SHOTGUN_DEF,
-		"onion": ORBIT_DEF,
-		"vampire": ORBIT_DEF,
-		"snowman": ORBIT_DEF,
+		"chef": PEPPER_DEF,
+		"cookie": KNIFE_DEF,
+		"witch": GARLIC_DEF,
+		"goblin": SOUP_DEF,
+		"mushroom": PAN_DEF,
+		"vampire": ONION_RING_DEF,
+		"onion": ONION_RING_DEF,
+		"dumpling": LADLE_DEF,
+		"snowman": TOASTER_DEF,
 	}
 
 	for character in CharacterRoster.load_roster():
@@ -105,15 +110,17 @@ func test_weapon_controller_configure_weapons_replaces_loadout() -> void:
 	add_child(controller)
 	add_child(projectile_container)
 
-	controller.configure_weapons(PISTOL_DEF)
+	controller.configure_weapons(PEPPER_DEF)
 	controller.setup(projectile_container, Rect2(-100.0, -100.0, 200.0, 200.0))
 	assert_int(controller.get_child_count()).is_equal(1)
-	assert_str((controller.get_child(0) as BaseWeapon).definition.id).is_equal("pistol")
+	assert_str((controller.get_child(0) as BaseWeapon).definition.id).is_equal("pepper_grinder_gun")
 
-	controller.configure_weapons(SHOTGUN_DEF)
+	controller.configure_weapons(SOUP_DEF)
 	controller.setup(projectile_container, Rect2(-100.0, -100.0, 200.0, 200.0))
 	assert_int(controller.get_child_count()).is_equal(1)
-	assert_str((controller.get_child(0) as BaseWeapon).definition.id).is_equal("shotgun")
+	assert_str((controller.get_child(0) as BaseWeapon).definition.id).is_equal(
+		"boiling_soup_splash"
+	)
 
 
 func _wait_ready(node: Node) -> void:

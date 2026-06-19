@@ -108,7 +108,7 @@ Player (CharacterBody2D)
 
 **When to use:** Melee-focused characters, chef melee upgrades, slap-stick pan attacks.
 
-**Not needed yet** — the player still uses pistol / shotgun / orbit blades from `WeaponController`.
+**Not needed yet** — the player uses kitchen weapons from `WeaponController` (pepper grinder, soup splash, onion rings, etc.).
 
 ---
 

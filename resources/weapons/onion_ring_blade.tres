@@ -1,11 +1,13 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3 uid="uid://weapondef_orbit_blade"]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3 uid="uid://weapondef_onion_ring"]
 
 [ext_resource type="Script" path="res://scripts/data/weapon_definition.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/weapons/orbit_weapon.gd" id="2"]
 
 [resource]
 script = ExtResource("1")
-id = "orbit_blade"
+id = "onion_ring_blade"
+display_name = "Onion Ring Blade"
+description = "Crispy rings that orbit and slice through swarms."
 weapon_script = ExtResource("2")
 damage = 12
 fire_rate = 0.0

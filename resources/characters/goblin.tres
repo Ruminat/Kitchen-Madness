@@ -2,13 +2,13 @@
 
 [ext_resource type="Script" path="res://scripts/data/character_definition.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/characters/player/goblin.png" id="2"]
-[ext_resource type="Resource" uid="uid://weapondef_shotgun" path="res://resources/weapons/shotgun.tres" id="3"]
+[ext_resource type="Resource" uid="uid://weapondef_boiling_soup" path="res://resources/weapons/boiling_soup_splash.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
 id = "goblin"
 display_name = "Goblin"
-description = "Greasy goblin cook. Fast feet and a wide spray attack."
+description = "Greasy goblin cook. Fast feet and boiling soup splashes."
 sprite = ExtResource("2")
 max_health = 85
 move_speed = 240.0

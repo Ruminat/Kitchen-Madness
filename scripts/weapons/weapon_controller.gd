@@ -1,6 +1,8 @@
 class_name WeaponController
 extends Node2D
 
+const MAX_WEAPONS := 6
+
 @export var starting_weapon: WeaponDefinition
 @export var extra_weapons: Array[WeaponDefinition] = []
 
@@ -59,3 +61,56 @@ func increase_damage_percent(percent: float) -> void:
 func increase_fire_rate_percent(percent: float) -> void:
 	for weapon in _weapons:
 		weapon.increase_fire_rate_percent(percent)
+
+
+func get_owned_weapon_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for weapon in _weapons:
+		if weapon.definition:
+			ids.append(weapon.definition.id)
+	return ids
+
+
+func has_weapon(weapon_id: String) -> bool:
+	return weapon_id in get_owned_weapon_ids()
+
+
+func can_add_weapon() -> bool:
+	return _weapons.size() < MAX_WEAPONS
+
+
+func get_weapon_display_name(weapon_id: String) -> String:
+	for weapon in _weapons:
+		if weapon.definition and weapon.definition.id == weapon_id:
+			if not weapon.definition.display_name.is_empty():
+				return weapon.definition.display_name
+			return weapon.definition.id
+	return weapon_id
+
+
+func upgrade_weapon_damage(weapon_id: String, percent: float) -> void:
+	for weapon in _weapons:
+		if weapon.definition and weapon.definition.id == weapon_id:
+			weapon.increase_damage_percent(percent)
+			return
+
+
+func upgrade_weapon_fire_rate(weapon_id: String, percent: float) -> void:
+	for weapon in _weapons:
+		if weapon.definition and weapon.definition.id == weapon_id:
+			weapon.increase_fire_rate_percent(percent)
+			return
+
+
+func upgrade_weapon_pellets(weapon_id: String, amount: int) -> void:
+	for weapon in _weapons:
+		if weapon.definition and weapon.definition.id == weapon_id:
+			weapon.increase_pellet_count(amount)
+			return
+
+
+func get_weapon_definition(weapon_id: String) -> WeaponDefinition:
+	for weapon in _weapons:
+		if weapon.definition and weapon.definition.id == weapon_id:
+			return weapon.definition
+	return null

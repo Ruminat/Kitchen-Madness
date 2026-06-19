@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=4 format=3 uid="uid://weapondef_shotgun"]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=4 format=3 uid="uid://weapondef_boiling_soup"]
 
 [ext_resource type="Script" path="res://scripts/data/weapon_definition.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/weapons/projectile_weapon.gd" id="2"]
@@ -6,7 +6,9 @@
 
 [resource]
 script = ExtResource("1")
-id = "shotgun"
+id = "boiling_soup_splash"
+display_name = "Boiling Soup Splash"
+description = "Short-range splash that coats nearby vermin."
 weapon_script = ExtResource("2")
 damage = 8
 fire_rate = 0.85

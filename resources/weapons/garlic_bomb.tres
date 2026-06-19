@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=4 format=3 uid="uid://weapondef_garlic_bomb"]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_definition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/weapons/burst_weapon.gd" id="2"]
+[ext_resource type="PackedScene" uid="uid://projectile001" path="res://scenes/projectiles/projectile.tscn" id="3"]
+
+[resource]
+script = ExtResource("1")
+id = "garlic_bomb"
+display_name = "Garlic Bomb"
+description = "Pungent radial burst that repels pests in every direction."
+weapon_script = ExtResource("2")
+damage = 6
+fire_rate = 1.4
+projectile_scene = ExtResource("3")
+pellet_count = 8
+projectile_speed = 320.0
+projectile_lifetime = 0.45
