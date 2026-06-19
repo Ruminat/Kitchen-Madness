@@ -54,6 +54,9 @@ func _check_blade_hits(blade_pos: Vector2, damage: int) -> void:
 
 		if enemy.has_method("take_damage"):
 			enemy.take_damage(damage)
+			var accent := definition.vfx_accent if definition else Color(0.75, 0.85, 1.0, 0.9)
+			var hit_direction: Vector2 = (enemy.global_position - blade_pos).normalized()
+			EventBus.projectile_hit.emit(blade_pos, hit_direction, accent)
 		_hit_cooldowns[enemy_id] = HIT_COOLDOWN
 
 

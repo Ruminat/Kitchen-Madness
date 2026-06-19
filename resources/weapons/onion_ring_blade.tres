@@ -14,3 +14,4 @@ fire_rate = 0.0
 pellet_count = 2
 orbit_radius = 58.0
 orbit_speed = 4.5
+vfx_accent = Color(0.75, 0.95, 0.55, 1)

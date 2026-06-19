@@ -12,6 +12,7 @@ var _owner: Node2D
 var _elapsed := 0.0
 var _returning := false
 var _hit_enemies: Dictionary = {}
+var _accent_color := Color(0.85, 0.6, 0.3, 1.0)
 
 
 func _ready() -> void:
@@ -51,7 +52,8 @@ func setup(
 	projectile_speed: float = DEFAULT_SPEED,
 	projectile_lifetime: float = DEFAULT_LIFETIME,
 	texture: Texture2D = null,
-	owner: Node2D = null
+	owner: Node2D = null,
+	accent_color: Color = Color(0.85, 0.6, 0.3, 1.0)
 ) -> void:
 	direction = fire_direction.normalized()
 	damage = projectile_damage
@@ -60,7 +62,10 @@ func setup(
 	rotation = direction.angle()
 	arena_bounds = bounds
 	_owner = owner
+	_accent_color = accent_color
 	_apply_texture(texture)
+	_apply_accent(accent_color)
+	_setup_trail(accent_color)
 
 
 func _apply_texture(texture: Texture2D) -> void:
@@ -70,6 +75,20 @@ func _apply_texture(texture: Texture2D) -> void:
 	var sprite := get_node_or_null("Visual/Sprite") as Sprite2D
 	if sprite:
 		sprite.texture = texture
+
+
+func _apply_accent(accent: Color) -> void:
+	var sprite := get_node_or_null("Visual/Sprite") as Sprite2D
+	if sprite:
+		sprite.modulate = accent.lerp(Color.WHITE, 0.35)
+
+
+func _setup_trail(accent: Color) -> void:
+	if has_node("Trail"):
+		return
+
+	var trail := VfxLibrary.create_trail(accent)
+	add_child(trail)
 
 
 func _on_body_entered(body: Node2D) -> void:
@@ -82,3 +101,4 @@ func _on_body_entered(body: Node2D) -> void:
 
 	body.take_damage(damage)
 	_hit_enemies[enemy_id] = true
+	EventBus.projectile_hit.emit(global_position, direction, _accent_color)

@@ -17,12 +17,14 @@ var _arena_bounds := Rect2()
 @onready var enemy_container: Node2D = $EnemyContainer
 @onready var projectile_container: Node2D = $ProjectileContainer
 @onready var pickup_container: Node2D = $PickupContainer
+@onready var vfx_container: Node2D = $VFXContainer
 @onready var wave_manager: WaveManager = $WaveManager
 @onready var enemy_spawner: EnemySpawner = $EnemySpawner
 @onready var loot_spawner: LootSpawner = $LootSpawner
 @onready var level_up_manager: Node = $LevelUpManager
 @onready var gold_system: GoldSystem = $GoldSystem
 @onready var shop_manager: ShopManager = $ShopManager
+@onready var vfx_manager: VfxManager = $VfxManager
 @onready var ui: CanvasLayer = $UI
 
 
@@ -36,6 +38,7 @@ func _ready() -> void:
 	_follow_player_camera()
 	_configure_current_wave()
 	loot_spawner.configure(pickup_container, health_drop)
+	vfx_manager.configure(vfx_container)
 	if level_up_manager.has_method("configure"):
 		level_up_manager.configure(player, ui, Callable(self, "is_run_active"))
 	if shop_manager.has_method("configure"):

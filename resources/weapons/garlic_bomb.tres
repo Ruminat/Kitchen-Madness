@@ -16,3 +16,4 @@ projectile_scene = ExtResource("3")
 pellet_count = 8
 projectile_speed = 320.0
 projectile_lifetime = 0.45
+vfx_accent = Color(0.95, 0.9, 1, 1)

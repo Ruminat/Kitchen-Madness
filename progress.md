@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 4C weapon-focused shop
+**Last updated:** Phase 4D VFX pass
 
 ---
 
@@ -56,31 +56,13 @@ Done. Retired pistol, shotgun, and orbit blade. Added 8 kitchen `WeaponDefinitio
 
 Done. Shop generates 4 dynamic weapon offers per wave (add weapon, sharpen, speed up, extra projectile). Stat `UpgradeDefinition` resources are level-up only. Added `WeaponShopOffer`, `ShopDisplay`, per-weapon upgrade APIs on `WeaponController`, and tests asserting stat upgrades never appear in shop.
 
+### Phase 4D - VFX pass
+
+Done. Added `VfxLibrary` + pooled `VfxManager` listening to `enemy_killed` and `projectile_hit`. Enemies hide on death and burst with tinted `GPUParticles2D`. Projectiles get world-space trails, accent tints, and impact sparks. Each weapon `.tres` has `vfx_accent`. Style guide at `docs/vfx-style-guide.md`. Visual captures for projectile trails and enemy death. Unit tests for VFX library, manager, and projectile wiring.
+
 ---
 
 ## Active tasks
-
-### Phase 4D - VFX pass
-
-**Goal:** Add satisfying visual effects so enemies and projectiles no longer feel flat or instant.
-
-Research summary:
-
-- Godot recommends `GPUParticles2D` for most 2D particle effects.
-- One-shot effects should use `restart()` on reuse and clean up or return to pool via `finished`.
-- Particle counts should stay low; use scale/color curves, alpha fades, and visibility rects for readability/performance.
-- Projectile trails may need global-space particles so trails stay behind fast-moving projectiles.
-
-| Task | Status | Notes |
-|---|---|---|
-| Write VFX style guide | Planned | Kitchen-themed crumbs, sparks, smoke, pepper clouds, soup splashes |
-| Add enemy death effect | Planned | Enemies should burst/fade instead of instantly disappearing |
-| Improve projectile visuals | Planned | Add trails, impact sparks, and clearer silhouettes |
-| Add weapon-specific effects | Planned | Keep effects readable during swarms |
-| Add VFX spawner/pooling if needed | Planned | Pool frequent death/projectile effects once counts rise |
-| Capture visual tests | Planned | Compare surrounded player, projectiles, enemy death, and upgrade/shop views |
-
----
 
 ### Phase 4E - Wave pacing and enemy density
 

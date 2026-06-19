@@ -12,6 +12,7 @@ const UPGRADE_PATHS: Array[String] = [
 	"res://resources/upgrades/damage_boost.tres",
 	"res://resources/upgrades/attack_speed.tres",
 ]
+const PEPPER_GUN_PATH := "res://resources/weapons/pepper_grinder_gun.tres"
 
 var _output_dir := DEFAULT_OUTPUT_DIR
 
@@ -34,6 +35,8 @@ func _run() -> void:
 
 	await _capture_player_surrounded(output_path)
 	await _capture_off_camera_spawns(output_path)
+	await _capture_projectile_trails(output_path)
+	await _capture_enemy_death(output_path)
 	await _capture_upgrade_menu(output_path)
 	await _capture_dead_screen(output_path)
 
@@ -104,6 +107,72 @@ func _spawn_off_camera_enemies(game: Node, bounds: Rect2, camera: Camera2D) -> v
 		enemy.set_physics_process(false)
 
 
+func _capture_projectile_trails(output_path: String) -> void:
+	var game := await _load_game()
+	await _prepare_game_scene(game)
+	_spawn_enemy_ring(game, 8)
+
+	var player := game.get_node("Player") as Node2D
+	var projectile_container := game.get_node("ProjectileContainer") as Node2D
+	var weapon_def := load(PEPPER_GUN_PATH) as WeaponDefinition
+	var projectile := weapon_def.projectile_scene.instantiate()
+	projectile_container.add_child(projectile)
+	projectile.global_position = player.global_position
+	if projectile.has_method("setup"):
+		projectile.setup(
+			Vector2.RIGHT,
+			game.get_node("Arena").get_bounds(),
+			weapon_def.damage,
+			weapon_def.projectile_speed,
+			weapon_def.projectile_lifetime,
+			weapon_def.projectile_texture,
+			weapon_def.vfx_accent
+		)
+
+	for index in 6:
+		var extra := weapon_def.projectile_scene.instantiate()
+		projectile_container.add_child(extra)
+		extra.global_position = player.global_position + Vector2(0.0, float(index - 3) * 28.0)
+		if extra.has_method("setup"):
+			var angle := -0.35 + 0.14 * float(index)
+			extra.setup(
+				Vector2.RIGHT.rotated(angle),
+				game.get_node("Arena").get_bounds(),
+				weapon_def.damage,
+				weapon_def.projectile_speed,
+				weapon_def.projectile_lifetime,
+				weapon_def.projectile_texture,
+				weapon_def.vfx_accent
+			)
+
+	await _settle_frames(4)
+	await _save_screenshot(output_path.path_join("projectile_trails.png"))
+	await _unload_game(game)
+
+
+func _capture_enemy_death(output_path: String) -> void:
+	var game := await _load_game()
+	await _prepare_game_scene(game)
+
+	var container := game.get_node("EnemyContainer")
+	var definition := load(CHASER_DEFINITION_PATH) as EnemyDefinition
+	var enemy := definition.scene.instantiate() as CharacterBody2D
+	container.add_child(enemy)
+	enemy.global_position = Vector2(120.0, 0.0)
+	if enemy.has_method("set_arena_bounds"):
+		enemy.set_arena_bounds(game.get_node("Arena").get_bounds())
+	if enemy.has_method("configure"):
+		enemy.configure(definition)
+	enemy.set_physics_process(false)
+
+	if enemy.has_method("take_damage"):
+		enemy.take_damage(definition.max_health)
+
+	await _settle_frames(2)
+	await _save_screenshot(output_path.path_join("enemy_death_burst.png"))
+	await _unload_game(game)
+
+
 func _capture_upgrade_menu(output_path: String) -> void:
 	var game := await _load_game()
 	await _prepare_game_scene(game)
@@ -148,6 +217,7 @@ func _prepare_game_scene(game: Node) -> void:
 	_clear_children(game.get_node("EnemyContainer"))
 	_clear_children(game.get_node("ProjectileContainer"))
 	_clear_children(game.get_node("PickupContainer"))
+	_clear_children(game.get_node_or_null("VFXContainer"))
 
 	await process_frame
 	var camera := game.get_node("Camera2D") as Camera2D

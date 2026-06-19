@@ -17,3 +17,4 @@ projectile_speed = 420.0
 projectile_lifetime = 1.2
 turret_duration = 5.0
 turret_fire_rate = 0.5
+vfx_accent = Color(1, 0.45, 0.1, 1)

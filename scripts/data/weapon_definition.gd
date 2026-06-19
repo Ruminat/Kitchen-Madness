@@ -18,3 +18,4 @@ extends Resource
 @export var orbit_speed: float = 4.0
 @export var turret_duration: float = 5.0
 @export var turret_fire_rate: float = 0.5
+@export var vfx_accent: Color = Color(0.95, 0.82, 0.45, 1.0)

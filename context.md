@@ -4,14 +4,13 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 ## Current status
 
-**Phase 4C done.** Playable loop: character select → waves → **weapon shop** → repeat. Level-ups give **stat upgrades only**; shop gives **weapon offers only** (add weapon, +damage, +attack speed, +pellet).
+**Phase 4D done.** Combat VFX: enemy death bursts, projectile trails, impact sparks, weapon `vfx_accent` tints. `VfxManager` pools one-shot `GPUParticles2D` effects via `EventBus`.
 
-**Content in place:**
-- 9 playable characters (`CharacterDefinition` + pre-run picker; headless auto-selects Chef)
-- 8 kitchen weapons (`WeaponRoster`, `.tres` in `resources/weapons/`)
-- Enemies, XP/gold, level-up, HUD, larger arena (`2640×1440`), following camera, off-camera spawns
+**Playable loop:** character select → waves → weapon shop → repeat. Level-ups = stat upgrades; shop = weapon offers only.
 
-**Next:** Phase 4D — VFX pass (death bursts, projectile trails, impacts).
+**Content:** 9 characters, 8 kitchen weapons, enemies, XP/gold, HUD, `2640×1440` arena, following camera, off-camera spawns.
+
+**Next:** Phase 4E — wave pacing and enemy density (shorter early waves, more enemies).
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 
@@ -33,14 +32,16 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 | Pattern | Where |
 |---|---|
 | **EventBus** | `scripts/autoload/event_bus.gd` — gameplay emits, UI listens |
+| **VfxManager** | `scripts/systems/vfx_manager.gd` — death bursts + impact sparks (pooled) |
 | **HealthComponent** | Shared HP + armor + i-frames (player: 0.1s) |
 | **WaveManager / EnemySpawner** | Timer, weighted spawns, camera-ring spawns |
-| **GoldSystem / ShopManager** | Kill gold → dynamic `WeaponShopOffer` shop → `start_next_wave()` |
-| **LevelUpManager** | 1-of-3 free stat picks from `UpgradeDefinition` (not shop) |
+| **GoldSystem / ShopManager** | Kill gold → weapon shop → `start_next_wave()` |
+| **LevelUpManager** | 1-of-3 free stat picks from `UpgradeDefinition` |
 | **WeaponController** | Starting + extra weapons; per-weapon upgrade APIs |
-| **Resource `.tres`** | Characters, enemies, weapons, drops, waves, upgrades |
 
-**Main scene:** `res://scenes/main/game.tscn`
+**Main scene:** `res://scenes/main/game.tscn` — includes `VFXContainer` + `VfxManager`.
+
+**VFX:** Style guide at [docs/vfx-style-guide.md](docs/vfx-style-guide.md). Trails on projectiles; `projectile_hit` / `enemy_killed` drive world effects.
 
 **Gotchas:** Contact damage = distance check in `player.gd`. UI = `PROCESS_MODE_ALWAYS`. `WindowSetup` skipped headless. Integration tests: assert after `EventBus` emits — don't `await` timers after pausing the tree.
 
@@ -56,26 +57,18 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 | Weapon shop | W/S or ↑/↓ · **1–4** or Enter buy · Enter continue |
 | Game over | R or Enter |
 
-Level-up cards: `scripts/ui/upgrade_display.gd`. Shop cards: `scripts/ui/shop_display.gd`.
-
-**Luck:** +1% gold/XP per point, +0.15% health drop (cap 22%), slightly better level-up rolls.
-
 ---
 
 ## Key paths
 
 ```
-scripts/systems/     wave_manager, enemy_spawner, gold_system, shop_manager, level_up_manager
-scripts/data/        character_definition, weapon_definition, weapon_roster, weapon_shop_offer
-scripts/weapons/     weapon_controller, projectile_weapon, burst/boomerang/turret weapons
-resources/characters/  9 roster .tres
-resources/weapons/     8 kitchen weapon .tres
-resources/upgrades/    stat upgrades (level-up pool only)
-tests/                 unit + integration (GdUnit4)
+scripts/systems/     wave_manager, enemy_spawner, gold_system, shop_manager, vfx_manager
+scripts/vfx/           vfx_library.gd
+scripts/weapons/     weapon_controller, projectile_weapon, burst/boomerang/turret
+resources/weapons/   8 kitchen weapon .tres (each has vfx_accent)
+tests/               unit + integration (GdUnit4)
 tools/codecheck.ps1
 ```
-
-Sprites / hurtboxes: [hitbox.md](hitbox.md) · Player grid: [docs/player-roster.md](docs/player-roster.md)
 
 ---
 
@@ -90,4 +83,4 @@ godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ign
 
 ## Read first in a new chat
 
-1. [progress.md](progress.md) · 2. [plans.md](plans.md) · 3. `scripts/game.gd` · 4. `event_bus.gd` · 5. `shop_manager.gd`
+1. [progress.md](progress.md) · 2. [plans.md](plans.md) · 3. `scripts/game.gd` · 4. `event_bus.gd` · 5. `vfx_manager.gd`

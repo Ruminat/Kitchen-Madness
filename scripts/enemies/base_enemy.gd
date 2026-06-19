@@ -75,6 +75,7 @@ func take_damage(amount: int) -> void:
 	_flash_hit()
 
 	if not health_component.is_alive():
+		visual.visible = false
 		died.emit(self)
 		EventBus.enemy_killed.emit(self, null)
 		queue_free()

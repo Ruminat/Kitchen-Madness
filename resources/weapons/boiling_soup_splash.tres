@@ -17,3 +17,4 @@ pellet_count = 5
 spread_degrees = 32.0
 projectile_speed = 360.0
 projectile_lifetime = 0.55
+vfx_accent = Color(1, 0.55, 0.15, 1)

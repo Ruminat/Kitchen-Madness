@@ -68,7 +68,8 @@ func _fire_at(target: Node2D) -> void:
 			_damage,
 			_definition.projectile_speed,
 			_definition.projectile_lifetime,
-			_definition.projectile_texture
+			_definition.projectile_texture,
+			_definition.vfx_accent
 		)
 	_projectile_container.add_child(projectile)
 	projectile.global_position = global_position

@@ -63,7 +63,8 @@ func _throw_at(target: Node2D) -> void:
 			definition.projectile_speed,
 			definition.projectile_lifetime,
 			definition.projectile_texture,
-			player
+			player,
+			definition.vfx_accent
 		)
 	container.add_child(projectile)
 	projectile.global_position = global_position

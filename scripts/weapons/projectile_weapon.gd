@@ -71,7 +71,8 @@ func _spawn_projectile(container: Node2D, direction: Vector2, damage: int) -> vo
 			damage,
 			definition.projectile_speed,
 			definition.projectile_lifetime,
-			definition.projectile_texture
+			definition.projectile_texture,
+			definition.vfx_accent
 		)
 	container.add_child(projectile)
 	projectile.global_position = global_position
