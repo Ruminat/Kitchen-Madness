@@ -1,17 +1,19 @@
 # Kitchen Madness — project context
 
-Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena survivor roguelite (Godot 4). Details: [progress.md](progress.md), roadmap: [plans.md](plans.md).
+Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena survivor roguelite (Godot 4). Full history: [progress.md](progress.md). Roadmap: [plans.md](plans.md).
 
 ## Current status
 
-**Phase 4C done** — between-wave shop is weapon-only (add weapon, +damage, +attack speed, +pellet upgrades). Stat upgrades remain level-up rewards only.
+**Phase 4C done.** Playable loop: character select → waves → **weapon shop** → repeat. Level-ups give **stat upgrades only**; shop gives **weapon offers only** (add weapon, +damage, +attack speed, +pellet).
 
-**Phase 4B done** — generic pistol/shotgun/orbit blade retired; 8 kitchen weapons via `.tres` + `WeaponRoster`.
+**Content in place:**
+- 9 playable characters (`CharacterDefinition` + pre-run picker; headless auto-selects Chef)
+- 8 kitchen weapons (`WeaponRoster`, `.tres` in `resources/weapons/`)
+- Enemies, XP/gold, level-up, HUD, larger arena (`2640×1440`), following camera, off-camera spawns
 
-**Visual pass:** Sprites for player (Chef default), enemies, arena floor, projectiles, XP orbs, and health pickups. 9-player roster from `assets/characters/Players.png` via grid splitter — see `docs/sprite-grid-splitter.md`, `docs/player-roster.md`.
+**Next:** Phase 4D — VFX pass (death bursts, projectile trails, impacts).
 
-**Loop:** 60s waves → shop → next wave. Pauses on level-up, shop, death. Spawns ramp 2×–8×; XP thresholds tuned slow.
-**Map/camera:** Arena bounds are `2640x1440`; camera view targets old `880x480` play area and follows the player.
+**Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 
 ---
 
@@ -20,9 +22,9 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 1. Zero parser/scene errors · **F5** smoke test
 2. `.\tools\codecheck.ps1` must pass (gdlint + gdformat + boot + tests)
 3. Update [progress.md](progress.md) after a phase/slice
-4. For large visual/gameplay iterations, run `.\tools\capture-visuals.ps1` and inspect `visual-tests/screenshots/`
+4. Large visual iterations: `.\tools\capture-visuals.ps1` → `visual-tests/screenshots/`
 
-**Godot 4.6+** and `gdtoolkit` on PATH. Lint/format config: `.gdlintrc`, `.gdformatrc`. **Never commit `.vscode/`**.
+**Godot 4.6+**, `gdtoolkit` on PATH. **Never commit `.vscode/`**.
 
 ---
 
@@ -32,14 +34,15 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 |---|---|
 | **EventBus** | `scripts/autoload/event_bus.gd` — gameplay emits, UI listens |
 | **HealthComponent** | Shared HP + armor + i-frames (player: 0.1s) |
-| **WaveManager / EnemySpawner** | Timer, weighted spawns, elite cap |
-| **GoldSystem / ShopManager** | Kill gold → shop → `start_next_wave()` |
-| **LevelUpManager** | 1-of-3 free upgrades from `UpgradeDefinition` |
-| **Resource `.tres`** | Enemies, weapons, drops, waves, upgrades — add content without editing spawners |
+| **WaveManager / EnemySpawner** | Timer, weighted spawns, camera-ring spawns |
+| **GoldSystem / ShopManager** | Kill gold → dynamic `WeaponShopOffer` shop → `start_next_wave()` |
+| **LevelUpManager** | 1-of-3 free stat picks from `UpgradeDefinition` (not shop) |
+| **WeaponController** | Starting + extra weapons; per-weapon upgrade APIs |
+| **Resource `.tres`** | Characters, enemies, weapons, drops, waves, upgrades |
 
 **Main scene:** `res://scenes/main/game.tscn`
 
-**Gotchas:** Contact damage = distance check in `player.gd` (not Area2D). UI = `PROCESS_MODE_ALWAYS`; don't set `WHEN_PAUSED` on Game root. `WindowSetup` skipped headless.
+**Gotchas:** Contact damage = distance check in `player.gd`. UI = `PROCESS_MODE_ALWAYS`. `WindowSetup` skipped headless. Integration tests: assert after `EventBus` emits — don't `await` timers after pausing the tree.
 
 ---
 
@@ -47,29 +50,32 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 | Context | Keyboard |
 |---|---|
-| Move | **WASD or arrows** (input actions, not raw keycodes) |
+| Move | **WASD or arrows** |
+| Character select | W/S or ↑/↓ · 1–9 or Enter |
 | Level-up | W/S or ↑/↓ · 1/2/3 or Enter |
-| Shop | W/S or ↑/↓ · 1–8 or Enter buy · Enter continue |
+| Weapon shop | W/S or ↑/↓ · **1–4** or Enter buy · Enter continue |
 | Game over | R or Enter |
 
-`ui_up/down` also bind WASD in `project.godot`. Upgrade cards: emoji + accent via `scripts/ui/upgrade_display.gd`.
+Level-up cards: `scripts/ui/upgrade_display.gd`. Shop cards: `scripts/ui/shop_display.gd`.
 
-**Luck (balanced):** +1% gold/XP per point, +0.15% health drop chance (cap 22%), slightly better level-up rolls.
+**Luck:** +1% gold/XP per point, +0.15% health drop (cap 22%), slightly better level-up rolls.
 
 ---
 
 ## Key paths
 
 ```
-scripts/systems/   wave_manager, enemy_spawner, gold_system, shop_manager, level_up_manager, xp_system
-scripts/ui/        game_ui.gd, upgrade_display.gd, floating_text_manager.gd
-resources/upgrades/  max_health, armor, damage_boost, attack_speed, speed_boost, luck, pickup_range, xp_gain
-resources/waves/   wave_01.tres
-tests/             unit + integration (GdUnit4)
-tools/codecheck.ps1 / .sh
+scripts/systems/     wave_manager, enemy_spawner, gold_system, shop_manager, level_up_manager
+scripts/data/        character_definition, weapon_definition, weapon_roster, weapon_shop_offer
+scripts/weapons/     weapon_controller, projectile_weapon, burst/boomerang/turret weapons
+resources/characters/  9 roster .tres
+resources/weapons/     8 kitchen weapon .tres
+resources/upgrades/    stat upgrades (level-up pool only)
+tests/                 unit + integration (GdUnit4)
+tools/codecheck.ps1
 ```
 
-Sprites / hurtboxes: [hitbox.md](hitbox.md)
+Sprites / hurtboxes: [hitbox.md](hitbox.md) · Player grid: [docs/player-roster.md](docs/player-roster.md)
 
 ---
 
@@ -80,18 +86,8 @@ Sprites / hurtboxes: [hitbox.md](hitbox.md)
 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode
 ```
 
-Integration tests: assert synchronously after `EventBus` emits — don't `await` timers after pausing the tree.
-
----
-
-## Next work
-
-Phase 4D — VFX pass (enemy death bursts, projectile trails, weapon impact effects). Playtest weapon shop pricing and offer variety.
-
-**Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
-
 ---
 
 ## Read first in a new chat
 
-1. [progress.md](progress.md) · 2. [plans.md](plans.md) · 3. `scripts/game.gd` · 4. `event_bus.gd` · 5. `wave_01.tres`
+1. [progress.md](progress.md) · 2. [plans.md](plans.md) · 3. `scripts/game.gd` · 4. `event_bus.gd` · 5. `shop_manager.gd`
