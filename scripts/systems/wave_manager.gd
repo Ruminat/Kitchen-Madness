@@ -7,13 +7,19 @@ var wave_definition: WaveDefinition
 var time_remaining: float = 0.0
 var is_complete := false
 var is_paused := false
+var _resolved_duration: float = 30.0
 
 
-func configure(definition: WaveDefinition) -> void:
+func configure(definition: WaveDefinition, duration_override: float = -1.0) -> void:
 	wave_definition = definition
 	is_complete = false
 	is_paused = false
-	time_remaining = definition.duration if definition else 30.0
+	_resolved_duration = (
+		duration_override
+		if duration_override > 0.0
+		else (definition.duration if definition else 30.0)
+	)
+	time_remaining = _resolved_duration
 	EventBus.wave_time_changed.emit(time_remaining)
 
 
@@ -35,7 +41,7 @@ func pause() -> void:
 func reset() -> void:
 	is_complete = false
 	is_paused = false
-	time_remaining = wave_definition.duration if wave_definition else 30.0
+	time_remaining = _resolved_duration
 	EventBus.wave_time_changed.emit(time_remaining)
 
 

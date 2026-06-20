@@ -199,4 +199,6 @@ func _check_contact_damage() -> void:
 		if enemy.has_method("get_contact_damage"):
 			damage = enemy.get_contact_damage()
 		health_component.take_damage(damage)
+		if enemy.has_method("apply_contact_slow"):
+			enemy.apply_contact_slow()
 		return

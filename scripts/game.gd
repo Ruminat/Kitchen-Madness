@@ -155,7 +155,10 @@ func get_current_wave_definition() -> WaveDefinition:
 
 func _configure_current_wave() -> void:
 	var wave := get_current_wave_definition()
-	wave_manager.configure(wave)
+	var duration := WaveDefinition.resolve_duration(
+		wave, current_wave, maxi(wave_definitions.size(), 1)
+	)
+	wave_manager.configure(wave, duration)
 	enemy_spawner.set_camera_spawn_target(player, _get_camera_world_view_size())
 	enemy_spawner.configure(wave, enemy_container, _arena_bounds)
 

@@ -3,9 +3,14 @@ extends CharacterBody2D
 
 signal died(enemy: CharacterBody2D)
 
+const CONTACT_SLOW_DURATION := 2.0
+const CONTACT_SLOW_MULTIPLIER := 0.35
+
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var move_speed := 90.0
 var definition: EnemyDefinition
+var _base_move_speed := 90.0
+var _slow_timer := 0.0
 
 @onready var visual: Node2D = $Visual
 @onready var health_component: HealthComponent = $HealthComponent
@@ -31,6 +36,8 @@ func _apply_definition() -> void:
 		return
 
 	move_speed = definition.move_speed
+	_base_move_speed = move_speed
+	_sync_move_speed()
 
 	var health := _get_health_component()
 	if health == null:
@@ -66,6 +73,11 @@ func set_arena_bounds(bounds: Rect2) -> void:
 	arena_bounds = bounds
 
 
+func apply_contact_slow(duration: float = CONTACT_SLOW_DURATION) -> void:
+	_slow_timer = maxf(_slow_timer, duration)
+	_sync_move_speed()
+
+
 func take_damage(amount: int) -> void:
 	if not health_component.is_alive():
 		return
@@ -85,6 +97,8 @@ func _physics_process(delta: float) -> void:
 	if not health_component.is_alive():
 		return
 
+	_update_contact_slow(delta)
+
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
@@ -97,6 +111,21 @@ func _physics_process(delta: float) -> void:
 
 func _get_move_direction(player: Node2D, _delta: float) -> Vector2:
 	return (player.global_position - global_position).normalized()
+
+
+func _update_contact_slow(delta: float) -> void:
+	if _slow_timer <= 0.0:
+		return
+
+	_slow_timer = maxf(_slow_timer - delta, 0.0)
+	_sync_move_speed()
+
+
+func _sync_move_speed() -> void:
+	if _slow_timer > 0.0:
+		move_speed = _base_move_speed * CONTACT_SLOW_MULTIPLIER
+	else:
+		move_speed = _base_move_speed
 
 
 func get_contact_damage() -> int:

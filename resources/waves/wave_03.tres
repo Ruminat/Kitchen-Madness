@@ -10,25 +10,25 @@
 [sub_resource type="Resource" id="EnemySpawnEntry_chaser"]
 script = ExtResource("2")
 definition = ExtResource("3")
-weight = 3
-
-[sub_resource type="Resource" id="EnemySpawnEntry_tank"]
-script = ExtResource("2")
-definition = ExtResource("4")
-weight = 3
+weight = 5
 
 [sub_resource type="Resource" id="EnemySpawnEntry_sprinter"]
 script = ExtResource("2")
 definition = ExtResource("5")
-weight = 5
+weight = 4
+
+[sub_resource type="Resource" id="EnemySpawnEntry_tank"]
+script = ExtResource("2")
+definition = ExtResource("4")
+weight = 1
 
 [resource]
 script = ExtResource("1")
-duration = 60.0
-spawn_interval = 1.1
-max_enemies = 180
-spawn_multiplier_start = 3.0
-spawn_multiplier_end = 10.0
-spawn_multiplier_curve = 1.6
-enemy_weights = [SubResource("EnemySpawnEntry_chaser"), SubResource("EnemySpawnEntry_tank"), SubResource("EnemySpawnEntry_sprinter")]
+duration = 22.0
+spawn_interval = 1.7
+max_enemies = 24
+spawn_multiplier_start = 1.0
+spawn_multiplier_end = 1.5
+spawn_multiplier_curve = 1.2
+enemy_weights = [SubResource("EnemySpawnEntry_chaser"), SubResource("EnemySpawnEntry_sprinter"), SubResource("EnemySpawnEntry_tank")]
 fallback_enemy_scene = ExtResource("6")

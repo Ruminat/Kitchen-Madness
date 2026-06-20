@@ -1,18 +1,16 @@
-[gd_resource type="Resource" script_class="WaveDefinition" load_steps=6 format=3 uid="uid://wavedef_01"]
+[gd_resource type="Resource" script_class="WaveDefinition" load_steps=4 format=3 uid="uid://wavedef_01"]
 
 [ext_resource type="Script" path="res://scripts/data/wave_definition.gd" id="1"]
 [ext_resource type="Resource" uid="uid://spawnentry_chaser" path="res://resources/enemies/chaser_spawn_entry.tres" id="2"]
-[ext_resource type="Resource" uid="uid://spawnentry_tank" path="res://resources/enemies/tank_spawn_entry.tres" id="3"]
-[ext_resource type="Resource" uid="uid://spawnentry_sprinter" path="res://resources/enemies/sprinter_spawn_entry.tres" id="4"]
-[ext_resource type="PackedScene" uid="uid://enemy001" path="res://scenes/enemy/enemy.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://enemy001" path="res://scenes/enemy/enemy.tscn" id="3"]
 
 [resource]
 script = ExtResource("1")
-duration = 60.0
-spawn_interval = 1.5
-max_enemies = 130
-spawn_multiplier_start = 2.0
-spawn_multiplier_end = 8.0
-spawn_multiplier_curve = 2.0
-enemy_weights = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
-fallback_enemy_scene = ExtResource("5")
+duration = 12.0
+spawn_interval = 2.5
+max_enemies = 10
+spawn_multiplier_start = 1.0
+spawn_multiplier_end = 1.2
+spawn_multiplier_curve = 1.0
+enemy_weights = [ExtResource("2")]
+fallback_enemy_scene = ExtResource("3")

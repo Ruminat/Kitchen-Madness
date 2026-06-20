@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 4D VFX pass
+**Last updated:** Phase 4E wave pacing + contact slow
 
 ---
 
@@ -60,23 +60,13 @@ Done. Shop generates 4 dynamic weapon offers per wave (add weapon, sharpen, spee
 
 Done. Added `VfxLibrary` + pooled `VfxManager` listening to `enemy_killed` and `projectile_hit`. Enemies hide on death and burst with tinted `GPUParticles2D`. Projectiles get world-space trails, accent tints, and impact sparks. Each weapon `.tres` has `vfx_accent`. Style guide at `docs/vfx-style-guide.md`. Visual captures for projectile trails and enemy death. Unit tests for VFX library, manager, and projectile wiring.
 
+### Phase 4E - Wave pacing and enemy density
+
+Done. Wave 1–3 durations are 12s / 17s / 22s. Wave 1 is chaser-only with ~6 pests; wave 2 adds sprinters; wave 3 adds rare tanks. Spawn multipliers stay near 1.0× (no burst flooding). `WaveDefinition.resolve_duration()` adds +5s per wave after the authored roster. Enemies slow to 35% speed for 2s after player contact.
+
 ---
 
 ## Active tasks
-
-### Phase 4E - Wave pacing and enemy density
-
-**Goal:** Start with short waves and ramp length/density while keeping enemies weaker and more numerous.
-
-| Task | Status | Notes |
-|---|---|---|
-| Add wave duration progression | Planned | Wave 1 around 10-15 seconds, then about +5 seconds per wave initially |
-| Increase enemy density | Planned | More enemies on screen, with lower individual HP/damage as needed |
-| Retune enemy stats | Planned | Favor many simple pests over a few durable enemies |
-| Update wave resources | Planned | Apply pacing to `wave_01.tres` onward |
-| Add tests | Planned | Cover duration progression, spawn caps, and authored wave selection |
-
----
 
 ### Phase 4F - Balance metrics and tuning
 

@@ -8,9 +8,9 @@
 script = ExtResource("1")
 id = "chaser"
 scene = ExtResource("2")
-max_health = 30
-move_speed = 90.0
-contact_damage = 10
+max_health = 18
+move_speed = 95.0
+contact_damage = 6
 xp_drop = ExtResource("3")
 gold_reward = 1
 color = Color(0.9, 0.2, 0.2, 1)
