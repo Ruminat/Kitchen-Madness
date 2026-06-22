@@ -44,6 +44,24 @@ func test_contact_slow_refreshes_timer() -> void:
 	assert_float(enemy.move_speed).is_equal(expected)
 
 
+func test_take_damage_does_not_emit_damage_dealt() -> void:
+	var enemy: BaseEnemy = auto_free(ENEMY_SCENE.instantiate()) as BaseEnemy
+	add_child(enemy)
+	enemy.configure(CHASER_DEFINITION)
+	await _wait_ready(enemy)
+
+	var emission_info := {"count": 0}
+	EventBus.damage_dealt.connect(
+		func(_pos: Vector2, _amount: int, _is_crit: bool) -> void:
+			emission_info.count += 1
+	)
+
+	enemy.take_damage(5)
+
+	assert_int(emission_info.count).is_equal(0)
+	assert_int(enemy.health_component.current_health).is_equal(CHASER_DEFINITION.max_health - 5)
+
+
 func _wait_ready(node: Node) -> void:
 	if not node.is_node_ready():
 		await node.ready

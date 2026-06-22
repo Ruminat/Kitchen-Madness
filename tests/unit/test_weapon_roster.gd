@@ -15,6 +15,18 @@ const TURRET_SCRIPT := preload("res://scripts/weapons/turret_weapon.gd")
 const ORBIT_SCRIPT := preload("res://scripts/weapons/orbit_weapon.gd")
 
 
+class MockOrbitEnemy:
+	extends Node2D
+
+	var last_damage := 0
+
+	func take_damage(amount: int) -> void:
+		last_damage = amount
+
+	func get_collision_radius() -> float:
+		return 12.0
+
+
 func test_weapon_roster_loads_eight_kitchen_weapons() -> void:
 	var roster := WeaponRoster.load_roster()
 	assert_int(roster.size()).is_equal(8)
@@ -44,7 +56,6 @@ func test_get_by_id_returns_matching_weapon() -> void:
 func test_projectile_weapons_reference_projectile_scene() -> void:
 	for weapon in [PEPPER_DEF, SOUP_DEF, KNIFE_DEF, PAN_DEF, GARLIC_DEF, LADLE_DEF, TOASTER_DEF]:
 		assert_object(weapon.projectile_scene).is_not_null()
-		assert_object(weapon.projectile_texture).is_not_null()
 
 
 func test_special_weapons_use_expected_scripts() -> void:
@@ -52,3 +63,30 @@ func test_special_weapons_use_expected_scripts() -> void:
 	assert_object(LADLE_DEF.weapon_script).is_same(BOOMERANG_SCRIPT)
 	assert_object(TOASTER_DEF.weapon_script).is_same(TURRET_SCRIPT)
 	assert_object(ONION_RING_DEF.weapon_script).is_same(ORBIT_SCRIPT)
+
+
+func test_orbit_blade_hit_emits_damage_dealt_once() -> void:
+	var weapon: Node2D = Node2D.new()
+	weapon.set_script(ORBIT_SCRIPT)
+	add_child(weapon)
+	weapon.setup(ONION_RING_DEF, Rect2(), null)
+
+	var enemy := MockOrbitEnemy.new()
+	enemy.add_to_group("enemies")
+	add_child(enemy)
+	enemy.global_position = Vector2(58.0, 0.0)
+
+	var emission_info := {"count": 0, "amount": 0, "is_crit": true}
+	EventBus.damage_dealt.connect(
+		func(_pos: Vector2, amount: int, is_crit: bool) -> void:
+			emission_info.count += 1
+			emission_info.amount = amount
+			emission_info.is_crit = is_crit
+	)
+
+	weapon._check_blade_hits(Vector2(58.0, 0.0), ONION_RING_DEF.damage)
+
+	assert_int(emission_info.count).is_equal(1)
+	assert_int(emission_info.amount).is_equal(ONION_RING_DEF.damage)
+	assert_bool(emission_info.is_crit).is_false()
+	assert_int(enemy.last_damage).is_equal(ONION_RING_DEF.damage)

@@ -130,6 +130,28 @@ func test_crit_damage_emits_damage_dealt_signal() -> void:
 	assert_bool(damage_info.is_crit).is_true()
 
 
+func test_projectile_hit_emits_damage_dealt_once() -> void:
+	var projectile: Area2D = auto_free(PROJECTILE_SCENE.instantiate()) as Area2D
+	add_child(projectile)
+	projectile.setup(Vector2.RIGHT, Rect2(-100, -100, 200, 200), 10, 400.0, 1.0, null, Color.WHITE)
+	projectile.set_crit_stats(0.0, 1.5)
+	await _wait_ready(projectile)
+
+	var emission_info := {"count": 0}
+	EventBus.damage_dealt.connect(
+		func(_pos: Vector2, _amount: int, _is_crit: bool) -> void:
+			emission_info.count += 1
+	)
+
+	var enemy := MockEnemy.new()
+	enemy.add_to_group("enemies")
+	add_child(enemy)
+
+	projectile._on_body_entered(enemy)
+
+	assert_int(emission_info.count).is_equal(1)
+
+
 func _create_player() -> CharacterBody2D:
 	var player: CharacterBody2D = auto_free(PLAYER_SCENE.instantiate()) as CharacterBody2D
 	add_child(player)
