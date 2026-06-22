@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 4F balance metrics and tuning
+**Last updated:** Phase 5A critical damage system
 
 ---
 
@@ -63,6 +63,14 @@ Done. Added `VfxLibrary` + pooled `VfxManager` listening to `enemy_killed` and `
 ### Phase 4E - Wave pacing and enemy density
 
 Done. Wave 1–3 durations are 12s / 17s / 22s. Wave 1 is chaser-only with ~6 pests; wave 2 adds sprinters; wave 3 adds rare tanks. Spawn multipliers stay near 1.0× (no burst flooding). `WaveDefinition.resolve_duration()` adds +5s per wave after the authored roster. Enemies slow to 35% speed for 2s after player contact.
+
+### Phase 5A - Critical damage system
+
+Done. Added `crit_chance` and `crit_damage` to `CharacterDefinition` (base 5% chance, 150% damage). Player tracks crit stats with `increase_crit_chance()` and `increase_crit_damage()` methods. Weapons pass crit stats to projectiles via `set_crit_stats()`. Projectiles roll for crits on hit and emit `damage_dealt` with `is_crit=true`. Added two new level-up upgrades: "Precision" (+4% crit chance) and "Devastation" (+20% crit damage). Crit damage numbers display in yellow/gold via existing `FloatingTextManager`. Created `test_crit_system.gd` with 10 tests covering crit initialization, increases, caps, upgrades, and projectile crit behavior.
+
+### Phase 5B - Enhanced damage number visuals
+
+Done. `FloatingTextManager` now pools labels (32 pre-allocated) for better performance. Added `play_damage()` method to `FloatingText` with bounce/pop animation on all damage numbers. Crit numbers render at 1.5x scale with an extra pop effect (scales to 1.95x then back to 1.5x). Added `damage_number_color` field to `WeaponDefinition` for future per-weapon color customization. Updated tests in `test_floating_text_manager.gd` for pool validation.
 
 ---
 

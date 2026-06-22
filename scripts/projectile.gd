@@ -9,6 +9,8 @@ var speed := DEFAULT_SPEED
 var lifetime := DEFAULT_LIFETIME
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var _accent_color := Color(0.95, 0.82, 0.45, 1.0)
+var _crit_chance := 0.05
+var _crit_damage := 1.5
 
 
 func _ready() -> void:
@@ -67,9 +69,23 @@ func _setup_trail(accent: Color) -> void:
 	add_child(trail)
 
 
+func set_crit_stats(crit_chance: float, crit_damage: float) -> void:
+	_crit_chance = clampf(crit_chance, 0.0, 1.0)
+	_crit_damage = maxf(crit_damage, 1.0)
+
+
+func _roll_crit() -> bool:
+	return randf() < _crit_chance
+
+
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
-		body.take_damage(damage)
+		var is_crit := _roll_crit()
+		var final_damage := damage
+		if is_crit:
+			final_damage = maxi(roundi(float(damage) * _crit_damage), 1)
+		body.take_damage(final_damage)
 		EventBus.projectile_hit.emit(global_position, direction, _accent_color)
-		EventBus.metrics_damage_dealt.emit(damage, "")
+		EventBus.damage_dealt.emit(body.global_position, final_damage, is_crit)
+		EventBus.metrics_damage_dealt.emit(final_damage, "")
 		queue_free()

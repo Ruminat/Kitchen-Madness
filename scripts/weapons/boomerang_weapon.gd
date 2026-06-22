@@ -52,5 +52,7 @@ func _throw_at(target: Node2D) -> void:
 			player,
 			definition.vfx_accent
 		)
+	if projectile.has_method("set_crit_stats"):
+		projectile.set_crit_stats(_crit_chance, _crit_damage)
 	container.add_child(projectile)
 	projectile.global_position = global_position

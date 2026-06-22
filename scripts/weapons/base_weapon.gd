@@ -16,6 +16,8 @@ var _base_orbit_angle := 0.0
 var _orbit_phase := 0.0
 var _recoil_timer := 0.0
 var _aim_direction := Vector2.RIGHT
+var _crit_chance := 0.05
+var _crit_damage := 1.5
 
 
 func setup(def: WeaponDefinition, bounds: Rect2, projectile_container: Node2D) -> void:
@@ -57,6 +59,19 @@ func increase_fire_rate_percent(percent: float) -> void:
 
 func get_fire_rate_multiplier() -> float:
 	return maxf(_fire_rate_multiplier, 0.1)
+
+
+func set_crit_stats(crit_chance: float, crit_damage: float) -> void:
+	_crit_chance = clampf(crit_chance, 0.0, 1.0)
+	_crit_damage = maxf(crit_damage, 1.0)
+
+
+func get_crit_chance() -> float:
+	return _crit_chance
+
+
+func get_crit_damage() -> float:
+	return _crit_damage
 
 
 func get_damage() -> int:

@@ -4,13 +4,13 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 ## Current status
 
-**Phase 4E done.** Short early waves (12s → 17s → 22s), denser spawns, weaker swarm pests. Enemies slow for 2s after hitting the player.
+**Phase 5B done.** Damage numbers now have bounce/pop animation and crit numbers are larger (1.5x scale). FloatingTextManager pools 32 labels for performance. WeaponDefinition has damage_number_color field for future customization.
 
-**Playable loop:** character select → waves → weapon shop → repeat. Level-ups = stat upgrades; shop = weapon offers only.
+**Playable loop:** character select → waves → weapon shop → repeat. Level-ups = stat upgrades (now including crit stats); shop = weapon offers only.
 
-**Content:** 9 characters, 8 kitchen weapons, combat VFX, HUD, `2640×1440` arena, following camera, off-camera spawns.
+**Content:** 9 characters, 8 kitchen weapons, combat VFX, HUD, `2640×1440` arena, following camera, off-camera spawns, crit system, enhanced damage numbers.
 
-**Next:** Phase 4F — balance metrics and tuning.
+**Next:** Phase 5C — projectile visuals fix (investigate gun weapons shooting themselves).
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 
@@ -33,11 +33,13 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 |---|---|
 | **EventBus** | `scripts/autoload/event_bus.gd` — gameplay emits, UI listens |
 | **VfxManager** | Pooled death bursts + impact sparks |
+| **FloatingTextManager** | Pooled damage number labels (32 pre-allocated) |
 | **WaveDefinition.resolve_duration** | Wave 4+ adds +5s per wave beyond authored roster |
 | **BaseEnemy.apply_contact_slow** | 2s slow on player contact (35% speed) |
 | **WaveManager / EnemySpawner** | Timer, weighted spawns, camera-ring spawns |
 | **GoldSystem / ShopManager** | Kill gold → weapon shop → `start_next_wave()` |
 | **LevelUpManager** | 1-of-3 free stat picks from `UpgradeDefinition` |
+| **Crit system** | `Player` → `WeaponController.sync_all_crit_stats()` → weapons → projectiles |
 
 **Main scene:** `res://scenes/main/game.tscn`
 

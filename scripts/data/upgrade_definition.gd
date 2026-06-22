@@ -38,3 +38,9 @@ func apply(player: Node) -> void:
 		&"xp_gain_percent":
 			if player.has_method("increase_xp_gain_percent"):
 				player.increase_xp_gain_percent(amount)
+		&"crit_chance_flat":
+			if player.has_method("increase_crit_chance"):
+				player.increase_crit_chance(amount)
+		&"crit_damage_percent":
+			if player.has_method("increase_crit_damage"):
+				player.increase_crit_damage(amount)

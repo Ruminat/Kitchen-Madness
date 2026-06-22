@@ -13,6 +13,8 @@ var _elapsed := 0.0
 var _returning := false
 var _hit_enemies: Dictionary = {}
 var _accent_color := Color(0.85, 0.6, 0.3, 1.0)
+var _crit_chance := 0.05
+var _crit_damage := 1.5
 
 
 func _ready() -> void:
@@ -68,6 +70,15 @@ func setup(
 	_setup_trail(accent_color)
 
 
+func set_crit_stats(crit_chance: float, crit_damage: float) -> void:
+	_crit_chance = clampf(crit_chance, 0.0, 1.0)
+	_crit_damage = maxf(crit_damage, 1.0)
+
+
+func _roll_crit() -> bool:
+	return randf() < _crit_chance
+
+
 func _apply_texture(texture: Texture2D) -> void:
 	if texture == null:
 		return
@@ -99,6 +110,12 @@ func _on_body_entered(body: Node2D) -> void:
 	if _hit_enemies.has(enemy_id):
 		return
 
-	body.take_damage(damage)
+	var is_crit := _roll_crit()
+	var final_damage := damage
+	if is_crit:
+		final_damage = maxi(roundi(float(damage) * _crit_damage), 1)
+	body.take_damage(final_damage)
 	_hit_enemies[enemy_id] = true
 	EventBus.projectile_hit.emit(global_position, direction, _accent_color)
+	EventBus.damage_dealt.emit(body.global_position, final_damage, is_crit)
+	EventBus.metrics_damage_dealt.emit(final_damage, "")

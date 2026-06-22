@@ -56,7 +56,30 @@ func add_weapon(definition: WeaponDefinition) -> BaseWeapon:
 	add_child(weapon)
 	weapon.setup(definition, _arena_bounds, _projectile_container)
 	_weapons.append(weapon)
+	_sync_crit_stats(weapon)
 	return weapon
+
+
+func _sync_crit_stats(weapon: BaseWeapon) -> void:
+	var player := get_parent() as Node
+	if player == null:
+		return
+	if not (player.has_method("get_crit_chance") and player.has_method("get_crit_damage")):
+		return
+	weapon.set_crit_stats(player.get_crit_chance(), player.get_crit_damage())
+
+
+func sync_all_crit_stats() -> void:
+	var player := get_parent() as Node
+	if player == null:
+		return
+	if not (player.has_method("get_crit_chance") and player.has_method("get_crit_damage")):
+		return
+	var crit_chance: float = player.get_crit_chance()
+	var crit_damage: float = player.get_crit_damage()
+	for weapon in _weapons:
+		if is_instance_valid(weapon):
+			weapon.set_crit_stats(crit_chance, crit_damage)
 
 
 func _get_orbiting_weapon_count() -> int:

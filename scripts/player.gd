@@ -15,6 +15,8 @@ var pickup_range_bonus := 0.0
 
 var _xp_gain_multiplier := 1.0
 var _character: CharacterDefinition
+var _crit_chance := 0.05
+var _crit_damage := 1.5
 
 @onready var visual: Node2D = $Visual
 @onready var sprite: Sprite2D = $Visual/Sprite
@@ -75,11 +77,14 @@ func configure(character: CharacterDefinition) -> void:
 	_character = character
 	move_speed = character.move_speed
 	luck = character.luck
+	_crit_chance = character.crit_chance
+	_crit_damage = character.crit_damage
 	health_component.max_health = character.max_health
 	health_component.current_health = character.max_health
 	if character.sprite:
 		sprite.texture = character.sprite
 	weapon_controller.configure_weapons(character.starting_weapon)
+	weapon_controller.sync_all_crit_stats()
 	_emit_initial_health()
 
 
@@ -155,6 +160,30 @@ func get_xp_multiplier() -> float:
 
 func get_health_drop_chance_bonus() -> float:
 	return float(luck) * 0.0015
+
+
+func get_crit_chance() -> float:
+	return _crit_chance
+
+
+func get_crit_damage() -> float:
+	return _crit_damage
+
+
+func increase_crit_chance(amount: float) -> void:
+	if amount <= 0.0:
+		return
+
+	_crit_chance = minf(_crit_chance + amount, 1.0)
+	weapon_controller.sync_all_crit_stats()
+
+
+func increase_crit_damage(percent: float) -> void:
+	if percent <= 0.0:
+		return
+
+	_crit_damage *= 1.0 + percent
+	weapon_controller.sync_all_crit_stats()
 
 
 func _emit_initial_health() -> void:

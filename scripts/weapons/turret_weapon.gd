@@ -40,4 +40,12 @@ func _deploy_turret() -> void:
 	container.add_child(turret)
 	turret.global_position = player.global_position
 	if turret.has_method("setup"):
-		turret.setup(definition, arena_bounds, container, get_damage(), get_fire_rate_multiplier())
+		turret.setup(
+			definition,
+			arena_bounds,
+			container,
+			get_damage(),
+			get_fire_rate_multiplier(),
+			_crit_chance,
+			_crit_damage
+		)

@@ -10,6 +10,8 @@ const DEFAULT_UPGRADE_PATHS: Array[String] = [
 	"res://resources/upgrades/luck.tres",
 	"res://resources/upgrades/pickup_range.tres",
 	"res://resources/upgrades/xp_gain.tres",
+	"res://resources/upgrades/crit_chance.tres",
+	"res://resources/upgrades/crit_damage.tres",
 ]
 
 @export var upgrades: Array[Resource] = []

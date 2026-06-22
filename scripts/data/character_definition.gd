@@ -9,6 +9,8 @@ extends Resource
 @export var move_speed: float = 220.0
 @export var luck: int = 0
 @export var starting_weapon: WeaponDefinition
+@export_range(0.0, 1.0) var crit_chance: float = 0.05
+@export_range(1.0, 5.0) var crit_damage: float = 1.5
 
 
 func apply_to_player(player: Node) -> void:
