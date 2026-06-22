@@ -20,17 +20,14 @@ func _play_internal(text_value: String, canvas_pos: Vector2, color: Color, is_cr
 	text = text_value
 
 	add_theme_color_override("font_color", color)
-	var font_size := 32 if is_crit else 22
+	var font_size := 64 if is_crit else 44
 	add_theme_font_size_override("font_size", font_size)
 
 	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pivot_offset = size * 0.5
 
-	# Random slight offset for variety
-	var random_offset := Vector2(randf_range(-6, 6), randf_range(-4, 4))
-	position = canvas_pos + random_offset
+	position = canvas_pos
 
-	# Start at normal scale, visible
 	scale = Vector2.ONE
 	modulate.a = 1.0
 	rotation = 0.0
@@ -49,16 +46,15 @@ func _play_internal(text_value: String, canvas_pos: Vector2, color: Color, is_cr
 
 
 func _crit_animation(tween: Tween) -> void:
-	# Big pop
-	tween.tween_property(self, "scale", Vector2(1.4, 1.4), 0.08).set_ease(Tween.EASE_OUT)
-	tween.chain().tween_property(self, "scale", Vector2(1.2, 1.2), 0.15).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.08).set_ease(Tween.EASE_OUT)
+	tween.chain().tween_property(self, "scale", Vector2(1.15, 1.15), 0.15).set_ease(
+		Tween.EASE_IN_OUT
+	)
 
-	# Rotation wobble
 	tween.parallel().tween_property(self, "rotation", deg_to_rad(-6), 0.06)
 	tween.chain().tween_property(self, "rotation", deg_to_rad(4), 0.1)
 	tween.chain().tween_property(self, "rotation", 0.0, 0.08)
 
-	# Float up
 	(
 		tween
 		. chain()
@@ -71,11 +67,9 @@ func _crit_animation(tween: Tween) -> void:
 
 
 func _normal_animation(tween: Tween) -> void:
-	# Small pop
-	tween.tween_property(self, "scale", Vector2(1.15, 1.15), 0.06).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", Vector2(1.1, 1.1), 0.06).set_ease(Tween.EASE_OUT)
 	tween.chain().tween_property(self, "scale", Vector2.ONE, 0.12).set_ease(Tween.EASE_IN_OUT)
 
-	# Float up
 	(
 		tween
 		. chain()

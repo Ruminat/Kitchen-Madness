@@ -5,9 +5,12 @@ const CRIT_COLOR := Color(1.0, 0.82, 0.2, 1.0)
 const XP_COLOR := Color(0.45, 0.88, 1.0, 1.0)
 const HEALTH_COLOR := Color(0.4, 1.0, 0.5, 1.0)
 const POOL_SIZE := 32
+const SPREAD_RADIUS := 40.0
 
 var _pool: Array[Label] = []
 var _active: Array[Label] = []
+var _hit_positions: Dictionary = {}
+var _hit_counts: Dictionary = {}
 
 
 func _ready() -> void:
@@ -51,7 +54,39 @@ func _return_to_pool(label: Label) -> void:
 
 func _on_damage_dealt(world_pos: Vector2, amount: int, is_crit: bool) -> void:
 	var color := CRIT_COLOR if is_crit else DAMAGE_COLOR
-	_spawn_damage(str(amount), world_pos, color, is_crit)
+	var spread_pos := _get_spread_position(world_pos)
+	_spawn_damage(str(amount), spread_pos, color, is_crit)
+
+
+func _get_spread_position(base_pos: Vector2) -> Vector2:
+	var pos_key := Vector2i(roundi(base_pos.x), roundi(base_pos.y))
+	var current_time := Time.get_ticks_msec()
+
+	_cleanup_old_hits(current_time)
+
+	var hit_count := 0
+	if _hit_counts.has(pos_key):
+		hit_count = _hit_counts[pos_key]
+
+	_hit_counts[pos_key] = hit_count + 1
+	_hit_positions[pos_key] = current_time
+
+	if hit_count == 0:
+		return base_pos
+
+	var angle := (TAU / 8.0) * hit_count
+	var offset := Vector2(cos(angle), sin(angle)) * SPREAD_RADIUS
+	return base_pos + offset
+
+
+func _cleanup_old_hits(current_time: int) -> void:
+	var to_remove: Array[Vector2i] = []
+	for pos_key in _hit_positions.keys():
+		if current_time - _hit_positions[pos_key] > 100:
+			to_remove.append(pos_key)
+	for pos_key in to_remove:
+		_hit_positions.erase(pos_key)
+		_hit_counts.erase(pos_key)
 
 
 func _on_pickup_collected(type: StringName, world_pos: Vector2, value: int) -> void:
