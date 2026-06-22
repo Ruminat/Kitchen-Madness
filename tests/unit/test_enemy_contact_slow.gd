@@ -52,8 +52,7 @@ func test_take_damage_does_not_emit_damage_dealt() -> void:
 
 	var emission_info := {"count": 0}
 	EventBus.damage_dealt.connect(
-		func(_pos: Vector2, _amount: int, _is_crit: bool) -> void:
-			emission_info.count += 1
+		func(_pos: Vector2, _amount: int, _is_crit: bool) -> void: emission_info.count += 1
 	)
 
 	enemy.take_damage(5)

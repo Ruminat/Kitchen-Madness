@@ -139,8 +139,7 @@ func test_projectile_hit_emits_damage_dealt_once() -> void:
 
 	var emission_info := {"count": 0}
 	EventBus.damage_dealt.connect(
-		func(_pos: Vector2, _amount: int, _is_crit: bool) -> void:
-			emission_info.count += 1
+		func(_pos: Vector2, _amount: int, _is_crit: bool) -> void: emission_info.count += 1
 	)
 
 	var enemy := MockEnemy.new()

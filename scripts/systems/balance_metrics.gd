@@ -65,6 +65,20 @@ class RunMetrics:
 		waves.append(wave)
 		total_run_time += wave.duration_seconds
 
+	func get_aggregates() -> Dictionary:
+		var totals := {
+			"total_kills": 0,
+			"total_damage_dealt": 0,
+			"total_damage_taken": 0,
+			"total_gold_earned": 0,
+		}
+		for wave in waves:
+			totals["total_kills"] += wave.total_kills
+			totals["total_damage_dealt"] += wave.damage_dealt
+			totals["total_damage_taken"] += wave.damage_taken
+			totals["total_gold_earned"] += wave.gold_earned
+		return totals
+
 	func to_dictionary() -> Dictionary:
 		var wave_summaries: Array[Dictionary] = []
 		for wave in waves:
@@ -75,6 +89,7 @@ class RunMetrics:
 			"total_run_time": total_run_time,
 			"waves_completed": waves.size(),
 			"run_completed": run_completed,
+			"aggregates": get_aggregates(),
 			"waves": wave_summaries,
 		}
 

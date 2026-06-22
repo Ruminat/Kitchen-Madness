@@ -4,13 +4,13 @@
 
 ## Current status
 
-**Phase 5D done.** Projectile visuals fixed (weapons no longer shoot themselves as sprites). AudioManager with 12 synthesized SFX (70% volume), pooled players, EventBus integration.
+**Phase 5E done.** Run statistics persist to `ignored/stats/` as timestamped JSON session files. Each run records character, weapons, upgrades, wave totals, and per-wave breakdowns. Saves on death or window close.
 
 **Playable loop:** character select → waves (3x enemies) → weapon shop → repeat. Level-ups = stat + crit upgrades. SFX for combat, pickups, level-up, wave complete.
 
-**Content:** 9 characters, 8 kitchen weapons, VFX, HUD, `2640×1440` arena, camera follow, crit system, pooled damage numbers, basic audio.
+**Content:** 9 characters, 8 kitchen weapons, VFX, HUD, `2640×1440` arena, camera follow, crit system, pooled damage numbers, basic audio, run stats persistence.
 
-**Next:** Phase 5E — Statistics persistence, Phase 5F — Melee weapons, Phase 6A — Enemy variety & swarm spawning, Phase 6B — Shop UI overhaul.
+**Next:** Phase 5F — Melee weapons, Phase 6A — Enemy variety & swarm spawning, Phase 6B — Shop UI overhaul.
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam.
 
@@ -33,6 +33,7 @@
 |---|---|
 | **EventBus** | `scripts/autoload/event_bus.gd` — gameplay emits, UI listens |
 | **AudioManager** | `scripts/autoload/audio_manager.gd` — pooled SFX players, synthesized placeholders |
+| **StatsPersistence** | `scripts/autoload/stats_persistence.gd` — writes run JSON to `ignored/stats/` on death/quit |
 | **VfxManager** | Pooled death bursts + impact sparks |
 | **FloatingTextManager** | Pooled damage number labels (32 pre-allocated) |
 | **WaveDefinition.resolve_duration** | Wave 4+ adds +5s per wave beyond authored roster |

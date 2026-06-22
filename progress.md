@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 5D basic sound effects
+**Last updated:** Phase 5E statistics persistence
 
 ---
 
@@ -72,70 +72,38 @@ Done. Added `crit_chance` and `crit_damage` to `CharacterDefinition` (base 5% ch
 
 Done. `FloatingTextManager` now pools labels (32 pre-allocated) for better performance. Added `play_damage()` method to `FloatingText` with bounce/pop animation on all damage numbers. Crit numbers render at 1.5x scale with an extra pop effect (scales to 1.95x then back to 1.5x). Added `damage_number_color` field to `WeaponDefinition` for future per-weapon color customization. Updated tests in `test_floating_text_manager.gd` for pool validation.
 
+### Phase 5C - Projectile visuals fix
+
+Done. Removed `projectile_texture` from 6 weapon definitions so projectiles use default bolt sprites with VFX accent tinting. Kept `projectile_texture` on ladle boomerang (returning weapon visual).
+
+### Phase 5D - Basic sound effects
+
+Done. `AudioManager` autoload with 12 synthesized placeholder SFX at 70% master volume, pooled `AudioStreamPlayer` instances, and EventBus integration for combat, pickups, level-up, wave complete, and shop actions.
+
+### Phase 5E - Statistics persistence
+
+Done. `RunStatsPersistence` writes run summaries to `ignored/stats/stats_YYYY-MM-DD_HHMMSS.json`. One session file per game launch; runs append to a `runs` array. Each record includes character, weapons, level-up upgrades, final wave, level reached, aggregate kills/damage/gold, per-wave timing, and end reason (`death` or `quit`). `StatsPersistence` autoload listens to `metrics_run_ended`; `LevelUpManager` emits `upgrade_applied`. Quit saves via `NOTIFICATION_WM_CLOSE_REQUEST` in `game.gd`. Disabled in headless mode. Tests in `test_run_stats_persistence.gd`.
+
+### Phase 4F - Balance metrics and tuning
+
+Done. `BalanceMetrics` tracks per-wave combat/economy data; `BalanceCalculator` estimates DPS budgets; `WaveSummaryDisplay` shows end-of-wave debug summary. Balance model at `docs/balance-model.md`. Tests in `test_balance_calculator.gd` and `test_balance_metrics.gd`.
+
 ---
 
 ## Active tasks
 
-### Phase 5C - Projectile visuals fix
+### Phase 5F - Melee weapons
 
-**Goal:** Fix the bug where gun weapons are shooting themselves as projectiles instead of just particles.
-
-| Task | Status | Notes |
-|---|---|---|
-| Bug investigation | Done | Root cause: weapon definitions set `projectile_texture` to the weapon icon, causing full weapon sprite to appear as projectile |
-| Projectile cleanup | Done | Removed `projectile_texture` from weapon definitions (6 files); projectiles now use default bolt texture with VFX accent tinting |
-| Ladle boomerang | Kept | Kept `projectile_texture` for ladle_boomerang - returning weapon makes sense to show full sprite |
-| Visual review | Done | Projectiles now render as small bolt sprites tinted with weapon's `vfx_accent` color |
-| Tests | Done | No new tests needed - existing projectile tests verify instantiation works correctly |
-
-**Fix applied to:**
-- `pepper_grinder_gun.tres`
-- `kitchen_knife.tres`
-- `frying_pan.tres`
-- `garlic_bomb.tres`
-- `boiling_soup_splash.tres`
-- `toaster_turret.tres`
-
-**Preserved:**
-- `ladle_boomerang.tres` (kept projectile_texture for returning weapon visual)
-
----
-
-### Phase 5D - Basic sound effects
-
-**Goal:** Add foundational audio feedback for core gameplay actions.
+**Goal:** Add true melee weapons that damage enemies in close range without creating projectiles.
 
 | Task | Status | Notes |
 |---|---|---|
-| Sound system | Done | Created `AudioManager` autoload with synthesized placeholder SFX |
-| Core sounds | Done | 12 sounds: enemy hit/death, player hurt, shoot (3 types), level up, wave complete, shop buy, pickup (xp/health/gold), weapon upgrade |
-| Audio manager | Done | Pool of 16 AudioStreamPlayers for one-shot SFX with automatic recycling |
-| Volume control | Done | Master volume property with linear-to-dB conversion |
-| Integration | Done | EventBus signals hooked (damage, kills, health, level up, wave complete, pickups, gold changes) |
-| Weapon sounds | Done | Projectile, burst, boomerang, and turret weapons all trigger shoot sounds |
-| Placeholder generation | Done | Procedural beeps, noise bursts, and arpeggios using AudioStreamWAV |
-
-**Sounds implemented:**
-- **Gameplay:** enemy_hit, enemy_death, player_hurt, level_up, wave_complete
-- **Weapons:** shoot_default, shoot_shotgun (burst), shoot_boomerang, shoot_turret
-- **Economy:** shop_buy, pickup_xp, pickup_health, pickup_gold, weapon_upgrade
-
-**To replace with real SFX:** Add `.wav` files to `assets/audio/sfx/` matching the paths in `SFX_PATHS` constant.
-
----
-
-### Phase 4F - Balance metrics and tuning
-
-**Goal:** Begin balancing around measured DPS, XP, gold, and wave pressure.
-
-| Task | Status | Notes |
-|---|---|---|
-| Create balance model doc | Done | `docs/balance-model.md` with targets for DPS, XP/wave, gold/wave, HP budget, time-to-level |
-| Add runtime metrics | Done | `BalanceMetrics` class tracks kills, damage dealt/taken, XP, gold, weapon contribution per wave |
-| Show end-of-wave debug summary | Done | `WaveSummaryDisplay` shows wave metrics on completion (press ENTER/ESC to continue) |
-| Estimate weapon DPS from data | Done | `BalanceCalculator` class computes theoretical DPS, XP/gold budgets, wave HP budgets |
-| Compare characters/weapons | Done | Balance model includes DPS comparison table for all 9 characters and 8 weapons |
-| Add deterministic balance tests | Done | `test_balance_calculator.gd` and `test_balance_metrics.gd` cover calculations |
+| Melee weapon type | Pending | New `WeaponType.MELEE` in `WeaponDefinition` |
+| Kitchen knife | Pending | Fast stab with short forward arc |
+| Frying pan | Pending | Slow swing with knockback in 180-degree frontal arc |
+| Hit detection | Pending | Area query or raycast for enemies in range/arc |
+| Visual feedback | Pending | Swing animation/trail effect on attack |
+| Tests | Pending | Cover melee hit detection and damage application |
 
 ---
 

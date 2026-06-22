@@ -55,6 +55,11 @@ func _ready() -> void:
 	_connect_metrics_signals()
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_save_run_on_quit()
+
+
 func _process(_delta: float) -> void:
 	_follow_player_camera()
 
@@ -182,7 +187,7 @@ func _clear_wave_entities() -> void:
 func _on_player_died() -> void:
 	is_game_over = true
 	balance_metrics.end_run(false)
-	_emit_run_ended_metrics()
+	_emit_run_ended_metrics("death")
 	ui.show_game_over()
 	_end_run()
 
@@ -241,9 +246,35 @@ func _on_wave_metrics_ready(report: Dictionary) -> void:
 	EventBus.metrics_wave_ended.emit(report)
 
 
-func _emit_run_ended_metrics() -> void:
+func _emit_run_ended_metrics(end_reason: String = "unknown") -> void:
 	var summary := balance_metrics.get_run_summary()
+	summary["final_wave"] = current_wave
+	summary["level_reached"] = _get_player_level()
+	summary["weapons"] = _get_player_weapon_ids()
+	summary["end_reason"] = end_reason
 	EventBus.metrics_run_ended.emit(summary)
+
+
+func _save_run_on_quit() -> void:
+	if is_game_over or not balance_metrics.is_tracking():
+		return
+
+	if balance_metrics.get_current_wave_summary().has("wave_number"):
+		_end_wave_metrics()
+
+	balance_metrics.end_run(false)
+	_emit_run_ended_metrics("quit")
+
+
+func _get_player_level() -> int:
+	var xp_system := $XpSystem as XpSystem
+	return 1 if xp_system == null else xp_system.level
+
+
+func _get_player_weapon_ids() -> Array[String]:
+	if player == null or player.weapon_controller == null:
+		return []
+	return player.weapon_controller.get_owned_weapon_ids()
 
 
 func _start_metrics_tracking() -> void:

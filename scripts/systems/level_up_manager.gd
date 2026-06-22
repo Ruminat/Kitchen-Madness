@@ -68,6 +68,8 @@ func _on_upgrade_selected(upgrade: Resource) -> void:
 
 	if upgrade.has_method("apply"):
 		upgrade.apply(_player)
+	if upgrade.get("id"):
+		EventBus.upgrade_applied.emit(String(upgrade.id))
 	_pending_levels -= 1
 	_waiting_for_choice = false
 
