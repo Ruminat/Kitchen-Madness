@@ -64,7 +64,7 @@ func _spawn_enemy() -> void:
 	if not is_active or enemy_container == null:
 		return
 
-	var max_enemies := wave_definition.max_enemies if wave_definition else 40
+	var max_enemies := (wave_definition.max_enemies * 3) if wave_definition else 120
 	if enemy_container.get_child_count() >= max_enemies:
 		_schedule_next_spawn()
 		return
