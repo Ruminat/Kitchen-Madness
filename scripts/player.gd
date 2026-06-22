@@ -164,7 +164,12 @@ func _emit_initial_health() -> void:
 
 
 func _on_health_changed(current: int, maximum: int) -> void:
+	var previous_health := health_component.current_health
 	EventBus.player_health_changed.emit(current, maximum)
+
+
+func _on_health_decreased(amount: int) -> void:
+	EventBus.metrics_damage_taken.emit(amount)
 
 
 func _on_died() -> void:
@@ -199,6 +204,7 @@ func _check_contact_damage() -> void:
 		if enemy.has_method("get_contact_damage"):
 			damage = enemy.get_contact_damage()
 		health_component.take_damage(damage)
+		EventBus.metrics_damage_taken.emit(damage)
 		if enemy.has_method("apply_contact_slow"):
 			enemy.apply_contact_slow()
 		return

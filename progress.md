@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 4E wave pacing + contact slow
+**Last updated:** Phase 4F balance metrics and tuning
 
 ---
 
@@ -74,12 +74,12 @@ Done. Wave 1–3 durations are 12s / 17s / 22s. Wave 1 is chaser-only with ~6 pe
 
 | Task | Status | Notes |
 |---|---|---|
-| Create balance model doc | Planned | Track target DPS, XP/wave, gold/wave, enemy HP budget, and time-to-level |
-| Add runtime metrics | Planned | Kills, gold, XP, damage dealt, damage taken, weapon contribution |
-| Show end-of-wave debug summary | Planned | Use for playtest tuning before building final UI |
-| Estimate weapon DPS from data | Planned | Compare theoretical DPS to observed playtest metrics |
-| Compare characters/weapons | Planned | Check that starter choices are distinct but not obviously dominant |
-| Add deterministic balance tests | Planned | Cover DPS formulas, XP/gold budgets, and wave-duration targets |
+| Create balance model doc | Done | `docs/balance-model.md` with targets for DPS, XP/wave, gold/wave, HP budget, time-to-level |
+| Add runtime metrics | Done | `BalanceMetrics` class tracks kills, damage dealt/taken, XP, gold, weapon contribution per wave |
+| Show end-of-wave debug summary | Done | `WaveSummaryDisplay` shows wave metrics on completion (press ENTER/ESC to continue) |
+| Estimate weapon DPS from data | Done | `BalanceCalculator` class computes theoretical DPS, XP/gold budgets, wave HP budgets |
+| Compare characters/weapons | Done | Balance model includes DPS comparison table for all 9 characters and 8 weapons |
+| Add deterministic balance tests | Done | `test_balance_calculator.gd` and `test_balance_metrics.gd` cover calculations |
 
 ---
 

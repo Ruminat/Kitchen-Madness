@@ -71,4 +71,5 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)
 		EventBus.projectile_hit.emit(global_position, direction, _accent_color)
+		EventBus.metrics_damage_dealt.emit(damage, "")
 		queue_free()

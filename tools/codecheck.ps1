@@ -58,8 +58,28 @@ if ($Gdformat) {
     Write-Host "SKIP: gdformat not found (pip install gdtoolkit)" -ForegroundColor Yellow
 }
 
-Write-Step "Headless boot smoke"
+Write-Step "GDScript compilation check"
 $Godot = Find-Godot
+if ($Godot) {
+    # Run Godot headless and check output for parser errors
+    $env:GODOT_DISABLE_IMPORTER = "1"
+    $CompileOutput = & $Godot --headless --path $ProjectRoot --quit-after 2 2>&1
+    Remove-Item Env:\GODOT_DISABLE_IMPORTER -ErrorAction SilentlyContinue
+
+    # Check for parser errors in output
+    $ParserErrors = $CompileOutput | Select-String -Pattern "(Parse Error|Script Error|Compile Error|Cannot infer the type)" -SimpleMatch
+    if ($ParserErrors) {
+        Write-Host "FAILED: Parser errors detected:" -ForegroundColor Red
+        $ParserErrors | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+        $script:Failed = $true
+    } else {
+        Write-Host "OK: No parser errors detected" -ForegroundColor Green
+    }
+} else {
+    Write-Host "SKIP: Godot not found on PATH or in default install locations" -ForegroundColor Yellow
+}
+
+Write-Step "Headless boot smoke"
 if ($Godot) {
     Invoke-CheckedCommand { & $Godot --headless --path $ProjectRoot --quit-after 1 2>&1 }
 } else {

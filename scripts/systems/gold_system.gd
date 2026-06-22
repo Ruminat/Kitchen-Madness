@@ -14,6 +14,7 @@ func add_gold(amount: int) -> void:
 		return
 
 	gold += amount
+	EventBus.metrics_gold_earned.emit(amount)
 	_emit_gold_changed()
 
 

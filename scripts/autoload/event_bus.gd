@@ -13,3 +13,12 @@ signal wave_time_changed(seconds_remaining: float)
 signal wave_completed
 signal gold_changed(gold: int)
 signal wave_index_changed(wave: int)
+
+# Balance metrics signals
+signal metrics_damage_dealt(amount: int, weapon_id: String)
+signal metrics_damage_taken(amount: int)
+signal metrics_gold_earned(amount: int)
+signal metrics_wave_started(wave_number: int, player_level: int)
+signal metrics_wave_ended(wave_summary: Dictionary)
+signal metrics_run_started(character_id: String)
+signal metrics_run_ended(run_summary: Dictionary)

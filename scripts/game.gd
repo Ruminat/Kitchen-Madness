@@ -26,9 +26,11 @@ var _arena_bounds := Rect2()
 @onready var shop_manager: ShopManager = $ShopManager
 @onready var vfx_manager: VfxManager = $VfxManager
 @onready var ui: CanvasLayer = $UI
+@onready var balance_metrics: BalanceMetrics = BalanceMetrics.new()
 
 
 func _ready() -> void:
+	add_child(balance_metrics)
 	get_tree().paused = false
 
 	_arena_bounds = arena.get_bounds()
@@ -49,6 +51,8 @@ func _ready() -> void:
 	EventBus.player_died.connect(_on_player_died)
 
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
+
+	_connect_metrics_signals()
 
 
 func _process(_delta: float) -> void:
@@ -109,13 +113,14 @@ func is_run_active() -> bool:
 
 
 func _apply_starting_character() -> void:
-	var character := starting_character
+	var character: CharacterDefinition = starting_character
 	if character == null and not _should_auto_start_character():
 		get_tree().paused = true
 		character = await ui.request_character_selection(CharacterRoster.load_roster())
 	if character == null:
 		character = CharacterRoster.get_default()
 	player.configure(character)
+	_start_metrics_tracking()
 	if get_tree().paused and not is_game_over and not is_wave_complete:
 		get_tree().paused = false
 
@@ -132,6 +137,7 @@ func _end_run() -> void:
 
 func _on_wave_completed() -> void:
 	is_wave_complete = true
+	_end_wave_metrics()
 	_end_run()
 
 
@@ -161,6 +167,7 @@ func _configure_current_wave() -> void:
 	wave_manager.configure(wave, duration)
 	enemy_spawner.set_camera_spawn_target(player, _get_camera_world_view_size())
 	enemy_spawner.configure(wave, enemy_container, _arena_bounds)
+	_start_wave_metrics()
 
 
 func _clear_wave_entities() -> void:
@@ -174,5 +181,86 @@ func _clear_wave_entities() -> void:
 
 func _on_player_died() -> void:
 	is_game_over = true
+	balance_metrics.end_run(false)
+	_emit_run_ended_metrics()
 	ui.show_game_over()
 	_end_run()
+
+
+func _connect_metrics_signals() -> void:
+	EventBus.metrics_damage_dealt.connect(_on_metrics_damage_dealt)
+	EventBus.metrics_damage_taken.connect(_on_metrics_damage_taken)
+	EventBus.metrics_gold_earned.connect(_on_metrics_gold_earned)
+	EventBus.enemy_killed.connect(_on_enemy_killed_metrics)
+	EventBus.pickup_collected.connect(_on_pickup_collected_metrics)
+
+	balance_metrics.metrics_report_ready.connect(_on_wave_metrics_ready)
+
+
+func _on_metrics_damage_dealt(amount: int, weapon_id: String) -> void:
+	balance_metrics.record_damage_dealt(amount, weapon_id)
+
+
+func _on_metrics_damage_taken(amount: int) -> void:
+	balance_metrics.record_damage_taken(amount)
+
+
+func _on_metrics_gold_earned(amount: int) -> void:
+	balance_metrics.record_gold_earned(amount)
+
+
+func _on_enemy_killed_metrics(enemy: Node, _killer: Node) -> void:
+	var enemy_type := &"unknown"
+	if enemy and "definition" in enemy and enemy.definition != null:
+		enemy_type = StringName(enemy.definition.id)
+	balance_metrics.record_kill(enemy_type)
+
+
+func _on_pickup_collected_metrics(type: StringName, _world_pos: Vector2, value: int) -> void:
+	if type == &"health":
+		balance_metrics.record_health_pickup()
+	elif type.begins_with(&"xp"):
+		balance_metrics.record_xp_collected(value)
+
+
+func _on_wave_metrics_ready(report: Dictionary) -> void:
+	print(
+		(
+			"Wave %d Metrics: DPS=%.1f, Kills=%d, Damage Dealt=%d, Damage Taken=%d, XP=%d, Gold=%d"
+			% [
+				report.get("wave_number", 0),
+				report.get("effective_dps", 0.0),
+				report.get("total_kills", 0),
+				report.get("damage_dealt", 0),
+				report.get("damage_taken", 0),
+				report.get("xp_collected", 0),
+				report.get("gold_earned", 0)
+			]
+		)
+	)
+	EventBus.metrics_wave_ended.emit(report)
+
+
+func _emit_run_ended_metrics() -> void:
+	var summary := balance_metrics.get_run_summary()
+	EventBus.metrics_run_ended.emit(summary)
+
+
+func _start_metrics_tracking() -> void:
+	var character: CharacterDefinition = player.get_character()
+	var character_id := character.id if character else "unknown"
+	balance_metrics.start_run(character_id)
+	EventBus.metrics_run_started.emit(character_id)
+
+
+func _start_wave_metrics() -> void:
+	var xp_system := $XpSystem as XpSystem
+	var player_level := 1 if xp_system == null else xp_system.level
+	balance_metrics.start_wave(current_wave, player_level)
+	EventBus.metrics_wave_started.emit(current_wave, player_level)
+
+
+func _end_wave_metrics() -> void:
+	var xp_system := $XpSystem as XpSystem
+	var player_level := 1 if xp_system == null else xp_system.level
+	balance_metrics.end_wave(player_level)

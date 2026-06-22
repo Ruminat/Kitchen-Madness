@@ -84,6 +84,7 @@ func take_damage(amount: int) -> void:
 
 	health_component.take_damage(amount)
 	EventBus.damage_dealt.emit(global_position, amount, false)
+	EventBus.metrics_damage_dealt.emit(amount, "")
 	_flash_hit()
 
 	if not health_component.is_alive():
