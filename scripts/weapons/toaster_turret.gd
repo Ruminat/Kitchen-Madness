@@ -72,6 +72,7 @@ func _fire_at(target: Node2D) -> void:
 	if _definition == null or _definition.projectile_scene == null or _projectile_container == null:
 		return
 
+	AudioManager.play_shoot_sound("turret")
 	var direction := (target.global_position - global_position).normalized()
 	var projectile := _definition.projectile_scene.instantiate()
 	_recoil_timer = 0.12

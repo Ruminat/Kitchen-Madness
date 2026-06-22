@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 5A critical damage system
+**Last updated:** Phase 5D basic sound effects
 
 ---
 
@@ -75,6 +75,54 @@ Done. `FloatingTextManager` now pools labels (32 pre-allocated) for better perfo
 ---
 
 ## Active tasks
+
+### Phase 5C - Projectile visuals fix
+
+**Goal:** Fix the bug where gun weapons are shooting themselves as projectiles instead of just particles.
+
+| Task | Status | Notes |
+|---|---|---|
+| Bug investigation | Done | Root cause: weapon definitions set `projectile_texture` to the weapon icon, causing full weapon sprite to appear as projectile |
+| Projectile cleanup | Done | Removed `projectile_texture` from weapon definitions (6 files); projectiles now use default bolt texture with VFX accent tinting |
+| Ladle boomerang | Kept | Kept `projectile_texture` for ladle_boomerang - returning weapon makes sense to show full sprite |
+| Visual review | Done | Projectiles now render as small bolt sprites tinted with weapon's `vfx_accent` color |
+| Tests | Done | No new tests needed - existing projectile tests verify instantiation works correctly |
+
+**Fix applied to:**
+- `pepper_grinder_gun.tres`
+- `kitchen_knife.tres`
+- `frying_pan.tres`
+- `garlic_bomb.tres`
+- `boiling_soup_splash.tres`
+- `toaster_turret.tres`
+
+**Preserved:**
+- `ladle_boomerang.tres` (kept projectile_texture for returning weapon visual)
+
+---
+
+### Phase 5D - Basic sound effects
+
+**Goal:** Add foundational audio feedback for core gameplay actions.
+
+| Task | Status | Notes |
+|---|---|---|
+| Sound system | Done | Created `AudioManager` autoload with synthesized placeholder SFX |
+| Core sounds | Done | 12 sounds: enemy hit/death, player hurt, shoot (3 types), level up, wave complete, shop buy, pickup (xp/health/gold), weapon upgrade |
+| Audio manager | Done | Pool of 16 AudioStreamPlayers for one-shot SFX with automatic recycling |
+| Volume control | Done | Master volume property with linear-to-dB conversion |
+| Integration | Done | EventBus signals hooked (damage, kills, health, level up, wave complete, pickups, gold changes) |
+| Weapon sounds | Done | Projectile, burst, boomerang, and turret weapons all trigger shoot sounds |
+| Placeholder generation | Done | Procedural beeps, noise bursts, and arpeggios using AudioStreamWAV |
+
+**Sounds implemented:**
+- **Gameplay:** enemy_hit, enemy_death, player_hurt, level_up, wave_complete
+- **Weapons:** shoot_default, shoot_shotgun (burst), shoot_boomerang, shoot_turret
+- **Economy:** shop_buy, pickup_xp, pickup_health, pickup_gold, weapon_upgrade
+
+**To replace with real SFX:** Add `.wav` files to `assets/audio/sfx/` matching the paths in `SFX_PATHS` constant.
+
+---
 
 ### Phase 4F - Balance metrics and tuning
 

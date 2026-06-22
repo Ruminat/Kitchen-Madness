@@ -39,6 +39,7 @@ func _throw_at(target: Node2D) -> void:
 		return
 
 	play_fire_feedback()
+	AudioManager.play_shoot_sound("boomerang")
 	var direction := (target.global_position - global_position).normalized()
 	var projectile := definition.projectile_scene.instantiate()
 	if projectile.has_method("setup"):

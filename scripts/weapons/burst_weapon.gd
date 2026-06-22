@@ -44,6 +44,7 @@ func _fire_burst() -> void:
 
 
 func _spawn_projectile(container: Node2D, direction: Vector2, damage: int) -> void:
+	AudioManager.play_shoot_sound("burst")
 	var projectile := definition.projectile_scene.instantiate()
 	if projectile.has_method("setup"):
 		projectile.setup(

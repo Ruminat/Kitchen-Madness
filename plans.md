@@ -105,6 +105,41 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 
 ---
 
+### Phase 6A - Enemy variety and swarm spawning
+
+**Goal:** Add more enemy types and spawn them in swarms rather than individually.
+
+| Task | Details |
+|---|---|
+| Enemy roster expansion | Add more kitchen pest enemies (see game-setting.md for ideas) |
+| Swarm spawn system | Spawn enemies in groups of 3-8 instead of one-by-one |
+| Swarm timing | Burst spawns with brief cooldowns between swarms |
+| Wave swarm density | More enemies per wave with swarm-based pacing |
+| New enemy types | Consider: flies (fast, fragile), ants (small swarms), pantry moths (erratic movement) |
+| Enemy variants | Add "greasy", "mutant", or "angry" variants with slight visual/stat differences |
+| Tests | Verify swarm spawning and enemy variety |
+
+---
+
+### Phase 6B - Shop UI overhaul
+
+**Goal:** Improve the shop UI with better structure, icons, spacing, and visual polish.
+
+| Task | Details |
+|---|---|
+| Layout structure | Better organized grid or card-based layout |
+| Weapon icons | Display weapon sprites/icons in shop cards |
+| Price display | Clearer gold cost with coin icon |
+| Rarity indicators | Visual distinction for weapon tiers/qualities |
+| Card styling | Background panels, borders, hover states |
+| Spacing | Proper padding between elements, less cramped feel |
+| Selection highlight | Clearer keyboard/mouse selection indicator |
+| Description tooltips | Optional: hover for weapon description/stats |
+| Keyboard shortcuts | Show key hints (1-4) more prominently |
+| Tests | Verify shop UI layout and interaction remain functional |
+
+---
+
 ## Definition of done
 
 Every iteration should end with:

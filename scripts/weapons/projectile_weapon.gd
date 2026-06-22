@@ -49,6 +49,7 @@ func _fire_at(target: Node2D) -> void:
 
 
 func _spawn_projectile(container: Node2D, direction: Vector2, damage: int) -> void:
+	AudioManager.play_shoot_sound("default")
 	var projectile := definition.projectile_scene.instantiate()
 	if projectile.has_method("setup"):
 		projectile.setup(

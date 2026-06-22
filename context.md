@@ -1,25 +1,25 @@
 # Kitchen Madness — project context
 
-Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena survivor roguelite (Godot 4). Full history: [progress.md](progress.md). Roadmap: [plans.md](plans.md).
+**Kitchen Madness** — top-down arena survivor roguelite (Godot 4). Full history: [progress.md](progress.md). Roadmap: [plans.md](plans.md).
 
 ## Current status
 
-**Phase 5B done.** Damage numbers: 44px normal / 64px crit, spread out when overlapping (circular pattern). 3x enemy count. Crit system (5% base chance, 150% damage) with Precision/Devastation upgrades.
+**Phase 5D done.** Projectile visuals fixed (weapons no longer shoot themselves as sprites). AudioManager with 12 synthesized SFX (70% volume), pooled players, EventBus integration.
 
-**Playable loop:** character select → waves (3x enemies) → weapon shop → repeat. Level-ups = stat + crit upgrades.
+**Playable loop:** character select → waves (3x enemies) → weapon shop → repeat. Level-ups = stat + crit upgrades. SFX for combat, pickups, level-up, wave complete.
 
-**Content:** 9 characters, 8 kitchen weapons, VFX, HUD, `2640×1440` arena, camera follow, crit system, pooled damage numbers.
+**Content:** 9 characters, 8 kitchen weapons, VFX, HUD, `2640×1440` arena, camera follow, crit system, pooled damage numbers, basic audio.
 
-**Next:** Phase 5C — projectile visuals fix.
+**Next:** Phase 5E — Statistics persistence, Phase 5F — Melee weapons, Phase 6A — Enemy variety & swarm spawning, Phase 6B — Shop UI overhaul.
 
-**Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
+**Not in scope:** save/meta, main menu, multiple maps, Steam.
 
 ---
 
 ## Iteration rule
 
 1. Zero parser/scene errors · **F5** smoke test
-2. `.\tools\codecheck.ps1` must pass (gdlint + gdformat + boot + tests)
+2. `\.\tools\codecheck.ps1` must pass (gdlint + gdformat + boot + tests)
 3. Update [progress.md](progress.md) after a phase/slice
 4. Large visual iterations: `.\tools\capture-visuals.ps1` → `visual-tests/screenshots/`
 
@@ -32,6 +32,7 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 | Pattern | Where |
 |---|---|
 | **EventBus** | `scripts/autoload/event_bus.gd` — gameplay emits, UI listens |
+| **AudioManager** | `scripts/autoload/audio_manager.gd` — pooled SFX players, synthesized placeholders |
 | **VfxManager** | Pooled death bursts + impact sparks |
 | **FloatingTextManager** | Pooled damage number labels (32 pre-allocated) |
 | **WaveDefinition.resolve_duration** | Wave 4+ adds +5s per wave beyond authored roster |
@@ -63,6 +64,7 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 ```
 scripts/systems/     wave_manager, enemy_spawner, vfx_manager
+scripts/autoload/    event_bus.gd, audio_manager.gd
 resources/waves/     wave_01 (12s) through wave_03 (22s)
 resources/enemies/   weaker chaser/sprinter/tank pests
 tests/               unit + integration (GdUnit4)
