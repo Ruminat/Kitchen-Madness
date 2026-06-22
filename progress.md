@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 5E statistics persistence
+**Last updated:** Phase 5F melee weapons
 
 ---
 
@@ -84,6 +84,10 @@ Done. `AudioManager` autoload with 12 synthesized placeholder SFX at 70% master 
 
 Done. `RunStatsPersistence` writes run summaries to `ignored/stats/stats_YYYY-MM-DD_HHMMSS.json`. One session file per game launch; runs append to a `runs` array. Each record includes character, weapons, level-up upgrades, final wave, level reached, aggregate kills/damage/gold, per-wave timing, and end reason (`death` or `quit`). `StatsPersistence` autoload listens to `metrics_run_ended`; `LevelUpManager` emits `upgrade_applied`. Quit saves via `NOTIFICATION_WM_CLOSE_REQUEST` in `game.gd`. Disabled in headless mode. Tests in `test_run_stats_persistence.gd`.
 
+### Phase 5F - Melee weapons
+
+Done. Added `WeaponType.MELEE` and melee fields (`melee_range`, `melee_arc_degrees`, `melee_knockback`) to `WeaponDefinition`. New `melee_weapon.gd` handles arc hit detection, crit rolls, swing VFX, and knockback. Kitchen knife: fast 50° stab at 46px range. Frying pan: slow 180° swing with 95px knockback. `BaseEnemy.apply_knockback()` added. Tests in `test_melee_weapon.gd`.
+
 ### Phase 4F - Balance metrics and tuning
 
 Done. `BalanceMetrics` tracks per-wave combat/economy data; `BalanceCalculator` estimates DPS budgets; `WaveSummaryDisplay` shows end-of-wave debug summary. Balance model at `docs/balance-model.md`. Tests in `test_balance_calculator.gd` and `test_balance_metrics.gd`.
@@ -92,18 +96,17 @@ Done. `BalanceMetrics` tracks per-wave combat/economy data; `BalanceCalculator` 
 
 ## Active tasks
 
-### Phase 5F - Melee weapons
+### Phase 6A - Enemy variety and swarm spawning
 
-**Goal:** Add true melee weapons that damage enemies in close range without creating projectiles.
+**Goal:** Add more enemy types and spawn them in swarms rather than individually.
 
 | Task | Status | Notes |
 |---|---|---|
-| Melee weapon type | Pending | New `WeaponType.MELEE` in `WeaponDefinition` |
-| Kitchen knife | Pending | Fast stab with short forward arc |
-| Frying pan | Pending | Slow swing with knockback in 180-degree frontal arc |
-| Hit detection | Pending | Area query or raycast for enemies in range/arc |
-| Visual feedback | Pending | Swing animation/trail effect on attack |
-| Tests | Pending | Cover melee hit detection and damage application |
+| Enemy roster expansion | Pending | Add more kitchen pest enemies |
+| Swarm spawn system | Pending | Spawn enemies in groups of 3-8 |
+| Swarm timing | Pending | Burst spawns with brief cooldowns |
+| New enemy types | Pending | Flies, ants, pantry moths |
+| Tests | Pending | Verify swarm spawning and enemy variety |
 
 ---
 

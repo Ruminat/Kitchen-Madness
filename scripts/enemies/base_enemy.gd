@@ -78,6 +78,14 @@ func apply_contact_slow(duration: float = CONTACT_SLOW_DURATION) -> void:
 	_sync_move_speed()
 
 
+func apply_knockback(direction: Vector2, force: float) -> void:
+	if direction.length_squared() <= 0.0001 or force <= 0.0:
+		return
+
+	global_position += direction.normalized() * force
+	global_position = ArenaClamp.clamp_position(global_position, arena_bounds, _get_radius())
+
+
 func take_damage(amount: int) -> void:
 	if not health_component.is_alive():
 		return

@@ -1,21 +1,20 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=4 format=3 uid="uid://weapondef_frying_pan"]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3 uid="uid://weapondef_frying_pan"]
 
 [ext_resource type="Script" path="res://scripts/data/weapon_definition.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/weapons/projectile_weapon.gd" id="2"]
-[ext_resource type="PackedScene" uid="uid://projectile001" path="res://scenes/projectiles/projectile.tscn" id="3"]
-[ext_resource type="Texture2D" path="res://assets/weapons/frying_pan.png" id="4"]
+[ext_resource type="Script" path="res://scripts/weapons/melee_weapon.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/weapons/frying_pan.png" id="3"]
 
 [resource]
 script = ExtResource("1")
 id = "frying_pan"
 display_name = "Frying Pan"
-description = "Heavy clangs with short reach and big knockback energy."
-icon = ExtResource("4")
+description = "Slow wide clang with heavy knockback."
+icon = ExtResource("3")
+weapon_type = 5
 weapon_script = ExtResource("2")
 damage = 26
 fire_rate = 1.1
-projectile_scene = ExtResource("3")
-pellet_count = 1
-projectile_speed = 300.0
-projectile_lifetime = 0.7
+melee_range = 54.0
+melee_arc_degrees = 180.0
+melee_knockback = 95.0
 vfx_accent = Color(0.75, 0.7, 0.65, 1)

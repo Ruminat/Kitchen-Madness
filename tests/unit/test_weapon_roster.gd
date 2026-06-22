@@ -13,6 +13,7 @@ const BURST_SCRIPT := preload("res://scripts/weapons/burst_weapon.gd")
 const BOOMERANG_SCRIPT := preload("res://scripts/weapons/boomerang_weapon.gd")
 const TURRET_SCRIPT := preload("res://scripts/weapons/turret_weapon.gd")
 const ORBIT_SCRIPT := preload("res://scripts/weapons/orbit_weapon.gd")
+const MELEE_SCRIPT := preload("res://scripts/weapons/melee_weapon.gd")
 
 
 class MockOrbitEnemy:
@@ -54,8 +55,15 @@ func test_get_by_id_returns_matching_weapon() -> void:
 
 
 func test_projectile_weapons_reference_projectile_scene() -> void:
-	for weapon in [PEPPER_DEF, SOUP_DEF, KNIFE_DEF, PAN_DEF, GARLIC_DEF, LADLE_DEF, TOASTER_DEF]:
+	for weapon in [PEPPER_DEF, SOUP_DEF, GARLIC_DEF, LADLE_DEF, TOASTER_DEF]:
 		assert_object(weapon.projectile_scene).is_not_null()
+
+
+func test_melee_weapons_use_melee_script_without_projectiles() -> void:
+	for weapon in [KNIFE_DEF, PAN_DEF]:
+		assert_object(weapon.weapon_script).is_same(MELEE_SCRIPT)
+		assert_int(weapon.weapon_type).is_equal(WeaponDefinition.WeaponType.MELEE)
+		assert_object(weapon.projectile_scene).is_null()
 
 
 func test_special_weapons_use_expected_scripts() -> void:

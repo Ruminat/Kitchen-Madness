@@ -4,13 +4,13 @@
 
 ## Current status
 
-**Phase 5E done.** Run statistics persist to `ignored/stats/` as timestamped JSON session files. Each run records character, weapons, upgrades, wave totals, and per-wave breakdowns. Saves on death or window close.
+**Phase 5F done.** Kitchen knife and frying pan are true melee weapons with arc hit detection, crit support, swing VFX, and pan knockback.
 
 **Playable loop:** character select → waves (3x enemies) → weapon shop → repeat. Level-ups = stat + crit upgrades. SFX for combat, pickups, level-up, wave complete.
 
-**Content:** 9 characters, 8 kitchen weapons, VFX, HUD, `2640×1440` arena, camera follow, crit system, pooled damage numbers, basic audio, run stats persistence.
+**Content:** 9 characters, 8 kitchen weapons (2 melee), VFX, HUD, `2640×1440` arena, camera follow, crit system, pooled damage numbers, basic audio, run stats persistence.
 
-**Next:** Phase 5F — Melee weapons, Phase 6A — Enemy variety & swarm spawning, Phase 6B — Shop UI overhaul.
+**Next:** Phase 6A — Enemy variety & swarm spawning, Phase 6B — Shop UI overhaul.
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam.
 
@@ -37,11 +37,12 @@
 | **VfxManager** | Pooled death bursts + impact sparks |
 | **FloatingTextManager** | Pooled damage number labels (32 pre-allocated) |
 | **WaveDefinition.resolve_duration** | Wave 4+ adds +5s per wave beyond authored roster |
-| **BaseEnemy.apply_contact_slow** | 2s slow on player contact (35% speed) |
+| **BaseEnemy** | `apply_contact_slow` (2s @ 35% speed) · `apply_knockback` (melee pan) |
+| **MeleeWeapon** | Arc hit query from player position; `melee_range` / `melee_arc_degrees` / `melee_knockback` on `.tres` |
 | **WaveManager / EnemySpawner** | Timer, weighted spawns, camera-ring spawns |
 | **GoldSystem / ShopManager** | Kill gold → weapon shop → `start_next_wave()` |
 | **LevelUpManager** | 1-of-3 free stat picks from `UpgradeDefinition` |
-| **Crit system** | `Player` → `WeaponController.sync_all_crit_stats()` → weapons → projectiles |
+| **Crit system** | `Player` → `WeaponController.sync_all_crit_stats()` → weapons → projectiles/melee |
 
 **Main scene:** `res://scenes/main/game.tscn`
 
@@ -64,8 +65,9 @@
 ## Key paths
 
 ```
+scripts/weapons/     melee_weapon.gd, projectile_weapon.gd, orbit_weapon.gd
 scripts/systems/     wave_manager, enemy_spawner, vfx_manager
-scripts/autoload/    event_bus.gd, audio_manager.gd
+scripts/autoload/    event_bus.gd, audio_manager.gd, stats_persistence.gd
 resources/waves/     wave_01 (12s) through wave_03 (22s)
 resources/enemies/   weaker chaser/sprinter/tank pests
 tests/               unit + integration (GdUnit4)
