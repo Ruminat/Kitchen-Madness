@@ -6,6 +6,18 @@ const CHEF_DEF := preload("res://resources/characters/chef.tres")
 const KNIFE_DEF := preload("res://resources/weapons/kitchen_knife.tres")
 
 
+class MockEnemy:
+	extends Node2D
+
+	var health_component := HealthComponent.new()
+
+	func _init(alive: bool = true) -> void:
+		add_child(health_component)
+		health_component.name = "HealthComponent"
+		health_component.max_health = 10
+		health_component.current_health = 10 if alive else 0
+
+
 func test_get_owned_weapon_ids_returns_starting_weapon() -> void:
 	var controller := await _create_controller()
 	assert_int(controller.get_owned_weapon_ids().size()).is_equal(1)
@@ -35,6 +47,37 @@ func test_upgrade_weapon_damage_only_affects_target_weapon() -> void:
 
 	assert_int(starter.get_damage()).is_equal(starter_before)
 	assert_int(knife.get_damage()).is_greater(knife_before)
+
+
+func test_weapons_create_visible_orbit_sprite() -> void:
+	var controller := await _create_controller()
+	var weapon := controller.get_child(0) as BaseWeapon
+
+	assert_object(weapon.get_node_or_null("WeaponSprite")).is_not_null()
+
+
+func test_controller_offsets_orbiting_weapons() -> void:
+	var controller := await _create_controller()
+	var weapon := controller.get_child(0) as BaseWeapon
+
+	controller._process(0.1)
+
+	assert_vector(weapon.position).is_not_equal(Vector2.ZERO)
+
+
+func test_find_nearest_enemy_ignores_dead_enemies() -> void:
+	var controller := await _create_controller()
+	var weapon := controller.get_child(0) as BaseWeapon
+	var dead_near := MockEnemy.new(false)
+	var alive_far := MockEnemy.new(true)
+	dead_near.add_to_group("enemies")
+	alive_far.add_to_group("enemies")
+	dead_near.global_position = weapon.global_position + Vector2.RIGHT * 5.0
+	alive_far.global_position = weapon.global_position + Vector2.RIGHT * 30.0
+	add_child(dead_near)
+	add_child(alive_far)
+
+	assert_object(weapon.find_nearest_enemy()).is_same(alive_far)
 
 
 func _create_controller() -> WeaponController:

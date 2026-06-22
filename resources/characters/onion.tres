@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CharacterDefinition" load_steps=4 format=3 uid="uid://chardef_onion"]
 
 [ext_resource type="Script" path="res://scripts/data/character_definition.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/onion.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/characters/player_generated/onion.png" id="2"]
 [ext_resource type="Resource" uid="uid://weapondef_onion_ring" path="res://resources/weapons/onion_ring_blade.tres" id="3"]
 
 [resource]

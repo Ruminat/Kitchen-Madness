@@ -7,6 +7,10 @@ var _angle := 0.0
 var _hit_cooldowns: Dictionary = {}
 
 
+func uses_orbit_slot() -> bool:
+	return false
+
+
 func _process(delta: float) -> void:
 	var player := get_parent().get_parent() as CharacterBody2D
 	if player == null:
@@ -78,8 +82,15 @@ func _draw() -> void:
 	var blade_count := definition.pellet_count
 	var orbit_radius := definition.orbit_radius
 	var blade_color := Color(0.75, 0.85, 1.0, 0.9)
+	var blade_texture := definition.icon
 
 	for blade_index in blade_count:
 		var blade_angle := _angle + TAU * float(blade_index) / float(blade_count)
 		var offset := Vector2(cos(blade_angle), sin(blade_angle)) * orbit_radius
-		draw_circle(offset, BLADE_RADIUS, blade_color)
+		if blade_texture:
+			var size := Vector2(BLADE_RADIUS * 2.8, BLADE_RADIUS * 2.8)
+			draw_set_transform(offset, blade_angle, Vector2.ONE)
+			draw_texture_rect(blade_texture, Rect2(-size * 0.5, size), false, blade_color)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		else:
+			draw_circle(offset, BLADE_RADIUS, blade_color)

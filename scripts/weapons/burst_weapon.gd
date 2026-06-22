@@ -33,6 +33,7 @@ func _fire_burst() -> void:
 	if container == null:
 		return
 
+	play_fire_feedback()
 	var damage := get_damage()
 	var pellet_count := maxi(definition.pellet_count, 1)
 

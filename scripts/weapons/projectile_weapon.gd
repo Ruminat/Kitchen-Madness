@@ -16,28 +16,13 @@ func _process(delta: float) -> void:
 	if _cooldown > 0.0:
 		return
 
-	var target := _find_nearest_enemy()
+	var target := find_nearest_enemy()
 	if target == null:
 		return
 
 	_fire_at(target)
 	var fire_rate := definition.fire_rate if definition else 0.45
 	_cooldown = fire_rate / get_fire_rate_multiplier()
-
-
-func _find_nearest_enemy() -> Node2D:
-	var nearest: Node2D = null
-	var nearest_dist_sq := INF
-
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if not is_instance_valid(enemy):
-			continue
-		var dist_sq := global_position.distance_squared_to(enemy.global_position)
-		if dist_sq < nearest_dist_sq:
-			nearest_dist_sq = dist_sq
-			nearest = enemy
-
-	return nearest
 
 
 func _fire_at(target: Node2D) -> void:
@@ -48,6 +33,7 @@ func _fire_at(target: Node2D) -> void:
 	if container == null:
 		return
 
+	play_fire_feedback()
 	var damage := get_damage()
 	var base_direction := (target.global_position - global_position).normalized()
 	var pellet_count := definition.pellet_count if definition else 1

@@ -25,6 +25,7 @@ func test_each_weapon_has_required_fields() -> void:
 		assert_str(weapon.id).is_not_empty()
 		assert_str(weapon.display_name).is_not_empty()
 		assert_str(weapon.description).is_not_empty()
+		assert_object(weapon.icon).is_not_null()
 		assert_object(weapon.weapon_script).is_not_null()
 
 
@@ -41,8 +42,9 @@ func test_get_by_id_returns_matching_weapon() -> void:
 
 
 func test_projectile_weapons_reference_projectile_scene() -> void:
-	for weapon in [PEPPER_DEF, SOUP_DEF, KNIFE_DEF, PAN_DEF]:
+	for weapon in [PEPPER_DEF, SOUP_DEF, KNIFE_DEF, PAN_DEF, GARLIC_DEF, LADLE_DEF, TOASTER_DEF]:
 		assert_object(weapon.projectile_scene).is_not_null()
+		assert_object(weapon.projectile_texture).is_not_null()
 
 
 func test_special_weapons_use_expected_scripts() -> void:

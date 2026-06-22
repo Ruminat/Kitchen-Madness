@@ -35,6 +35,18 @@ func setup(projectile_container: Node2D, bounds: Rect2) -> void:
 		add_weapon(starting_weapon)
 
 
+func _process(delta: float) -> void:
+	var visible_index := 0
+	var visible_count := _get_orbiting_weapon_count()
+	for weapon in _weapons:
+		if not is_instance_valid(weapon):
+			continue
+		if weapon.uses_orbit_slot():
+			weapon.set_orbit_slot(visible_index, visible_count)
+			visible_index += 1
+		weapon.update_weapon_visual(delta)
+
+
 func add_weapon(definition: WeaponDefinition) -> BaseWeapon:
 	var weapon: BaseWeapon
 	if definition.weapon_script:
@@ -45,6 +57,14 @@ func add_weapon(definition: WeaponDefinition) -> BaseWeapon:
 	weapon.setup(definition, _arena_bounds, _projectile_container)
 	_weapons.append(weapon)
 	return weapon
+
+
+func _get_orbiting_weapon_count() -> int:
+	var count := 0
+	for weapon in _weapons:
+		if is_instance_valid(weapon) and weapon.uses_orbit_slot():
+			count += 1
+	return count
 
 
 func set_arena_bounds(bounds: Rect2) -> void:

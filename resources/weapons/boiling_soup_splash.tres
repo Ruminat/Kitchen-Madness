@@ -1,18 +1,21 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=4 format=3 uid="uid://weapondef_boiling_soup"]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=5 format=3 uid="uid://weapondef_boiling_soup"]
 
 [ext_resource type="Script" path="res://scripts/data/weapon_definition.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/weapons/projectile_weapon.gd" id="2"]
 [ext_resource type="PackedScene" uid="uid://projectile001" path="res://scenes/projectiles/projectile.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/weapons/boiling_soup_splash.png" id="4"]
 
 [resource]
 script = ExtResource("1")
 id = "boiling_soup_splash"
 display_name = "Boiling Soup Splash"
 description = "Short-range splash that coats nearby vermin."
+icon = ExtResource("4")
 weapon_script = ExtResource("2")
 damage = 8
 fire_rate = 0.85
 projectile_scene = ExtResource("3")
+projectile_texture = ExtResource("4")
 pellet_count = 5
 spread_degrees = 32.0
 projectile_speed = 360.0

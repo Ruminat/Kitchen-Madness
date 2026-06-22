@@ -11,7 +11,7 @@ func _process(delta: float) -> void:
 	if _cooldown > 0.0:
 		return
 
-	var target := _find_nearest_enemy()
+	var target := find_nearest_enemy()
 	if target == null:
 		return
 
@@ -29,21 +29,6 @@ func _player_is_alive() -> bool:
 	return health_component == null or health_component.is_alive()
 
 
-func _find_nearest_enemy() -> Node2D:
-	var nearest: Node2D = null
-	var nearest_dist_sq := INF
-
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if not is_instance_valid(enemy):
-			continue
-		var dist_sq := global_position.distance_squared_to(enemy.global_position)
-		if dist_sq < nearest_dist_sq:
-			nearest_dist_sq = dist_sq
-			nearest = enemy
-
-	return nearest
-
-
 func _throw_at(target: Node2D) -> void:
 	if definition == null or definition.projectile_scene == null:
 		return
@@ -53,6 +38,7 @@ func _throw_at(target: Node2D) -> void:
 	if container == null or player == null:
 		return
 
+	play_fire_feedback()
 	var direction := (target.global_position - global_position).normalized()
 	var projectile := definition.projectile_scene.instantiate()
 	if projectile.has_method("setup"):

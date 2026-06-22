@@ -34,6 +34,7 @@ func _deploy_turret() -> void:
 	if container == null or player == null:
 		return
 
+	play_fire_feedback()
 	var turret := Node2D.new()
 	turret.set_script(load("res://scripts/weapons/toaster_turret.gd"))
 	container.add_child(turret)

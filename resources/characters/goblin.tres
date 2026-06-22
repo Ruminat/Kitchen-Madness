@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CharacterDefinition" load_steps=4 format=3 uid="uid://chardef_goblin"]
 
 [ext_resource type="Script" path="res://scripts/data/character_definition.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/goblin.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/characters/player_generated/goblin.png" id="2"]
 [ext_resource type="Resource" uid="uid://weapondef_boiling_soup" path="res://resources/weapons/boiling_soup_splash.tres" id="3"]
 
 [resource]

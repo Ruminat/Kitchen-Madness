@@ -1,18 +1,21 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=4 format=3 uid="uid://weapondef_pepper_grinder"]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=5 format=3 uid="uid://weapondef_pepper_grinder"]
 
 [ext_resource type="Script" path="res://scripts/data/weapon_definition.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/weapons/projectile_weapon.gd" id="2"]
 [ext_resource type="PackedScene" uid="uid://projectile001" path="res://scenes/projectiles/projectile.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/weapons/pepper_grinder_gun.png" id="4"]
 
 [resource]
 script = ExtResource("1")
 id = "pepper_grinder_gun"
 display_name = "Pepper Grinder Gun"
 description = "Steady pepper bursts at the nearest pest."
+icon = ExtResource("4")
 weapon_script = ExtResource("2")
 damage = 15
 fire_rate = 0.45
 projectile_scene = ExtResource("3")
+projectile_texture = ExtResource("4")
 pellet_count = 1
 spread_degrees = 0.0
 vfx_accent = Color(0.85, 0.65, 0.25, 1)
