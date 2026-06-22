@@ -4,13 +4,13 @@ Handoff doc for new chat sessions. **Kitchen Madness** — top-down arena surviv
 
 ## Current status
 
-**Phase 5B done.** Damage numbers now have bounce/pop animation and crit numbers are larger (1.5x scale). FloatingTextManager pools 32 labels for performance. WeaponDefinition has damage_number_color field for future customization.
+**Phase 5B done.** Damage numbers: 44px normal / 64px crit, spread out when overlapping (circular pattern). 3x enemy count. Crit system (5% base chance, 150% damage) with Precision/Devastation upgrades.
 
-**Playable loop:** character select → waves → weapon shop → repeat. Level-ups = stat upgrades (now including crit stats); shop = weapon offers only.
+**Playable loop:** character select → waves (3x enemies) → weapon shop → repeat. Level-ups = stat + crit upgrades.
 
-**Content:** 9 characters, 8 kitchen weapons, combat VFX, HUD, `2640×1440` arena, following camera, off-camera spawns, crit system, enhanced damage numbers.
+**Content:** 9 characters, 8 kitchen weapons, VFX, HUD, `2640×1440` arena, camera follow, crit system, pooled damage numbers.
 
-**Next:** Phase 5C — projectile visuals fix (investigate gun weapons shooting themselves).
+**Next:** Phase 5C — projectile visuals fix.
 
 **Not in scope:** save/meta, main menu, multiple maps, Steam, audio.
 
