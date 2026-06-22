@@ -33,7 +33,7 @@ func _ready() -> void:
 	add_child(balance_metrics)
 	get_tree().paused = false
 
-	_arena_bounds = arena.get_bounds()
+	_arena_bounds = arena.get_global_bounds()
 	await _apply_starting_character()
 	player.setup(_arena_bounds, projectile_container)
 	_fit_camera_to_play_area()
@@ -85,7 +85,9 @@ func _follow_player_camera() -> void:
 	if player == null or camera == null:
 		return
 
-	camera.global_position = _clamp_camera_position(player.global_position)
+	var clamped_position := _clamp_camera_position(player.global_position)
+	camera.global_position = clamped_position
+	enemy_spawner.set_camera_focus(clamped_position)
 
 
 func _clamp_camera_position(target_position: Vector2) -> Vector2:

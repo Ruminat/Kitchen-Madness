@@ -5,6 +5,7 @@ signal died
 const BASE_MOVE_SPEED := 220.0
 const CONTACT_DAMAGE := 10
 const BODY_RADIUS := 14.0
+const COLLISION := preload("res://scripts/data/collision_layers.gd")
 ## Small buffer so fast enemies still register contact on the frame they touch.
 const CONTACT_FORGIVENESS := 2.0
 
@@ -26,6 +27,9 @@ var _crit_damage := 1.5
 
 func _ready() -> void:
 	add_to_group("player")
+	collision_layer = COLLISION.PLAYER
+	collision_mask = COLLISION.PLAYER_MASK
+	motion_mode = MOTION_MODE_FLOATING
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_died)
 	call_deferred("_emit_initial_health")

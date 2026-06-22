@@ -9,9 +9,11 @@ var wave_definition: WaveDefinition
 var enemy_container: Node2D
 var arena_bounds := Rect2()
 var camera_target: Node2D
+var camera_focus := Vector2.ZERO
 var camera_view_size := Arena.DEFAULT_VIEW_SIZE
-
 var is_active := true
+
+var _has_camera_focus := false
 var _spawn_timer: Timer
 var _elapsed_time := 0.0
 
@@ -58,14 +60,22 @@ func set_camera_view_size(view_size: Vector2) -> void:
 func set_camera_spawn_target(focus_target: Node2D, view_size: Vector2) -> void:
 	camera_target = focus_target
 	camera_view_size = view_size
+	_has_camera_focus = false
+	if focus_target:
+		camera_focus = focus_target.global_position
+
+
+func set_camera_focus(world_position: Vector2) -> void:
+	camera_focus = world_position
+	_has_camera_focus = true
 
 
 func _spawn_enemy() -> void:
 	if not is_active or enemy_container == null:
 		return
 
-	var max_enemies := (wave_definition.max_enemies * 3) if wave_definition else 120
-	if enemy_container.get_child_count() >= max_enemies:
+	var max_alive := _max_alive_enemies()
+	if enemy_container.get_child_count() >= max_alive:
 		_schedule_next_spawn()
 		return
 
@@ -75,15 +85,59 @@ func _spawn_enemy() -> void:
 		_schedule_next_spawn()
 		return
 
-	var enemy := scene.instantiate() as CharacterBody2D
-	enemy_container.add_child(enemy)
-	enemy.global_position = _random_spawn_position()
-	if enemy.has_method("set_arena_bounds"):
-		enemy.set_arena_bounds(arena_bounds)
-	if enemy.has_method("configure") and definition:
-		enemy.configure(definition)
+	var swarm_size := _resolve_swarm_size(definition)
+	var anchor := _random_spawn_position()
+	var cluster_radius := wave_definition.swarm_cluster_radius if wave_definition else 0.0
+
+	for _index in swarm_size:
+		if enemy_container.get_child_count() >= max_alive:
+			break
+
+		var enemy := scene.instantiate() as CharacterBody2D
+		enemy_container.add_child(enemy)
+		enemy.global_position = _clamp_spawn_position(
+			_cluster_spawn_position(anchor, cluster_radius)
+		)
+		if enemy.has_method("set_arena_bounds"):
+			enemy.set_arena_bounds(arena_bounds)
+		if enemy.has_method("configure") and definition:
+			enemy.configure(definition)
 
 	_schedule_next_spawn()
+
+
+func _max_alive_enemies() -> int:
+	if wave_definition:
+		return wave_definition.max_enemies * 3
+	return 120
+
+
+func _resolve_swarm_size(definition: EnemyDefinition) -> int:
+	if definition and definition.is_elite:
+		return 1
+	if wave_definition == null:
+		return 1
+	return wave_definition.roll_swarm_size()
+
+
+func _cluster_spawn_position(anchor: Vector2, radius: float) -> Vector2:
+	if radius <= 0.0:
+		return anchor
+
+	var offset := Vector2.from_angle(randf() * TAU) * randf_range(0.0, radius)
+	return anchor + offset
+
+
+func _clamp_spawn_position(position: Vector2) -> Vector2:
+	return ArenaClamp.clamp_position(position, arena_bounds, EDGE_MARGIN)
+
+
+func _spawn_camera_center() -> Vector2:
+	if _has_camera_focus:
+		return camera_focus
+	if camera_target:
+		return camera_target.global_position
+	return Vector2.ZERO
 
 
 func _pick_spawn_definition() -> EnemyDefinition:
@@ -165,26 +219,27 @@ func _current_spawn_interval() -> float:
 func _random_spawn_position() -> Vector2:
 	var offscreen_position := _random_offscreen_position()
 	if offscreen_position != Vector2.INF:
-		return offscreen_position
-	return _random_arena_edge_position()
+		return _clamp_spawn_position(offscreen_position)
+	return _clamp_spawn_position(_random_arena_edge_position())
 
 
 func _random_offscreen_position() -> Vector2:
-	if camera_target == null:
+	if camera_target == null and not _has_camera_focus:
 		return Vector2.INF
 
 	var inner_bounds := arena_bounds.grow(-EDGE_MARGIN)
-	var camera_rect := Rect2(
-		camera_target.global_position - camera_view_size * 0.5, camera_view_size
-	)
+	var camera_rect := Rect2(_spawn_camera_center() - camera_view_size * 0.5, camera_view_size)
 	var spawn_bands := _build_spawn_bands(camera_rect, inner_bounds)
 	if spawn_bands.is_empty():
 		return Vector2.INF
 
 	var band: Dictionary = spawn_bands[randi() % spawn_bands.size()]
+	var position := Vector2.ZERO
 	if band.axis == &"horizontal":
-		return Vector2(randf_range(band.min, band.max), band.fixed)
-	return Vector2(band.fixed, randf_range(band.min, band.max))
+		position = Vector2(randf_range(band.min, band.max), band.fixed)
+	else:
+		position = Vector2(band.fixed, randf_range(band.min, band.max))
+	return _clamp_spawn_position(position)
 
 
 func _build_spawn_bands(camera_rect: Rect2, inner_bounds: Rect2) -> Array[Dictionary]:

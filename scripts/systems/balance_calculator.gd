@@ -75,7 +75,8 @@ static func estimate_wave_kills(wave: WaveDefinition) -> int:
 
 	var spawn_count := wave.duration / maxf(wave.spawn_interval, 0.1)
 	var avg_multiplier := (wave.spawn_multiplier_start + wave.spawn_multiplier_end) * 0.5
-	return int(spawn_count * avg_multiplier)
+	var avg_swarm_size := wave.average_swarm_size()
+	return int(spawn_count * avg_multiplier * avg_swarm_size)
 
 
 static func calculate_wave_hp_budget(

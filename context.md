@@ -1,48 +1,44 @@
 # Kitchen Madness — project context
 
-**Kitchen Madness** — top-down arena survivor roguelite (Godot 4). Full history: [progress.md](progress.md). Roadmap: [plans.md](plans.md).
+**Kitchen Madness** — top-down arena survivor roguelite (Godot 4). History: [progress.md](progress.md). Roadmap: [plans.md](plans.md).
 
 ## Current status
 
-**Phase 5F done.** Kitchen knife and frying pan are true melee weapons with arc hit detection, crit support, swing VFX, and pan knockback.
+**Phase 6A done** + post-6A tuning: swarm spawning, ant/moth enemies, **3× wave density**, **global arena bounds** (spawn + camera clamp), **enemy/enemy + enemy/player collisions** (no stacking).
 
-**Playable loop:** character select → waves (3x enemies) → weapon shop → repeat. Level-ups = stat + crit upgrades. SFX for combat, pickups, level-up, wave complete.
+**Loop:** character select → swarm waves → weapon shop → repeat. Level-ups = stat/crit upgrades. SFX + run stats to `ignored/stats/`.
 
-**Content:** 9 characters, 8 kitchen weapons (2 melee), VFX, HUD, `2640×1440` arena, camera follow, crit system, pooled damage numbers, basic audio, run stats persistence.
+**Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled damage numbers.
 
-**Next:** Phase 6A — Enemy variety & swarm spawning, Phase 6B — Shop UI overhaul.
-
-**Not in scope:** save/meta, main menu, multiple maps, Steam.
+**Next:** Phase 6B — Shop UI overhaul.
 
 ---
 
 ## Iteration rule
 
-1. Zero parser/scene errors · **F5** smoke test
-2. `\.\tools\codecheck.ps1` must pass (gdlint + gdformat + boot + tests)
+1. No parser errors · **F5** smoke test
+2. `.\tools\codecheck.ps1` (gdlint + gdformat + boot + tests)
 3. Update [progress.md](progress.md) after a phase/slice
-4. Large visual iterations: `.\tools\capture-visuals.ps1` → `visual-tests/screenshots/`
+4. Never commit `.vscode/`
 
-**Godot 4.6+**, `gdtoolkit` on PATH. **Never commit `.vscode/`**.
+**Godot 4.6+** · `gdtoolkit` on PATH.
 
 ---
 
-## Architecture (keep these patterns)
+## Architecture (patterns to keep)
 
 | Pattern | Where |
 |---|---|
-| **EventBus** | `scripts/autoload/event_bus.gd` — gameplay emits, UI listens |
-| **AudioManager** | `scripts/autoload/audio_manager.gd` — pooled SFX players, synthesized placeholders |
-| **StatsPersistence** | `scripts/autoload/stats_persistence.gd` — writes run JSON to `ignored/stats/` on death/quit |
-| **VfxManager** | Pooled death bursts + impact sparks |
-| **FloatingTextManager** | Pooled damage number labels (32 pre-allocated) |
-| **WaveDefinition.resolve_duration** | Wave 4+ adds +5s per wave beyond authored roster |
-| **BaseEnemy** | `apply_contact_slow` (2s @ 35% speed) · `apply_knockback` (melee pan) |
-| **MeleeWeapon** | Arc hit query from player position; `melee_range` / `melee_arc_degrees` / `melee_knockback` on `.tres` |
-| **WaveManager / EnemySpawner** | Timer, weighted spawns, camera-ring spawns |
-| **GoldSystem / ShopManager** | Kill gold → weapon shop → `start_next_wave()` |
-| **LevelUpManager** | 1-of-3 free stat picks from `UpgradeDefinition` |
-| **Crit system** | `Player` → `WeaponController.sync_all_crit_stats()` → weapons → projectiles/melee |
+| **EventBus** | `scripts/autoload/event_bus.gd` |
+| **WaveDefinition** | Swarm fields + `resolve_duration()` (+5s per wave after roster) |
+| **EnemySpawner** | Weighted swarms, off-camera bands, `set_camera_focus()` for clamped spawn ring |
+| **Arena.get_global_bounds()** | Player, camera, spawner all use world-space bounds |
+| **CollisionLayers** | Player mask = wall+enemy; enemy mask = wall+enemy+player; `MOTION_MODE_FLOATING` |
+| **BaseEnemy** | Contact slow · knockback · collision radius from `EnemyDefinition` |
+| **MeleeWeapon** | Arc hits · crit · knockback via `.tres` fields |
+| **GoldSystem / ShopManager** | Between-wave weapon shop |
+| **LevelUpManager** | 1-of-3 stat upgrades only |
+| **Crit** | Player → `WeaponController.sync_all_crit_stats()` → weapons |
 
 **Main scene:** `res://scenes/main/game.tscn`
 
@@ -50,26 +46,26 @@
 
 ---
 
-## Controls (mouse OR keyboard — always both)
+## Controls (mouse OR keyboard)
 
 | Context | Keyboard |
 |---|---|
-| Move | **WASD or arrows** |
-| Character select | W/S or ↑/↓ · 1–9 or Enter |
-| Level-up | W/S or ↑/↓ · 1/2/3 or Enter |
-| Weapon shop | W/S or ↑/↓ · **1–4** or Enter buy · Enter continue |
-| Game over | R or Enter |
+| Move | WASD / arrows |
+| Character select | W/S · 1–9 · Enter |
+| Level-up | W/S · 1/2/3 · Enter |
+| Shop | W/S · **1–4** buy · Enter continue |
+| Game over | R / Enter |
 
 ---
 
 ## Key paths
 
 ```
-scripts/weapons/     melee_weapon.gd, projectile_weapon.gd, orbit_weapon.gd
-scripts/systems/     wave_manager, enemy_spawner, vfx_manager
-scripts/autoload/    event_bus.gd, audio_manager.gd, stats_persistence.gd
-resources/waves/     wave_01 (12s) through wave_03 (22s)
-resources/enemies/   weaker chaser/sprinter/tank pests
+scripts/systems/     enemy_spawner.gd, wave_manager.gd
+scripts/enemies/     base_enemy.gd, moth_enemy.gd
+scripts/data/        wave_definition.gd, collision_layers.gd
+resources/waves/     wave_01–03 (swarm-tuned, 3× density)
+resources/enemies/   chaser, sprinter, tank, ant, moth
 tests/               unit + integration (GdUnit4)
 tools/codecheck.ps1
 ```
@@ -83,8 +79,4 @@ tools/codecheck.ps1
 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode
 ```
 
----
-
-## Read first in a new chat
-
-1. [progress.md](progress.md) · 2. [plans.md](plans.md) · 3. `scripts/game.gd` · 4. `event_bus.gd` · 5. `wave_definition.gd`
+**New chat:** [progress.md](progress.md) → [plans.md](plans.md) → `scripts/game.gd` → `event_bus.gd` → `wave_definition.gd`

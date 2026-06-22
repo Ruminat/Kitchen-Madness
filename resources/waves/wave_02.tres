@@ -1,28 +1,36 @@
-[gd_resource type="Resource" script_class="WaveDefinition" load_steps=8 format=3 uid="uid://wavedef_02"]
+[gd_resource type="Resource" script_class="WaveDefinition" format=3 uid="uid://bfsggessm5dh4"]
 
-[ext_resource type="Script" path="res://scripts/data/wave_definition.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/data/enemy_spawn_entry.gd" id="2"]
-[ext_resource type="Resource" uid="uid://enemydef_chaser" path="res://resources/enemies/chaser.tres" id="3"]
-[ext_resource type="Resource" uid="uid://enemydef_sprinter" path="res://resources/enemies/sprinter.tres" id="4"]
-[ext_resource type="PackedScene" uid="uid://enemy001" path="res://scenes/enemy/enemy.tscn" id="5"]
+[ext_resource type="Script" uid="uid://csbu37rjarvka" path="res://scripts/data/wave_definition.gd" id="1"]
+[ext_resource type="Script" uid="uid://8b76112d4tq4" path="res://scripts/data/enemy_spawn_entry.gd" id="2"]
+[ext_resource type="Resource" path="res://resources/enemies/chaser.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/enemies/sprinter.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/enemies/ant.tres" id="5"]
+[ext_resource type="PackedScene" uid="uid://enemy001" path="res://scenes/enemy/enemy.tscn" id="6"]
 
 [sub_resource type="Resource" id="EnemySpawnEntry_chaser"]
 script = ExtResource("2")
 definition = ExtResource("3")
-weight = 7
+weight = 5
 
 [sub_resource type="Resource" id="EnemySpawnEntry_sprinter"]
 script = ExtResource("2")
 definition = ExtResource("4")
 weight = 3
 
+[sub_resource type="Resource" id="EnemySpawnEntry_ant"]
+script = ExtResource("2")
+definition = ExtResource("5")
+weight = 4
+
 [resource]
 script = ExtResource("1")
 duration = 17.0
-spawn_interval = 2.0
-max_enemies = 16
-spawn_multiplier_start = 1.0
+spawn_interval = 2.5
+max_enemies = 48
 spawn_multiplier_end = 1.35
 spawn_multiplier_curve = 1.2
-enemy_weights = [SubResource("EnemySpawnEntry_chaser"), SubResource("EnemySpawnEntry_sprinter")]
-fallback_enemy_scene = ExtResource("5")
+swarm_size_min = 6
+swarm_size_max = 12
+swarm_cluster_radius = 36.0
+enemy_weights = Array[ExtResource("2")]([SubResource("EnemySpawnEntry_chaser"), SubResource("EnemySpawnEntry_sprinter"), SubResource("EnemySpawnEntry_ant")])
+fallback_enemy_scene = ExtResource("6")

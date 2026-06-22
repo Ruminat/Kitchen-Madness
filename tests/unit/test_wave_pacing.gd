@@ -38,7 +38,7 @@ func test_wave_one_starts_with_chasers_only() -> void:
 	assert_int(WAVE_01.enemy_weights.size()).is_equal(1)
 	var entry := WAVE_01.enemy_weights[0] as EnemySpawnEntry
 	assert_str(entry.definition.id).is_equal("chaser")
-	assert_int(WAVE_01.max_enemies).is_less_equal(12)
+	assert_int(WAVE_01.max_enemies).is_greater_equal(30)
 	assert_float(WAVE_01.spawn_multiplier_start).is_equal(1.0)
 
 
@@ -49,3 +49,23 @@ func test_each_wave_gently_increases_density_and_variety() -> void:
 	assert_int(WAVE_02.max_enemies).is_less(WAVE_03.max_enemies)
 	assert_float(WAVE_01.spawn_interval).is_greater(WAVE_02.spawn_interval)
 	assert_float(WAVE_02.spawn_interval).is_greater(WAVE_03.spawn_interval)
+
+
+func test_each_wave_increases_swarm_size() -> void:
+	assert_int(WAVE_01.swarm_size_max).is_less(WAVE_02.swarm_size_max)
+	assert_int(WAVE_02.swarm_size_max).is_less(WAVE_03.swarm_size_max)
+
+
+func test_wave_two_includes_ants() -> void:
+	assert_bool(_wave_contains_enemy(WAVE_02, "ant")).is_true()
+
+
+func test_wave_three_includes_moths() -> void:
+	assert_bool(_wave_contains_enemy(WAVE_03, "moth")).is_true()
+
+
+func _wave_contains_enemy(wave: WaveDefinition, enemy_id: String) -> bool:
+	for entry in wave.enemy_weights:
+		if entry is EnemySpawnEntry and entry.definition and entry.definition.id == enemy_id:
+			return true
+	return false

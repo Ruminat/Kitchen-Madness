@@ -7,10 +7,13 @@
 [resource]
 script = ExtResource("1")
 duration = 12.0
-spawn_interval = 2.5
-max_enemies = 10
+spawn_interval = 2.8
+max_enemies = 30
 spawn_multiplier_start = 1.0
 spawn_multiplier_end = 1.2
 spawn_multiplier_curve = 1.0
+swarm_size_min = 3
+swarm_size_max = 6
+swarm_cluster_radius = 32.0
 enemy_weights = [ExtResource("2")]
 fallback_enemy_scene = ExtResource("3")

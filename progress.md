@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 5F melee weapons
+**Last updated:** Phase 6A + swarm density, bounds, and collision tuning
 
 ---
 
@@ -88,6 +88,14 @@ Done. `RunStatsPersistence` writes run summaries to `ignored/stats/stats_YYYY-MM
 
 Done. Added `WeaponType.MELEE` and melee fields (`melee_range`, `melee_arc_degrees`, `melee_knockback`) to `WeaponDefinition`. New `melee_weapon.gd` handles arc hit detection, crit rolls, swing VFX, and knockback. Kitchen knife: fast 50° stab at 46px range. Frying pan: slow 180° swing with 95px knockback. `BaseEnemy.apply_knockback()` added. Tests in `test_melee_weapon.gd`.
 
+### Phase 6A - Enemy variety and swarm spawning
+
+Done. `WaveDefinition` gained `swarm_size_min`, `swarm_size_max`, and `swarm_cluster_radius`. `EnemySpawner` spawns burst groups at a shared anchor with cluster jitter; elites always spawn solo. Added ant (tiny, fast chaser) and pantry moth (erratic darting) enemy types. `BalanceCalculator.estimate_wave_kills()` accounts for average swarm size. Tests in `test_spawn_table.gd`, `test_wave_pacing.gd`, and `test_enemy_variety.gd`.
+
+### Post-6A tuning - Density, bounds, collisions
+
+Done. Tripled swarm sizes and `max_enemies` caps (waves 1–3: swarms 3–6 / 6–12 / 9–18). Fixed off-map spawns and camera void by using `Arena.get_global_bounds()` and resetting arena origin in `game.tscn`. Camera and spawner share clamped focus via `EnemySpawner.set_camera_focus()`. Enemies no longer stack: `CollisionLayers` sets player/enemy masks and floating motion mode; collision shapes sync to `EnemyDefinition.radius`. Tests in `test_camera_bounds.gd` and `test_enemy_collision.gd`.
+
 ### Phase 4F - Balance metrics and tuning
 
 Done. `BalanceMetrics` tracks per-wave combat/economy data; `BalanceCalculator` estimates DPS budgets; `WaveSummaryDisplay` shows end-of-wave debug summary. Balance model at `docs/balance-model.md`. Tests in `test_balance_calculator.gd` and `test_balance_metrics.gd`.
@@ -96,17 +104,22 @@ Done. `BalanceMetrics` tracks per-wave combat/economy data; `BalanceCalculator` 
 
 ## Active tasks
 
-### Phase 6A - Enemy variety and swarm spawning
+### Phase 6B - Shop UI overhaul
 
-**Goal:** Add more enemy types and spawn them in swarms rather than individually.
+**Goal:** Improve the shop UI with better structure, icons, spacing, and visual polish.
 
 | Task | Status | Notes |
 |---|---|---|
-| Enemy roster expansion | Pending | Add more kitchen pest enemies |
-| Swarm spawn system | Pending | Spawn enemies in groups of 3-8 |
-| Swarm timing | Pending | Burst spawns with brief cooldowns |
-| New enemy types | Pending | Flies, ants, pantry moths |
-| Tests | Pending | Verify swarm spawning and enemy variety |
+| Layout structure | Pending | Better organized grid or card-based layout |
+| Weapon icons | Pending | Display weapon sprites/icons in shop cards |
+| Price display | Pending | Clearer gold cost with coin icon |
+| Rarity indicators | Pending | Visual distinction for weapon tiers/qualities |
+| Card styling | Pending | Background panels, borders, hover states |
+| Spacing | Pending | Proper padding between elements, less cramped feel |
+| Selection highlight | Pending | Clearer keyboard/mouse selection indicator |
+| Description tooltips | Pending | Optional: hover for weapon description/stats |
+| Keyboard shortcuts | Pending | Show key hints (1-4) more prominently |
+| Tests | Pending | Verify shop UI layout and interaction remain functional |
 
 ---
 

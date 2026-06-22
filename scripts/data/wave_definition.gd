@@ -11,6 +11,21 @@ const DURATION_GROWTH_PER_WAVE := 5.0
 @export var spawn_multiplier_curve: float = 1.0
 @export var enemy_weights: Array[EnemySpawnEntry] = []
 @export var fallback_enemy_scene: PackedScene
+@export var swarm_size_min: int = 1
+@export var swarm_size_max: int = 1
+@export var swarm_cluster_radius: float = 40.0
+
+
+func roll_swarm_size() -> int:
+	var min_size := maxi(swarm_size_min, 1)
+	var max_size := maxi(swarm_size_max, min_size)
+	return randi_range(min_size, max_size)
+
+
+func average_swarm_size() -> float:
+	var min_size := maxi(swarm_size_min, 1)
+	var max_size := maxi(swarm_size_max, min_size)
+	return float(min_size + max_size) * 0.5
 
 
 func get_spawn_multiplier(progress: float) -> float:

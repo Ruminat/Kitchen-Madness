@@ -5,6 +5,7 @@ signal died(enemy: CharacterBody2D)
 
 const CONTACT_SLOW_DURATION := 2.0
 const CONTACT_SLOW_MULTIPLIER := 0.35
+const COLLISION := preload("res://scripts/data/collision_layers.gd")
 
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var move_speed := 90.0
@@ -18,6 +19,7 @@ var _slow_timer := 0.0
 
 func _ready() -> void:
 	add_to_group("enemies")
+	_setup_collision()
 	if definition:
 		_apply_definition()
 
@@ -49,6 +51,21 @@ func _apply_definition() -> void:
 	health.health_changed.emit(health.current_health, health.max_health)
 	_apply_visual(definition)
 	_setup_health_bar(definition)
+	_sync_collision_shape()
+
+
+func _setup_collision() -> void:
+	collision_layer = COLLISION.ENEMY
+	collision_mask = COLLISION.ENEMY_MASK
+	motion_mode = MOTION_MODE_FLOATING
+
+
+func _sync_collision_shape() -> void:
+	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if shape_node == null or not shape_node.shape is CircleShape2D:
+		return
+
+	(shape_node.shape as CircleShape2D).radius = _get_radius()
 
 
 func _setup_health_bar(enemy_definition: EnemyDefinition) -> void:

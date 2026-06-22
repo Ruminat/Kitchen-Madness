@@ -2,6 +2,8 @@
 extends GdUnitTestSuite
 
 const ENEMY_SCENE := preload("res://scenes/enemy/enemy.tscn")
+const CHASER_DEF := preload("res://resources/enemies/chaser.tres")
+const TANK_DEF := preload("res://resources/enemies/tank.tres")
 
 
 func test_empty_entries_returns_null() -> void:
@@ -93,8 +95,9 @@ func test_spawner_picks_positions_outside_camera_view() -> void:
 	var bounds := Rect2(-1320.0, -720.0, 2640.0, 1440.0)
 	var view_size := Vector2(880.0, 480.0)
 	spawner.set_camera_spawn_target(target, view_size)
+	spawner.set_camera_focus(target.global_position)
 	spawner.configure(WaveDefinition.new(), container, bounds)
-	var camera_rect := Rect2(target.global_position - view_size * 0.5, view_size)
+	var camera_rect := Rect2(spawner.camera_focus - view_size * 0.5, view_size)
 	var inner_bounds := bounds.grow(-EnemySpawner.EDGE_MARGIN)
 	var margin := EnemySpawner.SPAWN_OFFSCREEN_MARGIN
 
@@ -144,6 +147,109 @@ func test_spawner_falls_back_to_arena_edge_without_camera_target() -> void:
 
 	assert_vector(spawner._random_offscreen_position()).is_equal(Vector2.INF)
 	assert_bool(spawner.arena_bounds.has_point(spawner._random_spawn_position())).is_true()
+
+
+func test_spawner_swarm_spawns_multiple_enemies() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	add_child(spawner)
+	var container: Node2D = auto_free(Node2D.new()) as Node2D
+	add_child(container)
+
+	var chaser_entry := EnemySpawnEntry.new()
+	chaser_entry.definition = CHASER_DEF
+	chaser_entry.weight = 1
+
+	var wave := WaveDefinition.new()
+	wave.enemy_weights = [chaser_entry]
+	wave.fallback_enemy_scene = ENEMY_SCENE
+	wave.swarm_size_min = 4
+	wave.swarm_size_max = 4
+
+	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner._spawn_enemy()
+	assert_int(container.get_child_count()).is_equal(4)
+
+
+func test_spawner_cluster_position_stays_within_radius() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	spawner.arena_bounds = Rect2(-440.0, -240.0, 880.0, 480.0)
+	var anchor := Vector2(100.0, 50.0)
+	var radius := 30.0
+
+	for _attempt in 20:
+		var position := spawner._cluster_spawn_position(anchor, radius)
+		assert_float(position.distance_to(anchor)).is_less_equal(radius + 0.01)
+
+
+func test_spawner_clamps_spawn_positions_to_arena_bounds() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	spawner.arena_bounds = Rect2(-1320.0, -720.0, 2640.0, 1440.0)
+	var inner_bounds := spawner.arena_bounds.grow(-EnemySpawner.EDGE_MARGIN)
+
+	for _attempt in 20:
+		var position := spawner._clamp_spawn_position(Vector2(9999.0, -9999.0))
+		assert_bool(inner_bounds.has_point(position)).is_true()
+
+
+func test_spawner_swarm_respects_alive_cap() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	add_child(spawner)
+	var container: Node2D = auto_free(Node2D.new()) as Node2D
+	add_child(container)
+
+	var chaser_entry := EnemySpawnEntry.new()
+	chaser_entry.definition = CHASER_DEF
+	chaser_entry.weight = 1
+
+	var wave := WaveDefinition.new()
+	wave.max_enemies = 1
+	wave.enemy_weights = [chaser_entry]
+	wave.fallback_enemy_scene = ENEMY_SCENE
+	wave.swarm_size_min = 6
+	wave.swarm_size_max = 6
+
+	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner._spawn_enemy()
+	assert_int(container.get_child_count()).is_equal(3)
+
+
+func test_spawner_elite_swarm_spawns_one_enemy() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	add_child(spawner)
+	var container: Node2D = auto_free(Node2D.new()) as Node2D
+	add_child(container)
+
+	var tank_entry := EnemySpawnEntry.new()
+	tank_entry.definition = TANK_DEF
+	tank_entry.weight = 1
+
+	var wave := WaveDefinition.new()
+	wave.enemy_weights = [tank_entry]
+	wave.fallback_enemy_scene = ENEMY_SCENE
+	wave.swarm_size_min = 5
+	wave.swarm_size_max = 5
+
+	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner._spawn_enemy()
+	assert_int(container.get_child_count()).is_equal(1)
+
+
+func test_wave_definition_roll_swarm_size_respects_bounds() -> void:
+	var wave := WaveDefinition.new()
+	wave.swarm_size_min = 3
+	wave.swarm_size_max = 6
+
+	for _attempt in 30:
+		var size := wave.roll_swarm_size()
+		assert_int(size).is_greater_equal(3)
+		assert_int(size).is_less_equal(6)
+
+
+func test_wave_definition_average_swarm_size() -> void:
+	var wave := WaveDefinition.new()
+	wave.swarm_size_min = 2
+	wave.swarm_size_max = 4
+	assert_float(wave.average_swarm_size()).is_equal(3.0)
 
 
 func test_spawner_caps_elite_enemies_at_two() -> void:

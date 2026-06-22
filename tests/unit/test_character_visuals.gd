@@ -117,6 +117,18 @@ func test_arena_bounds_are_three_times_camera_view() -> void:
 	assert_vector(arena.get_bounds().size).is_equal(Arena.DEFAULT_VIEW_SIZE * 3.0)
 
 
+func test_arena_global_bounds_include_node_offset() -> void:
+	var arena: Arena = auto_free(ARENA_SCENE.instantiate()) as Arena
+	arena.global_position = Vector2(100.0, 50.0)
+	add_child(arena)
+	await _wait_ready(arena)
+
+	var local_bounds := arena.get_bounds()
+	var global_bounds := arena.get_global_bounds()
+	assert_vector(global_bounds.position).is_equal(local_bounds.position + arena.global_position)
+	assert_vector(global_bounds.size).is_equal(local_bounds.size)
+
+
 func test_arena_floor_tiles_scaled_five_times_smaller() -> void:
 	var arena: Node2D = auto_free(ARENA_SCENE.instantiate()) as Node2D
 	add_child(arena)

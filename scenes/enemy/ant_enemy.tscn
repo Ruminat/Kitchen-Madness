@@ -1,13 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://enemy_sprinter"]
+[gd_scene load_steps=4 format=3 uid="uid://enemy_ant"]
 
-[ext_resource type="Script" path="res://scripts/enemies/sprinter_enemy.gd" id="1_enemy"]
-[ext_resource type="Texture2D" uid="uid://3ncpsn300yy3" path="res://assets/characters/enemies/fly.png" id="2_fly"]
+[ext_resource type="Script" path="res://scripts/enemies/chaser_enemy.gd" id="1_enemy"]
+[ext_resource type="Texture2D" uid="uid://bjq6oar8lslhr" path="res://assets/characters/enemies/cockroach.png" id="2_cockroach"]
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="3_health"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_enemy"]
-radius = 9.0
+radius = 7.0
 
-[node name="SprinterEnemy" type="CharacterBody2D"]
+[node name="AntEnemy" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 11
 motion_mode = 2
@@ -16,13 +16,13 @@ script = ExtResource("1_enemy")
 [node name="Visual" type="Node2D" parent="."]
 
 [node name="Sprite" type="Sprite2D" parent="Visual"]
-texture = ExtResource("2_fly")
-offset = Vector2(18, -4)
-scale = Vector2(0.15, 0.15)
+modulate = Color(0.45, 0.28, 0.12, 1)
+texture = ExtResource("2_cockroach")
+scale = Vector2(0.12, 0.12)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_enemy")
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("3_health")
-max_health = 15
+max_health = 8
