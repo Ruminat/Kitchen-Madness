@@ -4,6 +4,8 @@ signal finished
 
 const FLOAT_DISTANCE := 40.0
 const DURATION := 0.7
+const FONT_NORMAL_SIZE := 36
+const FONT_CRIT_SIZE := 40
 
 var _tween: Tween
 
@@ -20,7 +22,7 @@ func _play_internal(text_value: String, canvas_pos: Vector2, color: Color, is_cr
 	text = text_value
 
 	add_theme_color_override("font_color", color)
-	var font_size := 64 if is_crit else 44
+	var font_size := FONT_CRIT_SIZE if is_crit else FONT_NORMAL_SIZE
 	add_theme_font_size_override("font_size", font_size)
 
 	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

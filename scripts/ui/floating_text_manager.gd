@@ -7,6 +7,8 @@ const HEALTH_COLOR := Color(0.4, 1.0, 0.5, 1.0)
 const POOL_SIZE := 32
 const SPREAD_RADIUS := 40.0
 
+var _damage_font: Font
+
 var _pool: Array[Label] = []
 var _active: Array[Label] = []
 var _hit_positions: Dictionary = {}
@@ -20,7 +22,12 @@ func _ready() -> void:
 
 	EventBus.damage_dealt.connect(_on_damage_dealt)
 	EventBus.pickup_collected.connect(_on_pickup_collected)
+	_load_font()
 	_init_pool()
+
+
+func _load_font() -> void:
+	_damage_font = load("res://assets/fonts/bangers.ttf")
 
 
 func _init_pool() -> void:
@@ -33,6 +40,8 @@ func _create_pooled_label() -> Label:
 	var label := Label.new()
 	label.set_script(load("res://scripts/ui/floating_text.gd"))
 	label.visible = false
+	if _damage_font:
+		label.add_theme_font_override("font", _damage_font)
 	add_child(label)
 	return label
 
