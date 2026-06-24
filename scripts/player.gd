@@ -8,6 +8,7 @@ const BODY_RADIUS := 14.0
 const COLLISION := preload("res://scripts/data/collision_layers.gd")
 ## Small buffer so fast enemies still register contact on the frame they touch.
 const CONTACT_FORGIVENESS := 2.0
+const CONTACT_SLOW_RADIUS := 88.0
 
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var move_speed := BASE_MOVE_SPEED
@@ -238,6 +239,16 @@ func _check_contact_damage() -> void:
 			damage = enemy.get_contact_damage()
 		health_component.take_damage(damage)
 		EventBus.metrics_damage_taken.emit(damage)
+		_apply_contact_slow_around_player()
+		return
+
+
+func _apply_contact_slow_around_player() -> void:
+	var radius_sq := CONTACT_SLOW_RADIUS * CONTACT_SLOW_RADIUS
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy) or not enemy is Node2D:
+			continue
+		if global_position.distance_squared_to((enemy as Node2D).global_position) > radius_sq:
+			continue
 		if enemy.has_method("apply_contact_slow"):
 			enemy.apply_contact_slow()
-		return

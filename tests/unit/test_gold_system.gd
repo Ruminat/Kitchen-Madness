@@ -70,8 +70,19 @@ func test_luck_boosts_gold_from_kills() -> void:
 	assert_int(gold_system.gold).is_equal(11)
 
 
+func test_grease_drop_chance_zero_skips_kill_reward() -> void:
+	var gold_system := _create_gold_system()
+	gold_system.grease_drop_chance = 0.0
+	var enemy := _create_enemy(4)
+
+	EventBus.enemy_killed.emit(enemy, null)
+
+	assert_int(gold_system.gold).is_equal(0)
+
+
 func _create_gold_system() -> GoldSystem:
 	var gold_system: GoldSystem = auto_free(GoldSystem.new()) as GoldSystem
+	gold_system.grease_drop_chance = 1.0
 	add_child(gold_system)
 	return gold_system
 

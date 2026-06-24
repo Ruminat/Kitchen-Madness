@@ -20,6 +20,7 @@ const SFX_PATHS := {
 }
 
 const MUSIC_PATH := "res://assets/audio/music/jrpg_battle_loop.mp3"
+const MENU_DUCK_FACTOR := 0.5
 
 # Volume settings (0.0 to 1.0), default 70% for comfortable listening
 var master_volume := 0.7:
@@ -34,6 +35,8 @@ var sfx_volume := 0.5
 var _sfx_players: Array[AudioStreamPlayer] = []
 var _available_players: Array[AudioStreamPlayer] = []
 var _music_player: AudioStreamPlayer
+var _music_duck_depth := 0
+var _music_volume_tween: Tween
 
 # Cached sound effects
 var _sfx_cache: Dictionary = {}
@@ -43,6 +46,7 @@ var _last_gold := 0
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_initialize_sfx_players()
 	_connect_signals()
 	_generate_placeholder_sounds()
@@ -225,8 +229,38 @@ func _on_player_finished(player: AudioStreamPlayer) -> void:
 func _update_all_volumes() -> void:
 	for player in _sfx_players:
 		player.volume_db = linear_to_db(master_volume * sfx_volume)
-	if _music_player:
-		_music_player.volume_db = linear_to_db(master_volume * music_volume)
+	_apply_music_volume()
+
+
+func _get_effective_music_volume() -> float:
+	var volume := music_volume
+	if _music_duck_depth > 0:
+		volume *= MENU_DUCK_FACTOR
+	return master_volume * volume
+
+
+func duck_music(fade_duration := 0.0) -> void:
+	_music_duck_depth += 1
+	_apply_music_volume(fade_duration)
+
+
+func unduck_music(fade_duration := 0.0) -> void:
+	_music_duck_depth = maxi(_music_duck_depth - 1, 0)
+	_apply_music_volume(fade_duration)
+
+
+func _apply_music_volume(fade_duration := 0.0) -> void:
+	if _music_player == null:
+		return
+
+	var target_db := linear_to_db(_get_effective_music_volume())
+	if fade_duration > 0.0:
+		if _music_volume_tween and _music_volume_tween.is_valid():
+			_music_volume_tween.kill()
+		_music_volume_tween = create_tween()
+		_music_volume_tween.tween_property(_music_player, "volume_db", target_db, fade_duration)
+	else:
+		_music_player.volume_db = target_db
 
 
 func _start_music() -> void:
@@ -247,8 +281,9 @@ func _start_music() -> void:
 	_music_player = AudioStreamPlayer.new()
 	_music_player.name = "MusicPlayer"
 	_music_player.bus = "Master"
+	_music_player.process_mode = Node.PROCESS_MODE_ALWAYS
 	_music_player.stream = stream
-	_music_player.volume_db = linear_to_db(master_volume * music_volume)
+	_music_player.volume_db = linear_to_db(_get_effective_music_volume())
 	add_child(_music_player)
 	_music_player.play()
 

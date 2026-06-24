@@ -44,6 +44,32 @@ func test_contact_slow_refreshes_timer() -> void:
 	assert_float(enemy.move_speed).is_equal(expected)
 
 
+func test_enemy_stops_moving_when_overlapping_player() -> void:
+	var player: Node2D = auto_free(Node2D.new()) as Node2D
+	player.add_to_group("player")
+	add_child(player)
+	player.global_position = Vector2(100.0, 100.0)
+
+	var enemy: BaseEnemy = auto_free(ENEMY_SCENE.instantiate()) as BaseEnemy
+	add_child(enemy)
+	enemy.configure(CHASER_DEFINITION)
+	enemy.set_target(player)
+	await _wait_ready(enemy)
+
+	var touch_distance := (
+		CHASER_DEFINITION.radius
+		+ BaseEnemy.PLAYER_BODY_RADIUS
+		+ BaseEnemy.PLAYER_CONTACT_FORGIVENESS
+	)
+	enemy.global_position = player.global_position + Vector2(touch_distance - 1.0, 0.0)
+	var start_pos := enemy.global_position
+
+	enemy._physics_process(0.1)
+
+	assert_vector(enemy.global_position).is_equal(start_pos)
+	assert_vector(enemy.velocity).is_equal(Vector2.ZERO)
+
+
 func test_take_damage_does_not_emit_damage_dealt() -> void:
 	var enemy: BaseEnemy = auto_free(ENEMY_SCENE.instantiate()) as BaseEnemy
 	add_child(enemy)

@@ -1,8 +1,7 @@
-extends Node2D
+extends Control
 
 const DAMAGE_COLOR := Color(1.0, 0.88, 0.82, 1.0)
 const CRIT_COLOR := Color(1.0, 0.82, 0.2, 1.0)
-const XP_COLOR := Color(0.45, 0.88, 1.0, 1.0)
 const HEALTH_COLOR := Color(0.4, 1.0, 0.5, 1.0)
 const POOL_SIZE := 32
 const SPREAD_RADIUS := 40.0
@@ -17,12 +16,19 @@ var _hit_counts: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	z_index = 10
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	EventBus.damage_dealt.connect(_on_damage_dealt)
 	EventBus.pickup_collected.connect(_on_pickup_collected)
 	_load_font()
 	_init_pool()
+
+
+func _process(_delta: float) -> void:
+	for label in _active:
+		if label.has_method("sync_canvas_position"):
+			label.sync_canvas_position()
 
 
 func _load_font() -> void:
@@ -100,8 +106,6 @@ func _cleanup_old_hits(current_time: int) -> void:
 func _on_pickup_collected(type: StringName, world_pos: Vector2, value: int) -> void:
 	if type == &"health":
 		_spawn("+%d HP" % value, world_pos, HEALTH_COLOR)
-	elif type.begins_with(&"xp") or value > 0:
-		_spawn("+%d XP" % value, world_pos, XP_COLOR)
 
 
 func _spawn_damage(text_value: String, world_pos: Vector2, color: Color, is_crit: bool) -> void:
@@ -110,12 +114,8 @@ func _spawn_damage(text_value: String, world_pos: Vector2, color: Color, is_crit
 	label.modulate.a = 1.0
 	if label.has_method("play_damage"):
 		label.play_damage(text_value, world_pos, color, is_crit)
-	else:
+	elif label.has_method("play"):
 		label.play(text_value, world_pos, color)
-		if is_crit:
-			label.scale = Vector2(1.5, 1.5)
-		else:
-			label.scale = Vector2.ONE
 	if label.has_signal("finished"):
 		if not label.finished.is_connected(_return_to_pool.bind(label)):
 			label.finished.connect(_return_to_pool.bind(label), CONNECT_ONE_SHOT)

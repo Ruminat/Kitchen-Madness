@@ -5,6 +5,8 @@ signal died(enemy: CharacterBody2D)
 
 const CONTACT_SLOW_DURATION := 2.0
 const CONTACT_SLOW_MULTIPLIER := 0.35
+const PLAYER_BODY_RADIUS := 14.0
+const PLAYER_CONTACT_FORGIVENESS := 2.0
 const COLLISION := preload("res://scripts/data/collision_layers.gd")
 
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
@@ -156,6 +158,10 @@ func _physics_process(delta: float) -> void:
 	if player == null:
 		return
 
+	if _is_in_player_contact(player):
+		velocity = Vector2.ZERO
+		return
+
 	var direction := _get_move_direction(player, delta)
 	if _is_high_detail_active:
 		velocity = direction * move_speed
@@ -176,6 +182,12 @@ func _get_target() -> Node2D:
 
 func _get_move_direction(player: Node2D, _delta: float) -> Vector2:
 	return (player.global_position - global_position).normalized()
+
+
+func _is_in_player_contact(player: Node2D) -> bool:
+	var touch_distance := _get_radius() + PLAYER_BODY_RADIUS + PLAYER_CONTACT_FORGIVENESS
+	var distance_sq := global_position.distance_squared_to(player.global_position)
+	return distance_sq <= touch_distance * touch_distance
 
 
 func _update_contact_slow(delta: float) -> void:

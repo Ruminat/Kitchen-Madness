@@ -17,7 +17,6 @@
 [ext_resource type="Resource" path="res://resources/waves/wave_02.tres" id="14_wave_02"]
 [ext_resource type="Resource" path="res://resources/waves/wave_03.tres" id="15_wave_03"]
 [ext_resource type="Script" uid="uid://d1lsd65xmmw6k" path="res://scripts/systems/vfx_manager.gd" id="16_vfx"]
-[ext_resource type="Script" path="res://scripts/ui/floating_text_manager.gd" id="17_floating"]
 
 [node name="Game" type="Node2D" unique_id=1722599546]
 script = ExtResource("1_game")
@@ -62,8 +61,5 @@ script = ExtResource("13_shop")
 
 [node name="VfxManager" type="Node" parent="." unique_id=1173720881]
 script = ExtResource("16_vfx")
-
-[node name="FloatingTextManager" type="Node2D" parent="."]
-script = ExtResource("17_floating")
 
 [node name="UI" parent="." unique_id=1185049828 instance=ExtResource("4_ui")]

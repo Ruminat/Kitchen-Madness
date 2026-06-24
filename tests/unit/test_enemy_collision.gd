@@ -7,23 +7,24 @@ const CHASER_DEF := preload("res://resources/enemies/chaser.tres")
 const COLLISION := preload("res://scripts/data/collision_layers.gd")
 
 
-func test_enemy_collides_with_walls_player_and_other_enemies() -> void:
+func test_enemy_collides_with_walls_and_enemies_not_player() -> void:
 	var enemy: CharacterBody2D = auto_free(ENEMY_SCENE.instantiate()) as CharacterBody2D
 	add_child(enemy)
 	await await_idle_frame()
 
 	assert_int(enemy.collision_layer).is_equal(COLLISION.ENEMY)
 	assert_int(enemy.collision_mask).is_equal(COLLISION.ENEMY_MASK)
+	assert_int(enemy.collision_mask & COLLISION.PLAYER).is_equal(0)
 	assert_int(enemy.motion_mode).is_equal(CharacterBody2D.MOTION_MODE_FLOATING)
 
 
-func test_player_collides_with_walls_and_enemies() -> void:
+func test_player_collides_with_walls_only_not_enemies() -> void:
 	var player: CharacterBody2D = auto_free(PLAYER_SCENE.instantiate()) as CharacterBody2D
 	add_child(player)
 	await await_idle_frame()
 
 	assert_int(player.collision_layer).is_equal(COLLISION.PLAYER)
-	assert_int(player.collision_mask).is_equal(COLLISION.PLAYER_MASK)
+	assert_int(player.collision_mask).is_equal(COLLISION.WALL)
 	assert_int(player.motion_mode).is_equal(CharacterBody2D.MOTION_MODE_FLOATING)
 
 

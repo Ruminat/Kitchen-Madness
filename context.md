@@ -38,7 +38,7 @@
 | **MeleeWeapon** | Arc hits · crit · knockback via `.tres` fields |
 | **GoldSystem / ShopManager** | Between-wave weapon shop |
 | **LevelUpManager** | 1-of-3 stat upgrades only |
-| **FloatingTextManager** | `Node2D` in game world; labels at hit `world_pos`, not screen coords |
+| **FloatingTextManager** | UI `Control` on `CanvasLayer`; world anchor + per-frame canvas sync (true 36px screen text) |
 | **Crit** | Player → `WeaponController.sync_all_crit_stats()` → weapons |
 
 **Main scene:** `res://scenes/main/game.tscn`

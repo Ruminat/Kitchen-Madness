@@ -1,7 +1,10 @@
 class_name GoldSystem
 extends Node
 
+const DropRates = preload("res://scripts/data/drop_rates.gd")
+
 var gold := 0
+var grease_drop_chance: float = DropRates.GREASE_DROP_CHANCE
 
 
 func _ready() -> void:
@@ -42,11 +45,12 @@ func _on_enemy_killed(enemy: Node, _killer: Node) -> void:
 		enemy_definition = enemy.definition as EnemyDefinition
 
 	if enemy_definition and enemy_definition.gold_reward > 0:
-		var reward := enemy_definition.gold_reward
-		var player := get_tree().get_first_node_in_group("player")
-		if player and player.has_method("get_gold_multiplier"):
-			reward = maxi(roundi(float(reward) * player.get_gold_multiplier()), 1)
-		add_gold(reward)
+		if DropRates.roll_enemy_drop(grease_drop_chance, enemy_definition):
+			var reward := enemy_definition.gold_reward
+			var player := get_tree().get_first_node_in_group("player")
+			if player and player.has_method("get_gold_multiplier"):
+				reward = maxi(roundi(float(reward) * player.get_gold_multiplier()), 1)
+			add_gold(reward)
 
 
 func _emit_gold_changed() -> void:

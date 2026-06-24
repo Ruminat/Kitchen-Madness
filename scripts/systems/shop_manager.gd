@@ -67,7 +67,19 @@ func _on_wave_completed() -> void:
 	_current_offers = generate_offers()
 	_reset_sold_slots()
 	get_tree().paused = true
-	_refresh_ui(true)
+	_start_shop_transition()
+
+
+func _start_shop_transition() -> void:
+	if _ui == null:
+		return
+
+	if _ui.has_method("show_shop_transition"):
+		await _ui.show_shop_transition(
+			_current_offers, _current_gold(), _sold_slots, _current_reroll_cost()
+		)
+	elif _ui.has_method("show_shop"):
+		_ui.show_shop(_current_offers, _current_gold(), _sold_slots, _current_reroll_cost())
 
 
 func _on_shop_purchase(offer: Resource) -> void:

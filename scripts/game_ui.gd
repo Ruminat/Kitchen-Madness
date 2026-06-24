@@ -25,6 +25,7 @@ const SHOP_HINT_TEXT := (
 )
 
 const SHOP_HINT_TEXT_FIXED := "W/S rows  |  A/D cards  |  1-5 buy  |  R reroll  |  Enter continue"
+const SHOP_TRANSITION_DURATION := 0.5
 
 var _kills := 0
 var _current_wave := 1
@@ -756,6 +757,7 @@ func show_level_up_options(upgrades: Array[Resource]) -> void:
 	level_up_overlay.visible = true
 	level_up_title_label.text = "⭐  Level Up!"
 	level_up_hint_label.text = "W/S or ↑/↓ navigate  ·  1/2/3 or Enter pick  ·  Click to choose"
+	AudioManager.duck_music()
 
 	for index in _upgrade_buttons.size():
 		var button := _upgrade_buttons[index]
@@ -773,6 +775,7 @@ func show_level_up_options(upgrades: Array[Resource]) -> void:
 func hide_level_up_options() -> void:
 	level_up_overlay.visible = false
 	_upgrade_choices.clear()
+	AudioManager.unduck_music()
 
 
 func show_shop(
@@ -782,9 +785,41 @@ func show_shop(
 	_shop_sold_slots = sold_slots
 	_current_gold = gold
 	_current_reroll_cost = reroll_cost
+	shop_overlay.modulate = Color.WHITE
+	shop_panel.modulate = Color.WHITE
+	shop_panel.scale = Vector2.ONE
 	shop_overlay.visible = true
 	shop_hint_label.text = SHOP_HINT_TEXT_FIXED
 	_update_shop_buttons()
+	shop_continue_button.grab_focus()
+
+
+func show_shop_transition(
+	offers: Array[Resource], gold: int, sold_slots: Array[bool] = [], reroll_cost: int = 0
+) -> void:
+	_shop_upgrades = offers
+	_shop_sold_slots = sold_slots
+	_current_gold = gold
+	_current_reroll_cost = reroll_cost
+	shop_hint_label.text = SHOP_HINT_TEXT_FIXED
+	_update_shop_buttons()
+
+	shop_overlay.visible = true
+	shop_overlay.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	shop_panel.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	shop_panel.scale = Vector2(0.96, 0.96)
+
+	AudioManager.duck_music(SHOP_TRANSITION_DURATION)
+
+	var tween := create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(shop_overlay, "modulate:a", 1.0, SHOP_TRANSITION_DURATION)
+	tween.parallel().tween_property(shop_panel, "modulate:a", 1.0, SHOP_TRANSITION_DURATION)
+	var scale_tween := tween.parallel().tween_property(
+		shop_panel, "scale", Vector2.ONE, SHOP_TRANSITION_DURATION
+	)
+	scale_tween.set_ease(Tween.EASE_OUT)
+	await tween.finished
 	shop_continue_button.grab_focus()
 
 
@@ -805,8 +840,12 @@ func update_shop_gold(gold: int) -> void:
 
 func hide_shop() -> void:
 	shop_overlay.visible = false
+	shop_overlay.modulate = Color.WHITE
+	shop_panel.modulate = Color.WHITE
+	shop_panel.scale = Vector2.ONE
 	_shop_upgrades.clear()
 	_shop_sold_slots.clear()
+	AudioManager.unduck_music(0.2)
 
 
 func request_character_selection(characters: Array[CharacterDefinition]) -> CharacterDefinition:
