@@ -63,6 +63,8 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 | Stats validation | Compare `ignored/stats/` Grease earned, shop spend, and levels per wave before/after |
 | Tests | Update gold/XP/drop and shop cost tests; add affordability estimate if useful |
 
+**Done:** 40% XP / 50% Grease drops, smaller orbs, 240+65 XP curve, +15%/wave shop costs, affordability helper.
+
 ---
 
 ### Phase 7D - Audio mix and distance falloff

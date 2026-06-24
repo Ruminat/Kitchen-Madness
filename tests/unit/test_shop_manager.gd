@@ -142,7 +142,7 @@ func test_purchase_weapon_damage_upgrade_targets_one_weapon() -> void:
 	assert_int(weapon.get_damage()).is_greater(before)
 
 
-func test_early_wave_offers_use_discounted_costs() -> void:
+func test_wave_one_shop_costs_use_base_prices() -> void:
 	var manager := _create_manager()
 	var player := await _create_player()
 	manager.configure(player, _create_ui(), _create_gold_system())
@@ -151,7 +151,27 @@ func test_early_wave_offers_use_discounted_costs() -> void:
 	var offers := manager.generate_offers()
 	assert_int(offers.size()).is_greater(0)
 	for offer in offers:
-		assert_int((offer as WeaponShopOffer).gold_cost).is_less_equal(12)
+		var shop_offer := offer as WeaponShopOffer
+		if shop_offer.offer_type == WeaponShopOffer.OfferType.ADD_WEAPON:
+			assert_int(shop_offer.gold_cost).is_equal(12)
+			return
+	assert_bool(false).is_true()
+
+
+func test_later_wave_shop_costs_scale_up() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	manager.configure(player, _create_ui(), _create_gold_system())
+	manager._current_wave = 4
+
+	var offers := manager.generate_offers()
+	assert_int(offers.size()).is_greater(0)
+	for offer in offers:
+		var shop_offer := offer as WeaponShopOffer
+		if shop_offer.offer_type == WeaponShopOffer.OfferType.WEAPON_DAMAGE:
+			assert_int(shop_offer.gold_cost).is_equal(12)
+			return
+	assert_bool(false).is_true()
 
 
 func test_generate_offers_skips_duplicate_offer_keys() -> void:

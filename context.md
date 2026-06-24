@@ -4,13 +4,13 @@
 
 ## Current status
 
-**Phase 7B done** · **Phase 7C done** — combat balance tuning to curb early snowballing.
+**Phase 7B done** · **Phase 7C done** · **Phase 7F done** — economy and XP rebalance.
 
 **Loop:** character select → swarm waves → weapon shop → repeat. Level-ups = stat/crit upgrades. SFX + run stats to `ignored/stats/`.
 
 **Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers.
 
-**Next:** Phase 7F (economy and XP rebalance).
+**Next:** Phase 7D (audio mix and distance falloff).
 
 ---
 

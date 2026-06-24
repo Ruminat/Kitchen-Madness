@@ -114,6 +114,25 @@ static func estimate_levels_per_wave(
 	return float(wave_xp) / float(xp_to_level)
 
 
+static func estimate_wave_affordability(
+	wave: WaveDefinition,
+	enemy_roster: Array[EnemyDefinition],
+	wave_number: int = 1,
+	cheap_cost: int = 8,
+	weapon_cost: int = 12
+) -> Dictionary:
+	var grease := estimate_wave_gold(wave, enemy_roster, wave_number)
+	var scaled_cheap := _scaled_shop_cost(cheap_cost, wave_number)
+	var scaled_weapon := _scaled_shop_cost(weapon_cost, wave_number)
+	return {
+		"estimated_grease": grease,
+		"cheap_item_cost": scaled_cheap,
+		"weapon_item_cost": scaled_weapon,
+		"cheap_purchases": float(grease) / float(maxi(scaled_cheap, 1)),
+		"weapon_purchases": float(grease) / float(maxi(scaled_weapon, 1)),
+	}
+
+
 static func compare_weapon_dps(weapons: Array[WeaponDefinition]) -> Dictionary:
 	var results := {}
 	for weapon in weapons:
@@ -186,7 +205,12 @@ static func _calculate_avg_hp(enemies: Array[EnemyDefinition], wave_number: int 
 
 
 static func _xp_required_for_level(next_level: int) -> int:
-	return XpSystem.BASE_XP_TO_LEVEL + (next_level - 1) * 50
+	return XpSystem.BASE_XP_TO_LEVEL + (next_level - 1) * XpSystem.XP_PER_LEVEL_GROWTH
+
+
+static func _scaled_shop_cost(base_cost: int, wave_number: int) -> int:
+	var multiplier := 1.0 + ShopManager.WAVE_COST_GROWTH * float(maxi(wave_number - 1, 0))
+	return maxi(roundi(float(base_cost) * multiplier), 5)
 
 
 static func format_balance_report(report: Dictionary) -> String:

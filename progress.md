@@ -2,15 +2,11 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 7C combat balance tuning
+**Last updated:** Phase 7F economy and XP rebalance
 
 ---
 
 ## Active tasks
-
-### Phase 7F - Economy and XP rebalance
-
-Pending. Lower XP/Grease drop rates; target ~1–2 affordable shop purchases per wave; scale shop prices with wave number; let higher enemy counts partially restore total income without per-kill flooding.
 
 ### Phase 7D - Audio mix and distance falloff
 
@@ -146,3 +142,7 @@ Moved `FloatingTextManager` from UI `CanvasLayer` to game-world `Node2D`. Labels
 ### Phase 7C - Combat balance tuning
 
 Reduced compounding spawn pressure (10% density growth, interval-only scaling), smaller authored swarms, wave-scaled enemy HP/contact damage (+12%/+8% per wave), combat upgrades trimmed to +5%, `BalanceCalculator` uses wave index + drop rates, `BalanceMetrics` wave duration fixed. Tests updated.
+
+### Phase 7F - Economy and XP rebalance
+
+Lowered XP (40%) and Grease (50%) drop rates, smaller XP orbs, slower level curve (240 + 65/level), wave-scaled shop prices (+15%/wave), `BalanceCalculator.estimate_wave_affordability()`. Tests updated.

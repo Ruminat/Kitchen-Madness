@@ -1,7 +1,8 @@
 class_name XpSystem
 extends Node
 
-const BASE_XP_TO_LEVEL := 200
+const BASE_XP_TO_LEVEL := 240
+const XP_PER_LEVEL_GROWTH := 65
 
 var level := 1
 var current_xp := 0
@@ -41,7 +42,7 @@ func _scale_xp(amount: int) -> int:
 
 
 func _xp_required_for_level(next_level: int) -> int:
-	return BASE_XP_TO_LEVEL + (next_level - 1) * 50
+	return BASE_XP_TO_LEVEL + (next_level - 1) * XP_PER_LEVEL_GROWTH
 
 
 func _emit_xp_changed() -> void:

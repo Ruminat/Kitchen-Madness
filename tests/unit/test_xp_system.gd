@@ -12,7 +12,7 @@ func test_starts_at_level_one_with_zero_xp() -> void:
 	await _wait_ready(xp_system)
 	assert_int(xp_system.level).is_equal(1)
 	assert_int(xp_system.current_xp).is_equal(0)
-	assert_int(xp_system.xp_to_next).is_equal(200)
+	assert_int(xp_system.xp_to_next).is_equal(240)
 
 
 func test_pickup_adds_xp() -> void:
@@ -27,7 +27,7 @@ func test_level_up_at_threshold() -> void:
 	var xp_system: XpSystem = auto_free(XpSystem.new()) as XpSystem
 	add_child(xp_system)
 	await _wait_ready(xp_system)
-	xp_system.add_xp(200)
+	xp_system.add_xp(240)
 	assert_int(xp_system.level).is_equal(2)
 	assert_int(xp_system.current_xp).is_equal(0)
 
@@ -46,7 +46,7 @@ func test_level_up_emits_signal() -> void:
 	await _wait_ready(xp_system)
 	var levels: Array[int] = []
 	EventBus.level_up.connect(func(level: int) -> void: levels.append(level))
-	xp_system.add_xp(200)
+	xp_system.add_xp(240)
 	assert_int(levels.size()).is_equal(1)
 	assert_int(levels[0]).is_equal(2)
 
@@ -64,7 +64,7 @@ func test_xp_changed_emits_current_progress() -> void:
 	assert_int(snapshots.size()).is_greater_equal(1)
 	var last: Vector3i = snapshots[snapshots.size() - 1]
 	assert_int(last.x).is_equal(7)
-	assert_int(last.y).is_equal(200)
+	assert_int(last.y).is_equal(240)
 	assert_int(last.z).is_equal(1)
 
 
@@ -72,8 +72,8 @@ func test_xp_to_next_increases_after_level_up() -> void:
 	var xp_system: XpSystem = auto_free(XpSystem.new()) as XpSystem
 	add_child(xp_system)
 	await _wait_ready(xp_system)
-	xp_system.add_xp(200)
-	assert_int(xp_system.xp_to_next).is_equal(250)
+	xp_system.add_xp(240)
+	assert_int(xp_system.xp_to_next).is_equal(305)
 
 
 func test_player_luck_and_xp_gain_boost_pickup_xp() -> void:

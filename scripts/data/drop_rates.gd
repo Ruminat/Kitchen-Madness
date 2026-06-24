@@ -2,8 +2,8 @@ class_name DropRates
 extends RefCounted
 
 ## Per-kill orb/currency drop chances (1.0 = always).
-const XP_DROP_CHANCE := 2.0 / 3.0
-const GREASE_DROP_CHANCE := 2.0 / 3.0
+const XP_DROP_CHANCE := 0.40
+const GREASE_DROP_CHANCE := 0.50
 const HEALTH_DROP_CHANCE := 0.05 / 10.0
 const MAX_HEALTH_DROP_CHANCE := 0.22 / 10.0
 

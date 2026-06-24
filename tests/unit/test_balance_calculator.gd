@@ -129,6 +129,14 @@ func test_wave_hp_budget_grows_faster_than_flat_enemy_health() -> void:
 	assert_int(wave_three_budget).is_greater(wave_one_budget * 2)
 
 
+func test_wave_one_affordability_targets_one_to_two_purchases() -> void:
+	var enemies: Array[EnemyDefinition] = [CHASER_DEF]
+	var affordability := BalanceCalculator.estimate_wave_affordability(WAVE_01_DEF, enemies, 1)
+	assert_float(affordability.get("cheap_purchases", 0.0)).is_greater_equal(0.6)
+	assert_float(affordability.get("cheap_purchases", 0.0)).is_less_equal(1.6)
+	assert_float(affordability.get("weapon_purchases", 0.0)).is_less_equal(1.2)
+
+
 func test_wave_1_duration_matches_target() -> void:
 	assert_float(WAVE_01_DEF.duration).is_equal(12.0)
 

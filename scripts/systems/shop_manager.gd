@@ -22,6 +22,7 @@ const PELLET_UPGRADE_AMOUNT := 1
 const MAX_PELLET_COUNT := 8
 const REROLL_BASE_COST := 6
 const REROLL_COST_STEP := 4
+const WAVE_COST_GROWTH := 0.15
 
 @export var offer_count := 5
 
@@ -275,9 +276,8 @@ func _weapon_label(weapon: WeaponDefinition) -> String:
 
 
 func _scaled_cost(base_cost: int) -> int:
-	if _current_wave <= 2:
-		return maxi(roundi(float(base_cost) * 0.75), 5)
-	return base_cost
+	var multiplier := 1.0 + WAVE_COST_GROWTH * float(maxi(_current_wave - 1, 0))
+	return maxi(roundi(float(base_cost) * multiplier), 5)
 
 
 func _current_gold() -> int:

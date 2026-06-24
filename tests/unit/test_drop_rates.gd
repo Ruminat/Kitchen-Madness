@@ -4,12 +4,12 @@ extends GdUnitTestSuite
 const DropRates = preload("res://scripts/data/drop_rates.gd")
 
 
-func test_xp_drop_chance_is_two_thirds() -> void:
-	assert_float(DropRates.XP_DROP_CHANCE).is_equal_approx(2.0 / 3.0, 0.001)
+func test_xp_drop_chance_is_forty_percent() -> void:
+	assert_float(DropRates.XP_DROP_CHANCE).is_equal_approx(0.40, 0.001)
 
 
-func test_grease_drop_chance_is_two_thirds() -> void:
-	assert_float(DropRates.GREASE_DROP_CHANCE).is_equal_approx(2.0 / 3.0, 0.001)
+func test_grease_drop_chance_is_fifty_percent() -> void:
+	assert_float(DropRates.GREASE_DROP_CHANCE).is_equal_approx(0.50, 0.001)
 
 
 func test_health_drop_chance_is_ten_times_rarer_than_before() -> void:
