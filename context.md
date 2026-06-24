@@ -4,13 +4,13 @@
 
 ## Current status
 
-**Phase 6A done** + post-6A tuning: swarm spawning, ant/moth enemies, **3× wave density**, **global arena bounds** (spawn + camera clamp), **enemy/enemy + enemy/player collisions** (no stacking).
+**Phase 7A done** · **Phase 7B done** — world-space damage numbers (labels live in game world, not UI canvas).
 
 **Loop:** character select → swarm waves → weapon shop → repeat. Level-ups = stat/crit upgrades. SFX + run stats to `ignored/stats/`.
 
-**Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled damage numbers.
+**Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers.
 
-**Next:** Phase 7 (TBD — see plans.md).
+**Next:** Phase 7C (combat balance tuning from run stats).
 
 ---
 
@@ -38,6 +38,7 @@
 | **MeleeWeapon** | Arc hits · crit · knockback via `.tres` fields |
 | **GoldSystem / ShopManager** | Between-wave weapon shop |
 | **LevelUpManager** | 1-of-3 stat upgrades only |
+| **FloatingTextManager** | `Node2D` in game world; labels at hit `world_pos`, not screen coords |
 | **Crit** | Player → `WeaponController.sync_all_crit_stats()` → weapons |
 
 **Main scene:** `res://scenes/main/game.tscn`

@@ -10,15 +10,15 @@ const FONT_CRIT_SIZE := 40
 var _tween: Tween
 
 
-func play(text_value: String, canvas_pos: Vector2, color: Color) -> void:
-	_play_internal(text_value, canvas_pos, color, false)
+func play(text_value: String, world_pos: Vector2, color: Color) -> void:
+	_play_internal(text_value, world_pos, color, false)
 
 
-func play_damage(text_value: String, canvas_pos: Vector2, color: Color, is_crit: bool) -> void:
-	_play_internal(text_value, canvas_pos, color, is_crit)
+func play_damage(text_value: String, world_pos: Vector2, color: Color, is_crit: bool) -> void:
+	_play_internal(text_value, world_pos, color, is_crit)
 
 
-func _play_internal(text_value: String, canvas_pos: Vector2, color: Color, is_crit: bool) -> void:
+func _play_internal(text_value: String, world_pos: Vector2, color: Color, is_crit: bool) -> void:
 	text = text_value
 
 	add_theme_color_override("font_color", color)
@@ -28,7 +28,7 @@ func _play_internal(text_value: String, canvas_pos: Vector2, color: Color, is_cr
 	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pivot_offset = size * 0.5
 
-	position = canvas_pos
+	position = world_pos
 
 	scale = Vector2.ONE
 	modulate.a = 1.0

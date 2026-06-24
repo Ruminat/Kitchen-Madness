@@ -2,15 +2,11 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 7A HUD, Grease, and shop layout
+**Last updated:** Phase 7B world-space damage numbers
 
 ---
 
 ## Active tasks
-
-### Phase 7B - World-space damage numbers
-
-Pending. Damage numbers should stick to world position where they appear, not follow the player/camera.
 
 ### Phase 7C - Combat balance tuning from run statistics
 
@@ -146,3 +142,7 @@ Off-screen culling, VFX throttling, render-scale settings, swarm cap fix, `optim
 ### Phase 7A - HUD, Grease currency, shop layout
 
 Structured HUD (HP bar + value, wave timer, kills, Grease label, bottom XP panel). Grease rebrand in player-facing UI. Shop: 5 fixed slots in a row, sold cards stay in place, reroll with escalating cost (6 + 4× reroll count). Enemy sprite imports restored to full size (`size_limit=0`). Tests updated for 5-offer shop and Grease formatting.
+
+### Phase 7B - World-space damage numbers
+
+Moved `FloatingTextManager` from UI `CanvasLayer` to game-world `Node2D`. Labels spawn at hit `world_pos` and stay anchored as the camera moves. Pooling unchanged. Tests for world position and camera independence.

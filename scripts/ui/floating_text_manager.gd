@@ -1,4 +1,4 @@
-extends Control
+extends Node2D
 
 const DAMAGE_COLOR := Color(1.0, 0.88, 0.82, 1.0)
 const CRIT_COLOR := Color(1.0, 0.82, 0.2, 1.0)
@@ -17,8 +17,7 @@ var _hit_counts: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	z_index = 10
 
 	EventBus.damage_dealt.connect(_on_damage_dealt)
 	EventBus.pickup_collected.connect(_on_pickup_collected)
@@ -110,9 +109,9 @@ func _spawn_damage(text_value: String, world_pos: Vector2, color: Color, is_crit
 	label.visible = true
 	label.modulate.a = 1.0
 	if label.has_method("play_damage"):
-		label.play_damage(text_value, _world_to_canvas(world_pos), color, is_crit)
+		label.play_damage(text_value, world_pos, color, is_crit)
 	else:
-		label.play(text_value, _world_to_canvas(world_pos), color)
+		label.play(text_value, world_pos, color)
 		if is_crit:
 			label.scale = Vector2(1.5, 1.5)
 		else:
@@ -128,11 +127,7 @@ func _spawn(text_value: String, world_pos: Vector2, color: Color) -> void:
 	label.modulate.a = 1.0
 	label.scale = Vector2.ONE
 	if label.has_method("play"):
-		label.play(text_value, _world_to_canvas(world_pos), color)
+		label.play(text_value, world_pos, color)
 	if label.has_signal("finished"):
 		if not label.finished.is_connected(_return_to_pool.bind(label)):
 			label.finished.connect(_return_to_pool.bind(label), CONNECT_ONE_SHOT)
-
-
-func _world_to_canvas(world_pos: Vector2) -> Vector2:
-	return get_viewport().get_canvas_transform() * world_pos

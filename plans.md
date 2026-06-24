@@ -29,6 +29,8 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 | Pooling | Keep existing `FloatingTextManager` pool; only change coordinate handling |
 | Tests | Verify spawn position uses world/global coordinates |
 
+**Done:** Manager is a `Node2D` child of `Game`; labels use world coordinates directly.
+
 ---
 
 ### Phase 7C - Combat balance tuning from run statistics
