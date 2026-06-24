@@ -31,17 +31,33 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 
 ---
 
-### Phase 7C - Balance tuning from run statistics
+### Phase 7C - Combat balance tuning from run statistics
 
-**Goal:** Use persisted run stats to reduce snowballing — the player becomes overpowered too quickly after a few waves.
+**Goal:** Use persisted run stats to reduce combat snowballing — the player becomes overpowered too quickly after a few waves.
 
 | Task | Details |
 |---|---|
-| Analyze stats | Review `ignored/stats/` JSON for DPS, kills, damage taken, wave timing, and Grease curves |
+| Analyze stats | Review `ignored/stats/` JSON for DPS, kills, damage taken, and wave timing curves |
 | Enemy scaling | Tune wave density, enemy HP/damage, or spawn pacing based on findings |
-| Shop/progression | Adjust shop costs, upgrade potency, or level-up values if they outpace enemy growth |
+| Upgrade potency | Adjust level-up upgrade values if they outpace enemy growth |
 | Validation | Compare predicted DPS (`BalanceCalculator`) vs. actual metrics after changes |
 | Tests | Update balance calculator / wave pacing tests if formulas change |
+
+---
+
+### Phase 7F - Economy and XP rebalance
+
+**Goal:** Tighten Grease and XP income so each shop visit supports ~1–2 purchases, not clearing the whole board. Scale shop prices with wave number; let higher enemy counts restore total income without restoring today's per-kill flood.
+
+| Task | Details |
+|---|---|
+| Drop probability | Lower XP orb and Grease drop rates significantly (data-driven via enemy/drop `.tres` or spawn logic) |
+| Shop affordability target | Tune so a typical wave earns enough Grease for **1–2 shop items**, not all 5 slots + rerolls |
+| Wave-scaled prices | Increase shop offer costs each wave (extend or replace early-wave discount in `ShopManager._scaled_cost`) |
+| Volume compensation | Later waves spawn more enemies; total Grease/XP per wave may rise from kill count while **per-enemy** drop rate stays low |
+| XP pacing | Slow level-ups to match — fewer orbs, lower XP per orb, or higher XP-to-level curve |
+| Stats validation | Compare `ignored/stats/` Grease earned, shop spend, and levels per wave before/after |
+| Tests | Update gold/XP/drop and shop cost tests; add affordability estimate if useful |
 
 ---
 

@@ -12,9 +12,13 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 Pending. Damage numbers should stick to world position where they appear, not follow the player/camera.
 
-### Phase 7C - Balance tuning from run statistics
+### Phase 7C - Combat balance tuning from run statistics
 
-Pending. Use persisted stats to curb early snowballing (player too strong after a few waves).
+Pending. Use persisted stats to curb combat snowballing (player too strong after a few waves).
+
+### Phase 7F - Economy and XP rebalance
+
+Pending. Lower XP/Grease drop rates; target ~1–2 affordable shop purchases per wave; scale shop prices with wave number; let higher enemy counts partially restore total income without per-kill flooding.
 
 ### Phase 7D - Audio mix and distance falloff
 
