@@ -10,7 +10,7 @@
 
 **Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled damage numbers.
 
-**Next:** Phase 6B — Shop UI overhaul.
+**Next:** Phase 7 (TBD — see plans.md).
 
 ---
 
@@ -30,7 +30,7 @@
 | Pattern | Where |
 |---|---|
 | **EventBus** | `scripts/autoload/event_bus.gd` |
-| **WaveDefinition** | Swarm fields + `resolve_duration()` (+5s per wave after roster) |
+| **WaveDefinition** | Swarm fields + `resolve_duration()` (+5s per wave after roster) + `resolve_density_multiplier()` (+20% enemies/wave) |
 | **EnemySpawner** | Weighted swarms, off-camera bands, `set_camera_focus()` for clamped spawn ring |
 | **Arena.get_global_bounds()** | Player, camera, spawner all use world-space bounds |
 | **CollisionLayers** | Player mask = wall+enemy; enemy mask = wall+enemy+player; `MOTION_MODE_FLOATING` |

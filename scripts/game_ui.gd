@@ -17,6 +17,10 @@ const COLOR_XP_FLASH := Color(0.55, 0.88, 1.0, 1.0)
 const COLOR_LEVEL_UP_ACCENT := Color(0.55, 0.88, 1.0, 1.0)
 const COLOR_CHARACTER_ACCENT := Color(0.95, 0.72, 0.28, 1.0)
 const STAT_BAR_SCRIPT := preload("res://scripts/ui/stat_bar.gd")
+const ShopCard = preload("res://scripts/ui/shop_card.gd")
+const SHOP_HINT_TEXT := (
+	"W/S between rows  ·  A/D or ←/→ between cards  ·  " + "1–4 buy  ·  Enter continue"
+)
 
 var _kills := 0
 var _current_wave := 1
@@ -25,7 +29,7 @@ var _timer_pulse_tween: Tween
 var _xp_flash_tween: Tween
 var _upgrade_buttons: Array[Button] = []
 var _upgrade_choices: Array[Resource] = []
-var _shop_buttons: Array[Button] = []
+var _shop_cards: Array[Button] = []
 var _shop_upgrades: Array[Resource] = []
 var _character_buttons: Array[Button] = []
 var _character_choices: Array[CharacterDefinition] = []
@@ -94,14 +98,34 @@ var _character_choices: Array[CharacterDefinition] = []
 	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/HintLabel")
 	as Label
 )
-@onready var shop_button_1: Button = get_node(_shop_button_path(1)) as Button
-@onready var shop_button_2: Button = get_node(_shop_button_path(2)) as Button
-@onready var shop_button_3: Button = get_node(_shop_button_path(3)) as Button
-@onready var shop_button_4: Button = get_node(_shop_button_path(4)) as Button
-@onready var shop_button_5: Button = get_node(_shop_button_path(5)) as Button
-@onready var shop_button_6: Button = get_node(_shop_button_path(6)) as Button
-@onready var shop_button_7: Button = get_node(_shop_button_path(7)) as Button
-@onready var shop_button_8: Button = get_node(_shop_button_path(8)) as Button
+@onready var shop_grid: GridContainer = (
+	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ShopGrid")
+	as GridContainer
+)
+@onready var shop_card_1: ShopCard = (
+	get_node(
+		"ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ShopGrid/ShopCard1"
+	)
+	as ShopCard
+)
+@onready var shop_card_2: ShopCard = (
+	get_node(
+		"ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ShopGrid/ShopCard2"
+	)
+	as ShopCard
+)
+@onready var shop_card_3: ShopCard = (
+	get_node(
+		"ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ShopGrid/ShopCard3"
+	)
+	as ShopCard
+)
+@onready var shop_card_4: ShopCard = (
+	get_node(
+		"ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ShopGrid/ShopCard4"
+	)
+	as ShopCard
+)
 @onready var shop_continue_button: Button = (
 	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ContinueButton")
 	as Button
@@ -160,25 +184,10 @@ var _character_choices: Array[CharacterDefinition] = []
 )
 
 
-func _shop_button_path(index: int) -> String:
-	return (
-		"ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ShopButton%d" % index
-	)
-
-
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_upgrade_buttons = [upgrade_button_1, upgrade_button_2, upgrade_button_3]
-	_shop_buttons = [
-		shop_button_1,
-		shop_button_2,
-		shop_button_3,
-		shop_button_4,
-		shop_button_5,
-		shop_button_6,
-		shop_button_7,
-		shop_button_8,
-	]
+	_shop_cards = [shop_card_1, shop_card_2, shop_card_3, shop_card_4]
 	_apply_hud_theme()
 	overlay.visible = false
 	level_up_overlay.visible = false
@@ -188,8 +197,8 @@ func _ready() -> void:
 	shop_continue_button.pressed.connect(_on_shop_continue_pressed)
 	for index in _upgrade_buttons.size():
 		_upgrade_buttons[index].pressed.connect(_on_upgrade_button_pressed.bind(index))
-	for index in _shop_buttons.size():
-		_shop_buttons[index].pressed.connect(_on_shop_button_pressed.bind(index))
+	for index in _shop_cards.size():
+		_shop_cards[index].pressed.connect(_on_shop_button_pressed.bind(index))
 
 	EventBus.player_health_changed.connect(_on_player_health_changed)
 	EventBus.wave_time_changed.connect(_on_wave_time_changed)
@@ -209,7 +218,7 @@ func _apply_hud_theme() -> void:
 	level_up_panel.add_theme_stylebox_override(
 		"panel", _make_overlay_panel_style(COLOR_LEVEL_UP_ACCENT)
 	)
-	shop_panel.add_theme_stylebox_override("panel", panel_style)
+	shop_panel.add_theme_stylebox_override("panel", _make_overlay_panel_style(COLOR_GOLD))
 	character_select_panel.add_theme_stylebox_override(
 		"panel", _make_overlay_panel_style(COLOR_CHARACTER_ACCENT)
 	)
@@ -243,9 +252,10 @@ func _apply_hud_theme() -> void:
 
 	for button in _upgrade_buttons:
 		button.add_theme_font_size_override("font_size", 17)
-	for button in _shop_buttons:
-		button.add_theme_font_size_override("font_size", 16)
 
+	shop_title_label.add_theme_color_override("font_color", COLOR_GOLD)
+	shop_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
+	shop_hint_label.add_theme_font_size_override("font_size", 14)
 	level_up_title_label.add_theme_color_override("font_color", COLOR_LEVEL_UP_ACCENT)
 	level_up_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
 	level_up_hint_label.add_theme_font_size_override("font_size", 14)
@@ -361,31 +371,67 @@ func _handle_character_select_keyboard(event: InputEventKey) -> bool:
 
 
 func _handle_shop_keyboard(event: InputEventKey) -> bool:
-	var index := _number_key_index(event, 8)
+	var index := _number_key_index(event, 4)
 	if index >= 0:
 		return _try_press_shop_button(index)
 
+	var handled := false
 	if event.is_action_pressed("move_up") or event.is_action_pressed("ui_up"):
-		_navigate_button_focus(_shop_buttons, -1)
-		return true
-
-	if event.is_action_pressed("move_down") or event.is_action_pressed("ui_down"):
-		_navigate_button_focus(_shop_buttons, 1)
-		return true
-
-	if event.is_action_pressed("ui_accept"):
+		_navigate_shop_grid(-1)
+		handled = true
+	elif event.is_action_pressed("move_down") or event.is_action_pressed("ui_down"):
+		_navigate_shop_grid(1)
+		handled = true
+	elif event.is_action_pressed("move_left") or event.is_action_pressed("ui_left"):
+		_navigate_shop_grid_horizontal(-1)
+		handled = true
+	elif event.is_action_pressed("move_right") or event.is_action_pressed("ui_right"):
+		_navigate_shop_grid_horizontal(1)
+		handled = true
+	elif event.is_action_pressed("ui_accept"):
 		_handle_shop_accept()
-		return true
+		handled = true
 
-	return false
+	return handled
+
+
+func _navigate_shop_grid(row_direction: int) -> void:
+	var columns := maxi(shop_grid.columns, 1)
+	var current := _focused_button_index(_shop_cards)
+	if current < 0:
+		_focus_first_visible_button(_shop_cards)
+		return
+
+	var next := current + row_direction * columns
+	while next >= 0 and next < _shop_cards.size():
+		var card: Button = _shop_cards[next]
+		if card.visible and not card.disabled:
+			card.grab_focus()
+			return
+		next += row_direction * columns
+
+
+func _navigate_shop_grid_horizontal(column_direction: int) -> void:
+	var current := _focused_button_index(_shop_cards)
+	if current < 0:
+		_focus_first_visible_button(_shop_cards)
+		return
+
+	var next := current + column_direction
+	while next >= 0 and next < _shop_cards.size():
+		var card: Button = _shop_cards[next]
+		if card.visible and not card.disabled:
+			card.grab_focus()
+			return
+		next += column_direction
 
 
 func _try_press_shop_button(index: int) -> bool:
 	if index >= _shop_upgrades.size():
 		return false
 
-	var button := _shop_buttons[index]
-	if not button.visible or button.disabled:
+	var card: Button = _shop_cards[index]
+	if not card.visible or card.disabled:
 		return false
 
 	_on_shop_button_pressed(index)
@@ -397,7 +443,7 @@ func _handle_shop_accept() -> void:
 		_on_shop_continue_pressed()
 		return
 
-	var focused_index := _focused_button_index(_shop_buttons)
+	var focused_index := _focused_button_index(_shop_cards)
 	if focused_index >= 0 and _try_press_shop_button(focused_index):
 		return
 
@@ -557,8 +603,8 @@ func show_shop(offers: Array[Resource], gold: int) -> void:
 	_shop_upgrades = offers
 	_current_gold = gold
 	shop_overlay.visible = true
-	shop_gold_label.text = "%d gold  ·  stat upgrades come from level-ups" % gold
-	shop_hint_label.text = "W/S or ↑/↓ navigate  ·  1–4 or Enter buy  ·  Enter continue"
+	shop_gold_label.text = "🪙 %d gold  ·  stat upgrades come from level-ups" % gold
+	shop_hint_label.text = SHOP_HINT_TEXT
 	_update_shop_buttons()
 	shop_continue_button.grab_focus()
 
@@ -679,25 +725,18 @@ func _on_character_button_pressed(index: int) -> void:
 
 
 func _update_shop_buttons() -> void:
-	shop_gold_label.text = "%d gold  ·  stat upgrades come from level-ups" % _current_gold
+	shop_gold_label.text = "🪙 %d gold  ·  stat upgrades come from level-ups" % _current_gold
 
-	for index in _shop_buttons.size():
-		var button := _shop_buttons[index]
+	for index in _shop_cards.size():
+		var card: Button = _shop_cards[index]
 		var has_offer := index < _shop_upgrades.size()
-		button.visible = has_offer
+		card.visible = has_offer
 		if not has_offer:
-			button.disabled = true
+			card.disabled = true
 			continue
 
 		var offer: Resource = _shop_upgrades[index]
-		var cost := int(offer.get("gold_cost"))
-		var can_afford := _current_gold >= cost
-		button.disabled = not can_afford
-		var hotkey := "— %d gold" % cost
-		if index < 4:
-			hotkey = "— %d gold  ·  [%d]" % [cost, index + 1]
-		button.text = ShopDisplay.format_card_text(offer, hotkey)
-		ShopDisplay.apply_card_style(button, offer)
+		(card as ShopCard).configure(offer, index, _current_gold)
 
 
 func _on_shop_button_pressed(index: int) -> void:

@@ -23,6 +23,27 @@ func test_resolve_duration_grows_after_roster_ends() -> void:
 	assert_float(WaveDefinition.resolve_duration(WAVE_03, 8, 3)).is_equal(47.0)
 
 
+func test_resolve_density_multiplier_grows_twenty_percent_per_wave() -> void:
+	assert_float(WaveDefinition.resolve_density_multiplier(1)).is_equal(1.0)
+	assert_float(WaveDefinition.resolve_density_multiplier(2)).is_equal(1.2)
+	assert_float(WaveDefinition.resolve_density_multiplier(3)).is_equal(1.44)
+	assert_float(WaveDefinition.resolve_density_multiplier(4)).is_equal(1.728)
+
+
+func test_spawner_scales_density_with_wave_number() -> void:
+	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
+	var wave := WaveDefinition.new()
+	wave.spawn_interval = 2.0
+	wave.spawn_multiplier_start = 1.0
+	wave.spawn_multiplier_end = 1.0
+	spawner.wave_definition = wave
+	spawner._wave_number = 1
+	assert_float(spawner._current_spawn_interval()).is_equal(2.0)
+
+	spawner._wave_number = 2
+	assert_float(spawner._current_spawn_interval()).is_equal_approx(1.666667, 0.001)
+
+
 func test_wave_manager_uses_duration_override() -> void:
 	var manager: WaveManager = auto_free(WaveManager.new())
 	add_child(manager)

@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://gameui001"]
+[gd_scene load_steps=4 format=3 uid="uid://gameui001"]
 
 [ext_resource type="Script" path="res://scripts/game_ui.gd" id="1_ui"]
 [ext_resource type="Script" path="res://scripts/ui/floating_text_manager.gd" id="2_floating"]
+[ext_resource type="Script" path="res://scripts/ui/shop_card.gd" id="3_shop_card"]
 
 [node name="UI" type="CanvasLayer"]
 process_mode = 3
@@ -239,7 +240,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="ShopOverlay/CenterContainer"]
-custom_minimum_size = Vector2(560, 0)
+custom_minimum_size = Vector2(620, 0)
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="ShopOverlay/CenterContainer/PanelContainer"]
@@ -267,49 +268,31 @@ horizontal_alignment = 1
 
 [node name="HintLabel" type="Label" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "W/S or ↑/↓ navigate  ·  1–8 or Enter buy  ·  Enter continue"
+theme_override_font_sizes/font_size = 14
+text = "W/S or ↑/↓ between rows  ·  1–4 buy  ·  Enter continue"
 horizontal_alignment = 1
 
-[node name="ShopButton1" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 56)
+[node name="ShopGrid" type="GridContainer" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
-text = "Shop Item 1"
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14
+columns = 2
 
-[node name="ShopButton2" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 56)
+[node name="ShopCard1" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopGrid"]
 layout_mode = 2
-text = "Shop Item 2"
+script = ExtResource("3_shop_card")
 
-[node name="ShopButton3" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 56)
+[node name="ShopCard2" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopGrid"]
 layout_mode = 2
-text = "Shop Item 3"
+script = ExtResource("3_shop_card")
 
-[node name="ShopButton4" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 48)
+[node name="ShopCard3" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopGrid"]
 layout_mode = 2
-text = "Shop Item 4"
+script = ExtResource("3_shop_card")
 
-[node name="ShopButton5" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 48)
+[node name="ShopCard4" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopGrid"]
 layout_mode = 2
-text = "Shop Item 5"
-
-[node name="ShopButton6" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
-text = "Shop Item 6"
-
-[node name="ShopButton7" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
-text = "Shop Item 7"
-
-[node name="ShopButton8" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
-text = "Shop Item 8"
+script = ExtResource("3_shop_card")
 
 [node name="ContinueButton" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 custom_minimum_size = Vector2(0, 44)

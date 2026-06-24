@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 6A + swarm density, bounds, and collision tuning
+**Last updated:** Phase 6B — Shop UI overhaul
 
 ---
 
@@ -100,28 +100,15 @@ Done. Tripled swarm sizes and `max_enemies` caps (waves 1–3: swarms 3–6 / 6�
 
 Done. `BalanceMetrics` tracks per-wave combat/economy data; `BalanceCalculator` estimates DPS budgets; `WaveSummaryDisplay` shows end-of-wave debug summary. Balance model at `docs/balance-model.md`. Tests in `test_balance_calculator.gd` and `test_balance_metrics.gd`.
 
+### Phase 6B - Shop UI overhaul
+
+Done. Replaced 8 stacked text buttons with a 2×2 `ShopCard` grid showing weapon icons, type badges (NEW/SHARPEN/SPEED/EXTRA), coin prices, hotkey hints, tooltips, and accent-bordered cards. Shop panel uses gold accent styling. Grid keyboard nav: W/S between rows, A/D or arrows between columns. Tests in `test_shop_display.gd`.
+
 ---
 
 ## Active tasks
 
-### Phase 6B - Shop UI overhaul
-
-**Goal:** Improve the shop UI with better structure, icons, spacing, and visual polish.
-
-| Task | Status | Notes |
-|---|---|---|
-| Layout structure | Pending | Better organized grid or card-based layout |
-| Weapon icons | Pending | Display weapon sprites/icons in shop cards |
-| Price display | Pending | Clearer gold cost with coin icon |
-| Rarity indicators | Pending | Visual distinction for weapon tiers/qualities |
-| Card styling | Pending | Background panels, borders, hover states |
-| Spacing | Pending | Proper padding between elements, less cramped feel |
-| Selection highlight | Pending | Clearer keyboard/mouse selection indicator |
-| Description tooltips | Pending | Optional: hover for weapon description/stats |
-| Keyboard shortcuts | Pending | Show key hints (1-4) more prominently |
-| Tests | Pending | Verify shop UI layout and interaction remain functional |
-
----
+_None — see [plans.md](plans.md) for future roadmap._
 
 ## How to try it
 

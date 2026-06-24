@@ -19,15 +19,21 @@ const SFX_PATHS := {
 	"weapon_upgrade": "res://assets/audio/sfx/weapon_upgrade.wav",
 }
 
+const MUSIC_PATH := "res://assets/audio/music/jrpg_battle_loop.mp3"
+
 # Volume settings (0.0 to 1.0), default 70% for comfortable listening
 var master_volume := 0.7:
 	set(value):
 		master_volume = clampf(value, 0.0, 1.0)
 		_update_all_volumes()
 
+var music_volume := 0.4
+var sfx_volume := 0.5
+
 # AudioStreamPlayers pool for SFX
 var _sfx_players: Array[AudioStreamPlayer] = []
 var _available_players: Array[AudioStreamPlayer] = []
+var _music_player: AudioStreamPlayer
 
 # Cached sound effects
 var _sfx_cache: Dictionary = {}
@@ -40,6 +46,7 @@ func _ready() -> void:
 	_initialize_sfx_players()
 	_connect_signals()
 	_generate_placeholder_sounds()
+	_start_music()
 
 
 func _initialize_sfx_players() -> void:
@@ -180,7 +187,7 @@ func play_sfx(sound_name: StringName) -> void:
 
 	var player: AudioStreamPlayer = _available_players.pop_back()
 	player.stream = stream
-	player.volume_db = linear_to_db(master_volume)
+	player.volume_db = linear_to_db(master_volume * sfx_volume)
 	player.play()
 
 
@@ -217,7 +224,33 @@ func _on_player_finished(player: AudioStreamPlayer) -> void:
 
 func _update_all_volumes() -> void:
 	for player in _sfx_players:
-		player.volume_db = linear_to_db(master_volume)
+		player.volume_db = linear_to_db(master_volume * sfx_volume)
+	if _music_player:
+		_music_player.volume_db = linear_to_db(master_volume * music_volume)
+
+
+func _start_music() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	if not FileAccess.file_exists(MUSIC_PATH):
+		return
+
+	var stream: AudioStream = load(MUSIC_PATH) as AudioStream
+	if stream == null:
+		return
+
+	if stream is AudioStreamMP3:
+		(stream as AudioStreamMP3).loop = true
+	elif stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = true
+
+	_music_player = AudioStreamPlayer.new()
+	_music_player.name = "MusicPlayer"
+	_music_player.bus = "Master"
+	_music_player.stream = stream
+	_music_player.volume_db = linear_to_db(master_volume * music_volume)
+	add_child(_music_player)
+	_music_player.play()
 
 
 func set_master_volume(volume: float) -> void:

@@ -69,13 +69,14 @@ static func estimate_wave_xp(wave: WaveDefinition, enemy_roster: Array[EnemyDefi
 	return int(estimated_kills * avg_xp_per_kill)
 
 
-static func estimate_wave_kills(wave: WaveDefinition) -> int:
+static func estimate_wave_kills(wave: WaveDefinition, wave_number: int = 1) -> int:
 	if wave == null:
 		return 0
 
+	var density := WaveDefinition.resolve_density_multiplier(wave_number)
 	var spawn_count := wave.duration / maxf(wave.spawn_interval, 0.1)
 	var avg_multiplier := (wave.spawn_multiplier_start + wave.spawn_multiplier_end) * 0.5
-	var avg_swarm_size := wave.average_swarm_size()
+	var avg_swarm_size := wave.average_swarm_size() * density
 	return int(spawn_count * avg_multiplier * avg_swarm_size)
 
 

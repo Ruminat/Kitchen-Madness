@@ -16,12 +16,16 @@ var is_active := true
 var _has_camera_focus := false
 var _spawn_timer: Timer
 var _elapsed_time := 0.0
+var _wave_number := 1
 
 
-func configure(definition: WaveDefinition, container: Node2D, bounds: Rect2) -> void:
+func configure(
+	definition: WaveDefinition, container: Node2D, bounds: Rect2, wave_number: int = 1
+) -> void:
 	wave_definition = definition
 	enemy_container = container
 	arena_bounds = bounds
+	_wave_number = maxi(wave_number, 1)
 	is_active = true
 	_elapsed_time = 0.0
 
@@ -108,7 +112,8 @@ func _spawn_enemy() -> void:
 
 func _max_alive_enemies() -> int:
 	if wave_definition:
-		return wave_definition.max_enemies * 3
+		var scaled := roundi(float(wave_definition.max_enemies * 3) * _density_multiplier())
+		return maxi(scaled, wave_definition.max_enemies)
 	return 120
 
 
@@ -117,7 +122,12 @@ func _resolve_swarm_size(definition: EnemyDefinition) -> int:
 		return 1
 	if wave_definition == null:
 		return 1
-	return wave_definition.roll_swarm_size()
+
+	var min_size := maxi(roundi(float(wave_definition.swarm_size_min) * _density_multiplier()), 1)
+	var max_size := maxi(
+		roundi(float(wave_definition.swarm_size_max) * _density_multiplier()), min_size
+	)
+	return randi_range(min_size, max_size)
 
 
 func _cluster_spawn_position(anchor: Vector2, radius: float) -> Vector2:
@@ -213,7 +223,11 @@ func _current_spawn_interval() -> float:
 	if wave_definition:
 		var progress := _elapsed_time / maxf(wave_definition.duration, 0.01)
 		multiplier = wave_definition.get_spawn_multiplier(progress)
-	return base_interval / maxf(multiplier, 0.01)
+	return base_interval / maxf(multiplier * _density_multiplier(), 0.01)
+
+
+func _density_multiplier() -> float:
+	return WaveDefinition.resolve_density_multiplier(_wave_number)
 
 
 func _random_spawn_position() -> Vector2:

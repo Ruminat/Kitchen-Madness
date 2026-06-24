@@ -2,6 +2,7 @@ class_name WaveDefinition
 extends Resource
 
 const DURATION_GROWTH_PER_WAVE := 5.0
+const DENSITY_GROWTH_PER_WAVE := 0.2
 
 @export var duration: float = 30.0
 @export var spawn_interval: float = 1.4
@@ -42,3 +43,7 @@ static func resolve_duration(
 
 	var overflow := maxi(wave_number - roster_size, 0)
 	return definition.duration + DURATION_GROWTH_PER_WAVE * float(overflow)
+
+
+static func resolve_density_multiplier(wave_number: int) -> float:
+	return pow(1.0 + DENSITY_GROWTH_PER_WAVE, float(maxi(wave_number, 1) - 1))

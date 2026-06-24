@@ -173,7 +173,7 @@ func _configure_current_wave() -> void:
 	)
 	wave_manager.configure(wave, duration)
 	enemy_spawner.set_camera_spawn_target(player, _get_camera_world_view_size())
-	enemy_spawner.configure(wave, enemy_container, _arena_bounds)
+	enemy_spawner.configure(wave, enemy_container, _arena_bounds, current_wave)
 	_start_wave_metrics()
 
 
