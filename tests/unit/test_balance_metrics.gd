@@ -69,6 +69,7 @@ func test_balance_metrics_calculates_effective_dps() -> void:
 	var metrics := BalanceMetrics.new()
 	metrics.start_run("mushroom")
 	metrics.start_wave(1, 1)
+	await get_tree().create_timer(0.05).timeout
 
 	metrics.record_damage_dealt(120, "garlic_bomb")
 

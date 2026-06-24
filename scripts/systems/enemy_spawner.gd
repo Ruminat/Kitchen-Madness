@@ -107,15 +107,17 @@ func _spawn_enemy() -> void:
 		if enemy.has_method("set_target") and camera_target:
 			enemy.set_target(camera_target)
 		if enemy.has_method("configure") and definition:
-			enemy.configure(definition)
+			if enemy.has_method("configure_for_wave"):
+				enemy.configure_for_wave(definition, _wave_number)
+			else:
+				enemy.configure(definition)
 
 	_schedule_next_spawn()
 
 
 func _max_alive_enemies() -> int:
 	if wave_definition:
-		var scaled := roundi(float(wave_definition.max_enemies) * _density_multiplier())
-		return maxi(scaled, wave_definition.max_enemies)
+		return wave_definition.max_enemies
 	return 120
 
 
@@ -125,11 +127,7 @@ func _resolve_swarm_size(definition: EnemyDefinition) -> int:
 	if wave_definition == null:
 		return 1
 
-	var min_size := maxi(roundi(float(wave_definition.swarm_size_min) * _density_multiplier()), 1)
-	var max_size := maxi(
-		roundi(float(wave_definition.swarm_size_max) * _density_multiplier()), min_size
-	)
-	return randi_range(min_size, max_size)
+	return wave_definition.roll_swarm_size()
 
 
 func _cluster_spawn_position(anchor: Vector2, radius: float) -> Vector2:

@@ -23,11 +23,22 @@ func test_resolve_duration_grows_after_roster_ends() -> void:
 	assert_float(WaveDefinition.resolve_duration(WAVE_03, 8, 3)).is_equal(47.0)
 
 
-func test_resolve_density_multiplier_grows_twenty_percent_per_wave() -> void:
+func test_resolve_density_multiplier_grows_ten_percent_per_wave() -> void:
 	assert_float(WaveDefinition.resolve_density_multiplier(1)).is_equal(1.0)
-	assert_float(WaveDefinition.resolve_density_multiplier(2)).is_equal(1.2)
-	assert_float(WaveDefinition.resolve_density_multiplier(3)).is_equal(1.44)
-	assert_float(WaveDefinition.resolve_density_multiplier(4)).is_equal(1.728)
+	assert_float(WaveDefinition.resolve_density_multiplier(2)).is_equal_approx(1.1, 0.001)
+	assert_float(WaveDefinition.resolve_density_multiplier(3)).is_equal_approx(1.21, 0.001)
+	assert_float(WaveDefinition.resolve_density_multiplier(4)).is_equal_approx(1.331, 0.001)
+
+
+func test_resolve_enemy_health_scales_with_wave_number() -> void:
+	assert_int(WaveDefinition.resolve_enemy_health(18, 1)).is_equal(18)
+	assert_int(WaveDefinition.resolve_enemy_health(18, 3)).is_equal(22)
+	assert_int(WaveDefinition.resolve_enemy_health(50, 4)).is_equal(68)
+
+
+func test_resolve_contact_damage_scales_with_wave_number() -> void:
+	assert_int(WaveDefinition.resolve_contact_damage(6, 1)).is_equal(6)
+	assert_int(WaveDefinition.resolve_contact_damage(6, 3)).is_equal(7)
 
 
 func test_spawner_scales_density_with_wave_number() -> void:
@@ -41,7 +52,7 @@ func test_spawner_scales_density_with_wave_number() -> void:
 	assert_float(spawner._current_spawn_interval()).is_equal(2.0)
 
 	spawner._wave_number = 2
-	assert_float(spawner._current_spawn_interval()).is_equal_approx(1.666667, 0.001)
+	assert_float(spawner._current_spawn_interval()).is_equal_approx(1.818182, 0.001)
 
 
 func test_wave_manager_uses_duration_override() -> void:
@@ -59,7 +70,7 @@ func test_wave_one_starts_with_chasers_only() -> void:
 	assert_int(WAVE_01.enemy_weights.size()).is_equal(1)
 	var entry := WAVE_01.enemy_weights[0] as EnemySpawnEntry
 	assert_str(entry.definition.id).is_equal("chaser")
-	assert_int(WAVE_01.max_enemies).is_greater_equal(30)
+	assert_int(WAVE_01.max_enemies).is_greater_equal(24)
 	assert_float(WAVE_01.spawn_multiplier_start).is_equal(1.0)
 
 

@@ -6,7 +6,7 @@
 script = ExtResource("1")
 id = "attack_speed"
 title = "Quick Trigger"
-description = "+8% attack speed"
+description = "+5% attack speed"
 effect = &"attack_speed_percent"
-amount = 0.08
+amount = 0.05
 gold_cost = 15

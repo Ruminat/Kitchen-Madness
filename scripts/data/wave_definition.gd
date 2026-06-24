@@ -2,7 +2,9 @@ class_name WaveDefinition
 extends Resource
 
 const DURATION_GROWTH_PER_WAVE := 5.0
-const DENSITY_GROWTH_PER_WAVE := 0.2
+const DENSITY_GROWTH_PER_WAVE := 0.1
+const HEALTH_GROWTH_PER_WAVE := 0.12
+const DAMAGE_GROWTH_PER_WAVE := 0.08
 
 @export var duration: float = 30.0
 @export var spawn_interval: float = 1.4
@@ -47,3 +49,21 @@ static func resolve_duration(
 
 static func resolve_density_multiplier(wave_number: int) -> float:
 	return pow(1.0 + DENSITY_GROWTH_PER_WAVE, float(maxi(wave_number, 1) - 1))
+
+
+static func resolve_enemy_health(base_health: int, wave_number: int) -> int:
+	return maxi(
+		roundi(
+			float(base_health) * (1.0 + HEALTH_GROWTH_PER_WAVE * float(maxi(wave_number, 1) - 1))
+		),
+		1
+	)
+
+
+static func resolve_contact_damage(base_damage: int, wave_number: int) -> int:
+	return maxi(
+		roundi(
+			float(base_damage) * (1.0 + DAMAGE_GROWTH_PER_WAVE * float(maxi(wave_number, 1) - 1))
+		),
+		1
+	)

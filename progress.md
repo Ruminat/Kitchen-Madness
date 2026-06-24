@@ -2,15 +2,11 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 7B world-space damage numbers
+**Last updated:** Phase 7C combat balance tuning
 
 ---
 
 ## Active tasks
-
-### Phase 7C - Combat balance tuning from run statistics
-
-Pending. Use persisted stats to curb combat snowballing (player too strong after a few waves).
 
 ### Phase 7F - Economy and XP rebalance
 
@@ -146,3 +142,7 @@ Structured HUD (HP bar + value, wave timer, kills, Grease label, bottom XP panel
 ### Phase 7B - World-space damage numbers
 
 Moved `FloatingTextManager` from UI `CanvasLayer` to game-world `Node2D`. Labels spawn at hit `world_pos` and stay anchored as the camera moves. Pooling unchanged. Tests for world position and camera independence.
+
+### Phase 7C - Combat balance tuning
+
+Reduced compounding spawn pressure (10% density growth, interval-only scaling), smaller authored swarms, wave-scaled enemy HP/contact damage (+12%/+8% per wave), combat upgrades trimmed to +5%, `BalanceCalculator` uses wave index + drop rates, `BalanceMetrics` wave duration fixed. Tests updated.

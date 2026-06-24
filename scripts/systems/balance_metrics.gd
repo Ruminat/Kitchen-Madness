@@ -97,7 +97,7 @@ class RunMetrics:
 var _current_wave: WaveMetrics = null
 var _current_run: RunMetrics = null
 var _is_tracking: bool = false
-var _wave_start_time: float = 0.0
+var _wave_start_ticks: int = 0
 
 
 func start_run(character_id: String) -> void:
@@ -126,7 +126,7 @@ func start_wave(wave_number: int, player_level: int) -> void:
 	_current_wave = WaveMetrics.new()
 	_current_wave.wave_number = wave_number
 	_current_wave.player_level_start = player_level
-	_wave_start_time = Time.get_time_dict_from_system()["second"]
+	_wave_start_ticks = Time.get_ticks_msec()
 
 
 func end_wave(player_level: int) -> Dictionary:
@@ -197,7 +197,23 @@ func record_health_pickup() -> void:
 func get_current_wave_summary() -> Dictionary:
 	if _current_wave == null:
 		return {}
-	return _current_wave.to_dictionary()
+	return _wave_summary_with_live_duration(_current_wave)
+
+
+func _wave_summary_with_live_duration(wave_metrics: WaveMetrics) -> Dictionary:
+	var summary := wave_metrics.to_dictionary()
+	if wave_metrics.duration_seconds > 0.0:
+		return summary
+
+	var live_duration := _calculate_wave_duration()
+	if live_duration <= 0.0:
+		return summary
+
+	summary["duration_seconds"] = live_duration
+	summary["effective_dps"] = float(wave_metrics.damage_dealt) / live_duration
+	summary["kills_per_minute"] = float(wave_metrics.total_kills) / live_duration * 60.0
+	summary["gold_per_minute"] = float(wave_metrics.gold_earned) / live_duration * 60.0
+	return summary
 
 
 func is_tracking() -> bool:
@@ -205,9 +221,4 @@ func is_tracking() -> bool:
 
 
 func _calculate_wave_duration() -> float:
-	var time_dict := Time.get_time_dict_from_system()
-	var current_time: int = time_dict["second"]
-	var duration := float(current_time - _wave_start_time)
-	if duration < 0.0:
-		duration += 60.0
-	return duration
+	return maxf(float(Time.get_ticks_msec() - _wave_start_ticks) / 1000.0, 0.0)

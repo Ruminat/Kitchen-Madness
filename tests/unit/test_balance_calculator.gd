@@ -107,6 +107,26 @@ func test_compare_wave_budgets_returns_dictionary() -> void:
 	var enemies: Array[EnemyDefinition] = [CHASER_DEF]
 	var comparison := BalanceCalculator.compare_wave_budgets(waves, enemies)
 	assert_dict(comparison).is_not_empty()
+	var wave_two := comparison["wave_02.tres"] as Dictionary
+	assert_int(wave_two.get("wave_number", 0)).is_equal(2)
+	assert_int(wave_two.get("estimated_kills", 0)).is_greater(
+		BalanceCalculator.estimate_wave_kills(WAVE_01_DEF, 1)
+	)
+
+
+func test_wave_one_kill_estimate_stays_in_target_band() -> void:
+	var kills := BalanceCalculator.estimate_wave_kills(WAVE_01_DEF, 1)
+	assert_int(kills).is_greater_equal(8)
+	assert_int(kills).is_less_equal(20)
+
+
+func test_wave_hp_budget_grows_faster_than_flat_enemy_health() -> void:
+	var enemies: Array[EnemyDefinition] = [CHASER_DEF]
+	var wave_one_budget := BalanceCalculator.calculate_wave_hp_budget(WAVE_01_DEF, enemies, 1)
+	var wave_three_budget := BalanceCalculator.calculate_wave_hp_budget(
+		preload("res://resources/waves/wave_03.tres"), enemies, 3
+	)
+	assert_int(wave_three_budget).is_greater(wave_one_budget * 2)
 
 
 func test_wave_1_duration_matches_target() -> void:

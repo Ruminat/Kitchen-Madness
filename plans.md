@@ -45,6 +45,8 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 | Validation | Compare predicted DPS (`BalanceCalculator`) vs. actual metrics after changes |
 | Tests | Update balance calculator / wave pacing tests if formulas change |
 
+**Done:** 10% density growth on spawn interval only; smaller swarms; wave HP/damage scaling; +5% combat upgrades; calculator/metrics fixes.
+
 ---
 
 ### Phase 7F - Economy and XP rebalance

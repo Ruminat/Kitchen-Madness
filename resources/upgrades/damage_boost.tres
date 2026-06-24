@@ -6,7 +6,7 @@
 script = ExtResource("1")
 id = "damage_boost"
 title = "Sharpened Rounds"
-description = "+8% weapon damage"
+description = "+5% weapon damage"
 effect = &"damage_percent"
-amount = 0.08
+amount = 0.05
 gold_cost = 15
