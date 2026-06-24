@@ -9,9 +9,13 @@ const COLLISION := preload("res://scripts/data/collision_layers.gd")
 
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var move_speed := 90.0
+var target: Node2D
 var definition: EnemyDefinition
 var _base_move_speed := 90.0
 var _slow_timer := 0.0
+var _hit_flash_timer := 0.0
+var _is_high_detail_active := true
+var _is_render_active := true
 
 @onready var visual: Node2D = $Visual
 @onready var health_component: HealthComponent = $HealthComponent
@@ -58,6 +62,16 @@ func _setup_collision() -> void:
 	collision_layer = COLLISION.ENEMY
 	collision_mask = COLLISION.ENEMY_MASK
 	motion_mode = MOTION_MODE_FLOATING
+	_apply_collision_detail()
+
+
+func _apply_collision_detail() -> void:
+	if _is_high_detail_active:
+		collision_layer = COLLISION.ENEMY
+		collision_mask = COLLISION.ENEMY_MASK
+	else:
+		collision_layer = 0
+		collision_mask = 0
 
 
 func _sync_collision_shape() -> void:
@@ -88,6 +102,20 @@ func _get_health_component() -> HealthComponent:
 
 func set_arena_bounds(bounds: Rect2) -> void:
 	arena_bounds = bounds
+
+
+func set_target(target_node: Node2D) -> void:
+	target = target_node
+
+
+func set_screen_detail(render_active: bool, high_detail_active: bool) -> void:
+	if render_active != _is_render_active:
+		_is_render_active = render_active
+		_set_visuals_visible(render_active)
+
+	if high_detail_active != _is_high_detail_active:
+		_is_high_detail_active = high_detail_active
+		_apply_collision_detail()
 
 
 func apply_contact_slow(duration: float = CONTACT_SLOW_DURATION) -> void:
@@ -121,16 +149,29 @@ func _physics_process(delta: float) -> void:
 	if not health_component.is_alive():
 		return
 
+	_update_hit_flash(delta)
 	_update_contact_slow(delta)
 
-	var player := get_tree().get_first_node_in_group("player") as Node2D
+	var player := _get_target()
 	if player == null:
 		return
 
 	var direction := _get_move_direction(player, delta)
-	velocity = direction * move_speed
-	move_and_slide()
+	if _is_high_detail_active:
+		velocity = direction * move_speed
+		move_and_slide()
+	else:
+		velocity = Vector2.ZERO
+		global_position += direction * move_speed * delta
 	global_position = ArenaClamp.clamp_position(global_position, arena_bounds, _get_radius())
+
+
+func _get_target() -> Node2D:
+	if is_instance_valid(target):
+		return target
+
+	target = get_tree().get_first_node_in_group("player") as Node2D
+	return target
 
 
 func _get_move_direction(player: Node2D, _delta: float) -> Vector2:
@@ -189,9 +230,30 @@ func _get_visual() -> Node2D:
 	return get_node_or_null("Visual") as Node2D
 
 
+func _set_visuals_visible(is_visible: bool) -> void:
+	var visual_node := _get_visual()
+	if visual_node:
+		visual_node.visible = is_visible
+
+	var health_bar := get_node_or_null("EnemyHealthBar") as CanvasItem
+	if health_bar:
+		health_bar.visible = is_visible
+
+
 func _flash_hit() -> void:
-	visual.modulate = Color(1.0, 0.5, 0.5)
-	await get_tree().create_timer(0.05).timeout
-	if not is_instance_valid(self):
+	var visual_node := _get_visual()
+	if visual_node == null:
 		return
-	visual.modulate = Color.WHITE
+	visual_node.modulate = Color(1.0, 0.5, 0.5)
+	_hit_flash_timer = 0.05
+
+
+func _update_hit_flash(delta: float) -> void:
+	if _hit_flash_timer <= 0.0:
+		return
+
+	_hit_flash_timer = maxf(_hit_flash_timer - delta, 0.0)
+	if _hit_flash_timer <= 0.0:
+		var visual_node := _get_visual()
+		if visual_node:
+			visual_node.modulate = Color.WHITE

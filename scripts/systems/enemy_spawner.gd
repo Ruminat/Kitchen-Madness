@@ -104,6 +104,8 @@ func _spawn_enemy() -> void:
 		)
 		if enemy.has_method("set_arena_bounds"):
 			enemy.set_arena_bounds(arena_bounds)
+		if enemy.has_method("set_target") and camera_target:
+			enemy.set_target(camera_target)
 		if enemy.has_method("configure") and definition:
 			enemy.configure(definition)
 
@@ -112,7 +114,7 @@ func _spawn_enemy() -> void:
 
 func _max_alive_enemies() -> int:
 	if wave_definition:
-		var scaled := roundi(float(wave_definition.max_enemies * 3) * _density_multiplier())
+		var scaled := roundi(float(wave_definition.max_enemies) * _density_multiplier())
 		return maxi(scaled, wave_definition.max_enemies)
 	return 120
 

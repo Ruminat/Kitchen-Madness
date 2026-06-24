@@ -37,6 +37,24 @@ func test_enemy_collision_shape_matches_definition_radius() -> void:
 	assert_float(shape.radius).is_equal(CHASER_DEF.radius)
 
 
+func test_enemy_screen_detail_can_disable_render_and_collision() -> void:
+	var enemy: BaseEnemy = auto_free(ENEMY_SCENE.instantiate()) as BaseEnemy
+	add_child(enemy)
+	await await_idle_frame()
+
+	enemy.set_screen_detail(false, false)
+
+	assert_bool(enemy.get_node("Visual").visible).is_false()
+	assert_int(enemy.collision_layer).is_equal(0)
+	assert_int(enemy.collision_mask).is_equal(0)
+
+	enemy.set_screen_detail(true, true)
+
+	assert_bool(enemy.get_node("Visual").visible).is_true()
+	assert_int(enemy.collision_layer).is_equal(COLLISION.ENEMY)
+	assert_int(enemy.collision_mask).is_equal(COLLISION.ENEMY_MASK)
+
+
 func test_enemies_block_each_other() -> void:
 	var enemy_a: CharacterBody2D = auto_free(ENEMY_SCENE.instantiate()) as CharacterBody2D
 	var enemy_b: CharacterBody2D = auto_free(ENEMY_SCENE.instantiate()) as CharacterBody2D

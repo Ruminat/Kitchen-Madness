@@ -1,5 +1,9 @@
 extends Node2D
 
+const ENEMY_DETAIL_UPDATE_INTERVAL := 0.12
+const ENEMY_RENDER_MARGIN := 64.0
+const ENEMY_FULL_DETAIL_MARGIN := 180.0
+
 @export var wave_definition: WaveDefinition
 @export var wave_definitions: Array[WaveDefinition] = []
 @export var health_drop: DropDefinition
@@ -10,6 +14,7 @@ var is_wave_complete := false
 var is_game_over := false
 var current_wave := 1
 var _arena_bounds := Rect2()
+var _enemy_detail_timer := 0.0
 
 @onready var arena: Arena = $Arena
 @onready var camera: Camera2D = $Camera2D
@@ -40,7 +45,7 @@ func _ready() -> void:
 	_follow_player_camera()
 	_configure_current_wave()
 	loot_spawner.configure(pickup_container, health_drop)
-	vfx_manager.configure(vfx_container)
+	vfx_manager.configure(vfx_container, camera, Callable(self, "_get_camera_world_view_size"))
 	if level_up_manager.has_method("configure"):
 		level_up_manager.configure(player, ui, Callable(self, "is_run_active"))
 	if shop_manager.has_method("configure"):
@@ -51,6 +56,7 @@ func _ready() -> void:
 	EventBus.player_died.connect(_on_player_died)
 
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
+	PerformanceSettings.render_scale_changed.connect(_on_render_scale_changed)
 
 	_connect_metrics_signals()
 
@@ -60,8 +66,9 @@ func _notification(what: int) -> void:
 		_save_run_on_quit()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_follow_player_camera()
+	_update_enemy_detail_timer(delta)
 
 
 func _fit_camera_to_play_area() -> void:
@@ -79,6 +86,11 @@ func _on_viewport_size_changed() -> void:
 	_fit_camera_to_play_area()
 	_follow_player_camera()
 	enemy_spawner.set_camera_view_size(_get_camera_world_view_size())
+	_update_enemy_detail()
+
+
+func _on_render_scale_changed(_index: int, _scale_factor: float) -> void:
+	_on_viewport_size_changed()
 
 
 func _follow_player_camera() -> void:
@@ -113,6 +125,34 @@ func _get_camera_world_view_size() -> Vector2:
 	return Vector2(
 		viewport_size.x / maxf(camera.zoom.x, 0.01), viewport_size.y / maxf(camera.zoom.y, 0.01)
 	)
+
+
+func _update_enemy_detail_timer(delta: float) -> void:
+	_enemy_detail_timer -= delta
+	if _enemy_detail_timer > 0.0:
+		return
+
+	_enemy_detail_timer = ENEMY_DETAIL_UPDATE_INTERVAL
+	_update_enemy_detail()
+
+
+func _update_enemy_detail() -> void:
+	if camera == null or enemy_container == null:
+		return
+
+	var view_size := _get_camera_world_view_size()
+	var camera_rect := Rect2(camera.global_position - view_size * 0.5, view_size)
+	var render_rect := camera_rect.grow(ENEMY_RENDER_MARGIN)
+	var full_detail_rect := camera_rect.grow(ENEMY_FULL_DETAIL_MARGIN)
+
+	for child in enemy_container.get_children():
+		if not (child is Node2D) or not child.has_method("set_screen_detail"):
+			continue
+
+		var enemy_position := (child as Node2D).global_position
+		child.set_screen_detail(
+			render_rect.has_point(enemy_position), full_detail_rect.has_point(enemy_position)
+		)
 
 
 func is_run_active() -> bool:

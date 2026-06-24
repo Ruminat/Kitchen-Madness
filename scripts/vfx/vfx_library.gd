@@ -1,14 +1,21 @@
 class_name VfxLibrary
 extends RefCounted
 
-const DEATH_PARTICLE_AMOUNT := 7
-const IMPACT_PARTICLE_AMOUNT := 4
-const TRAIL_PARTICLE_AMOUNT := 5
+const DEATH_PARTICLE_AMOUNT := 5
+const IMPACT_PARTICLE_AMOUNT := 3
+const TRAIL_PARTICLE_AMOUNT := 3
+const PARTICLE_FIXED_FPS := 30
 
 static var _particle_texture: Texture2D
 static var _glow_texture: Texture2D
 static var _spark_texture: Texture2D
 static var _additive_material: CanvasItemMaterial
+static var _combat_ramps := {}
+static var _death_materials := {}
+static var _trail_materials := {}
+static var _death_scale_curve: CurveTexture
+static var _impact_scale_curve: CurveTexture
+static var _trail_scale_curve: CurveTexture
 
 
 static func get_particle_texture() -> Texture2D:
@@ -52,10 +59,17 @@ static func configure_death_burst(particles: GPUParticles2D, accent: Color) -> v
 	particles.one_shot = true
 	particles.explosiveness = 1.0
 	particles.lifetime = 0.32
-	particles.fixed_fps = 60
+	particles.fixed_fps = PARTICLE_FIXED_FPS
 	particles.emitting = false
-	particles.visibility_rect = Rect2(-72.0, -72.0, 144.0, 144.0)
+	particles.visibility_rect = Rect2(-56.0, -56.0, 112.0, 112.0)
 	particles.material = null
+	particles.process_material = _get_death_material(accent)
+
+
+static func _get_death_material(accent: Color) -> ParticleProcessMaterial:
+	var key := _color_key(accent)
+	if _death_materials.has(key):
+		return _death_materials[key]
 
 	var material := ParticleProcessMaterial.new()
 	material.particle_flag_disable_z = true
@@ -70,15 +84,10 @@ static func configure_death_burst(particles: GPUParticles2D, accent: Color) -> v
 	material.scale_max = 2.5
 	material.angular_velocity_min = -120.0
 	material.angular_velocity_max = 120.0
-	material.color_ramp = _make_combat_ramp(accent, accent.lightened(0.18))
-	material.scale_curve = _make_curve_texture(
-		[
-			Vector2(0.0, 0.2),
-			Vector2(0.18, 1.0),
-			Vector2(1.0, 0.25),
-		]
-	)
-	particles.process_material = material
+	material.color_ramp = _get_combat_ramp(accent, accent.lightened(0.18))
+	material.scale_curve = _get_death_scale_curve()
+	_death_materials[key] = material
+	return material
 
 
 static func configure_impact_spark(
@@ -89,36 +98,32 @@ static func configure_impact_spark(
 	particles.one_shot = true
 	particles.explosiveness = 1.0
 	particles.lifetime = 0.13
-	particles.fixed_fps = 60
+	particles.fixed_fps = PARTICLE_FIXED_FPS
 	particles.emitting = false
-	particles.visibility_rect = Rect2(-48.0, -48.0, 96.0, 96.0)
+	particles.visibility_rect = Rect2(-40.0, -40.0, 80.0, 80.0)
 	particles.material = get_additive_material()
 
 	var hit_direction := direction
 	if hit_direction.length_squared() <= 0.001:
 		hit_direction = Vector2.UP
 
-	var material := ParticleProcessMaterial.new()
-	material.particle_flag_disable_z = true
-	material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	material.emission_sphere_radius = 2.0
+	var material := particles.process_material as ParticleProcessMaterial
+	if material == null:
+		material = ParticleProcessMaterial.new()
+		material.particle_flag_disable_z = true
+		material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+		material.emission_sphere_radius = 2.0
+		material.spread = 28.0
+		material.initial_velocity_min = 75.0
+		material.initial_velocity_max = 130.0
+		material.gravity = Vector3.ZERO
+		material.scale_min = 0.42
+		material.scale_max = 0.95
+		material.scale_curve = _get_impact_scale_curve()
 	material.direction = Vector3(hit_direction.x, hit_direction.y, 0.0)
-	material.spread = 28.0
-	material.initial_velocity_min = 75.0
-	material.initial_velocity_max = 130.0
-	material.gravity = Vector3.ZERO
-	material.scale_min = 0.42
-	material.scale_max = 0.95
 	material.angle_min = rad_to_deg(hit_direction.angle()) - 8.0
 	material.angle_max = rad_to_deg(hit_direction.angle()) + 8.0
-	material.color_ramp = _make_combat_ramp(accent.lightened(0.24), Color.WHITE)
-	material.scale_curve = _make_curve_texture(
-		[
-			Vector2(0.0, 1.0),
-			Vector2(0.7, 0.55),
-			Vector2(1.0, 0.05),
-		]
-	)
+	material.color_ramp = _get_combat_ramp(accent.lightened(0.24), Color.WHITE)
 	particles.process_material = material
 
 
@@ -130,10 +135,18 @@ static func create_trail(accent: Color) -> GPUParticles2D:
 	particles.amount = TRAIL_PARTICLE_AMOUNT
 	particles.lifetime = 0.16
 	particles.preprocess = 0.06
-	particles.fixed_fps = 60
+	particles.fixed_fps = PARTICLE_FIXED_FPS
 	particles.emitting = true
-	particles.visibility_rect = Rect2(-40.0, -40.0, 80.0, 80.0)
+	particles.visibility_rect = Rect2(-32.0, -32.0, 64.0, 64.0)
 	particles.material = null
+	particles.process_material = _get_trail_material(accent)
+	return particles
+
+
+static func _get_trail_material(accent: Color) -> ParticleProcessMaterial:
+	var key := _color_key(accent)
+	if _trail_materials.has(key):
+		return _trail_materials[key]
 
 	var material := ParticleProcessMaterial.new()
 	material.particle_flag_disable_z = true
@@ -145,16 +158,10 @@ static func create_trail(accent: Color) -> GPUParticles2D:
 	material.gravity = Vector3.ZERO
 	material.scale_min = 0.45
 	material.scale_max = 1.0
-	material.color_ramp = _make_combat_ramp(accent, accent.lightened(0.18))
-	material.scale_curve = _make_curve_texture(
-		[
-			Vector2(0.0, 0.35),
-			Vector2(0.2, 1.0),
-			Vector2(1.0, 0.0),
-		]
-	)
-	particles.process_material = material
-	return particles
+	material.color_ramp = _get_combat_ramp(accent, accent.lightened(0.18))
+	material.scale_curve = _get_trail_scale_curve()
+	_trail_materials[key] = material
+	return material
 
 
 static func add_projectile_glow(projectile: Node2D, accent: Color) -> void:
@@ -176,7 +183,11 @@ static func add_projectile_glow(projectile: Node2D, accent: Color) -> void:
 	visual.move_child(glow, 0)
 
 
-static func _make_combat_ramp(accent: Color, hot_color: Color) -> GradientTexture1D:
+static func _get_combat_ramp(accent: Color, hot_color: Color) -> GradientTexture1D:
+	var key := "%s-%s" % [_color_key(accent), _color_key(hot_color)]
+	if _combat_ramps.has(key):
+		return _combat_ramps[key]
+
 	var gradient := Gradient.new()
 	gradient.set_color(0, Color(hot_color.r, hot_color.g, hot_color.b, 0.95))
 	gradient.set_color(1, Color(accent.r, accent.g, accent.b, 0.0))
@@ -184,7 +195,56 @@ static func _make_combat_ramp(accent: Color, hot_color: Color) -> GradientTextur
 	gradient.add_point(0.72, Color(accent.r, accent.g, accent.b, 0.22))
 	var ramp := GradientTexture1D.new()
 	ramp.gradient = gradient
+	_combat_ramps[key] = ramp
 	return ramp
+
+
+static func _get_death_scale_curve() -> CurveTexture:
+	if _death_scale_curve == null:
+		_death_scale_curve = _make_curve_texture(
+			[
+				Vector2(0.0, 0.2),
+				Vector2(0.18, 1.0),
+				Vector2(1.0, 0.25),
+			]
+		)
+	return _death_scale_curve
+
+
+static func _get_impact_scale_curve() -> CurveTexture:
+	if _impact_scale_curve == null:
+		_impact_scale_curve = _make_curve_texture(
+			[
+				Vector2(0.0, 1.0),
+				Vector2(0.7, 0.55),
+				Vector2(1.0, 0.05),
+			]
+		)
+	return _impact_scale_curve
+
+
+static func _get_trail_scale_curve() -> CurveTexture:
+	if _trail_scale_curve == null:
+		_trail_scale_curve = _make_curve_texture(
+			[
+				Vector2(0.0, 0.35),
+				Vector2(0.2, 1.0),
+				Vector2(1.0, 0.0),
+			]
+		)
+	return _trail_scale_curve
+
+
+static func _color_key(color: Color) -> String:
+	return (
+		"%02d%02d%02d%02d"
+		% [
+			roundi(clampf(color.r, 0.0, 1.0) * 31.0),
+			roundi(clampf(color.g, 0.0, 1.0) * 31.0),
+			roundi(clampf(color.b, 0.0, 1.0) * 31.0),
+			roundi(clampf(color.a, 0.0, 1.0) * 31.0),
+		]
+	)
 
 
 static func _make_curve_texture(points: Array[Vector2]) -> CurveTexture:

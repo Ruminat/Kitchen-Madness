@@ -210,7 +210,7 @@ func test_spawner_swarm_respects_alive_cap() -> void:
 
 	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	spawner._spawn_enemy()
-	assert_int(container.get_child_count()).is_equal(3)
+	assert_int(container.get_child_count()).is_equal(1)
 
 
 func test_spawner_elite_swarm_spawns_one_enemy() -> void:

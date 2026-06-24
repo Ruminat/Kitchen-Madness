@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 6B — Shop UI overhaul
+**Last updated:** Performance optimization pass
 
 ---
 
@@ -103,6 +103,10 @@ Done. `BalanceMetrics` tracks per-wave combat/economy data; `BalanceCalculator` 
 ### Phase 6B - Shop UI overhaul
 
 Done. Replaced 8 stacked text buttons with a 2×2 `ShopCard` grid showing weapon icons, type badges (NEW/SHARPEN/SPEED/EXTRA), coin prices, hotkey hints, tooltips, and accent-bordered cards. Shop panel uses gold accent styling. Grid keyboard nav: W/S between rows, A/D or arrows between columns. Tests in `test_shop_display.gd`.
+
+### Performance optimization pass
+
+Done. Added `optimizations.md` with the project's performance rules and Godot-specific guidance. Fixed the swarm cap bug where already-tripled wave `max_enemies` values were multiplied by 3 again in `EnemySpawner`; authored caps now use only the documented wave density curve. Enemies now cache their player target, use cheap off-screen movement with disabled render/collision detail outside the camera margin, and avoid per-hit timer allocation for flash feedback. VFX now skips off-screen effects, throttles death/impact particles per frame, reuses particle materials/curves/ramps, and runs lighter particle counts/fixed FPS. Enemy sprite imports are capped to 128px for runtime. Added `PerformanceSettings` autoload plus an in-game Settings overlay with selectable render scale using viewport stretch. Tests updated for render-scale settings and enemy detail toggling. `powershell -ExecutionPolicy Bypass -File .\tools\codecheck.ps1` passes.
 
 ---
 

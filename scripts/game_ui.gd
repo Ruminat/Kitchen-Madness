@@ -16,6 +16,7 @@ const COLOR_XP_FILL := Color(0.28, 0.62, 0.95, 1.0)
 const COLOR_XP_FLASH := Color(0.55, 0.88, 1.0, 1.0)
 const COLOR_LEVEL_UP_ACCENT := Color(0.55, 0.88, 1.0, 1.0)
 const COLOR_CHARACTER_ACCENT := Color(0.95, 0.72, 0.28, 1.0)
+const COLOR_SETTINGS_ACCENT := Color(0.36, 0.78, 0.58, 1.0)
 const STAT_BAR_SCRIPT := preload("res://scripts/ui/stat_bar.gd")
 const ShopCard = preload("res://scripts/ui/shop_card.gd")
 const SHOP_HINT_TEXT := (
@@ -33,6 +34,7 @@ var _shop_cards: Array[Button] = []
 var _shop_upgrades: Array[Resource] = []
 var _character_buttons: Array[Button] = []
 var _character_choices: Array[CharacterDefinition] = []
+var _settings_paused_tree := false
 
 @onready var hp_bar: ProgressBar = $HudPanel/MarginContainer/VBox/HPRow/HPBar
 @onready var hp_value_label: Label = $HudPanel/MarginContainer/VBox/HPRow/HPValue
@@ -182,6 +184,46 @@ var _character_choices: Array[CharacterDefinition] = []
 	)
 	as Label
 )
+@onready var settings_button: Button = $SettingsButton
+@onready var settings_overlay: ColorRect = $SettingsOverlay
+@onready var settings_panel: PanelContainer = (
+	$SettingsOverlay/CenterContainer/PanelContainer as PanelContainer
+)
+@onready var settings_title_label: Label = (
+	get_node("SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/TitleLabel")
+	as Label
+)
+@onready var render_scale_value_label: Label = (
+	get_node(
+		(
+			"SettingsOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/RenderScaleRow/ValueLabel"
+		)
+	)
+	as Label
+)
+@onready var render_scale_decrease_button: Button = (
+	get_node(
+		(
+			"SettingsOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/RenderScaleRow/DecreaseButton"
+		)
+	)
+	as Button
+)
+@onready var render_scale_increase_button: Button = (
+	get_node(
+		(
+			"SettingsOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/RenderScaleRow/IncreaseButton"
+		)
+	)
+	as Button
+)
+@onready var settings_close_button: Button = (
+	get_node("SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/CloseButton")
+	as Button
+)
 
 
 func _ready() -> void:
@@ -193,7 +235,12 @@ func _ready() -> void:
 	level_up_overlay.visible = false
 	shop_overlay.visible = false
 	character_select_overlay.visible = false
+	settings_overlay.visible = false
 	restart_button.pressed.connect(_on_restart_pressed)
+	settings_button.pressed.connect(_on_settings_button_pressed)
+	render_scale_decrease_button.pressed.connect(_on_render_scale_decrease_pressed)
+	render_scale_increase_button.pressed.connect(_on_render_scale_increase_pressed)
+	settings_close_button.pressed.connect(_hide_settings)
 	shop_continue_button.pressed.connect(_on_shop_continue_pressed)
 	for index in _upgrade_buttons.size():
 		_upgrade_buttons[index].pressed.connect(_on_upgrade_button_pressed.bind(index))
@@ -222,6 +269,9 @@ func _apply_hud_theme() -> void:
 	character_select_panel.add_theme_stylebox_override(
 		"panel", _make_overlay_panel_style(COLOR_CHARACTER_ACCENT)
 	)
+	settings_panel.add_theme_stylebox_override(
+		"panel", _make_overlay_panel_style(COLOR_SETTINGS_ACCENT)
+	)
 	var preview_style := StyleBoxFlat.new()
 	preview_style.bg_color = Color(0.1, 0.11, 0.14, 1.0)
 	preview_style.border_width_left = 2
@@ -245,7 +295,9 @@ func _apply_hud_theme() -> void:
 	shop_gold_label.add_theme_color_override("font_color", COLOR_GOLD)
 
 	restart_button.add_theme_font_size_override("font_size", 16)
+	settings_button.add_theme_font_size_override("font_size", 14)
 	shop_continue_button.add_theme_font_size_override("font_size", 16)
+	settings_close_button.add_theme_font_size_override("font_size", 16)
 	overlay_label.add_theme_font_size_override("font_size", 48)
 	restart_hint.add_theme_color_override("font_color", COLOR_MUTED)
 	restart_hint.add_theme_font_size_override("font_size", 18)
@@ -263,6 +315,9 @@ func _apply_hud_theme() -> void:
 	character_select_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
 	character_select_hint_label.add_theme_font_size_override("font_size", 14)
 	character_detail_label.add_theme_color_override("font_color", COLOR_TEXT)
+	settings_title_label.add_theme_color_override("font_color", COLOR_SETTINGS_ACCENT)
+	render_scale_value_label.add_theme_color_override("font_color", COLOR_TEXT)
+	render_scale_value_label.add_theme_font_size_override("font_size", 18)
 
 
 func _make_overlay_panel_style(accent: Color) -> StyleBoxFlat:
@@ -289,31 +344,109 @@ func _on_restart_pressed() -> void:
 	tree.reload_current_scene()
 
 
+func _on_settings_button_pressed() -> void:
+	if _is_modal_overlay_open():
+		return
+
+	_show_settings()
+
+
+func _show_settings() -> void:
+	_settings_paused_tree = not get_tree().paused
+	if _settings_paused_tree:
+		get_tree().paused = true
+
+	settings_overlay.visible = true
+	_refresh_settings()
+	settings_close_button.grab_focus()
+
+
+func _hide_settings() -> void:
+	settings_overlay.visible = false
+	if _settings_paused_tree:
+		get_tree().paused = false
+	_settings_paused_tree = false
+
+
+func _on_render_scale_decrease_pressed() -> void:
+	_change_render_scale(-1)
+
+
+func _on_render_scale_increase_pressed() -> void:
+	_change_render_scale(1)
+
+
+func _change_render_scale(direction: int) -> void:
+	PerformanceSettings.cycle_render_scale(direction)
+	_refresh_settings()
+
+
+func _refresh_settings() -> void:
+	render_scale_value_label.text = PerformanceSettings.get_render_scale_label()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.is_pressed() or event.echo:
 		return
 
-	if level_up_overlay.visible:
-		if _handle_level_up_keyboard(event as InputEventKey):
-			_mark_input_handled()
-		return
-
-	if shop_overlay.visible:
-		if _handle_shop_keyboard(event as InputEventKey):
-			_mark_input_handled()
-		return
-
-	if character_select_overlay.visible:
-		if _handle_character_select_keyboard(event as InputEventKey):
-			_mark_input_handled()
-		return
-
-	if not overlay.visible:
-		return
-
-	if event.is_action_pressed("restart") or event.is_action_pressed("ui_accept"):
+	if _handle_overlay_keyboard(event as InputEventKey):
 		_mark_input_handled()
+
+
+func _handle_overlay_keyboard(event: InputEventKey) -> bool:
+	var handled := false
+	if settings_overlay.visible:
+		handled = _handle_settings_keyboard(event)
+	elif _is_settings_toggle(event) and not _is_modal_overlay_open():
+		_show_settings()
+		handled = true
+	elif level_up_overlay.visible:
+		handled = _handle_level_up_keyboard(event)
+	elif shop_overlay.visible:
+		handled = _handle_shop_keyboard(event)
+	elif character_select_overlay.visible:
+		handled = _handle_character_select_keyboard(event)
+	elif (
+		overlay.visible
+		and (event.is_action_pressed("restart") or event.is_action_pressed("ui_accept"))
+	):
 		_on_restart_pressed()
+		handled = true
+
+	return handled
+
+
+func _is_settings_toggle(event: InputEventKey) -> bool:
+	return event.keycode == KEY_ESCAPE
+
+
+func _is_modal_overlay_open() -> bool:
+	return (
+		level_up_overlay.visible
+		or shop_overlay.visible
+		or character_select_overlay.visible
+		or overlay.visible
+	)
+
+
+func _handle_settings_keyboard(event: InputEventKey) -> bool:
+	if _is_settings_toggle(event):
+		_hide_settings()
+		return true
+
+	if event.is_action_pressed("move_left") or event.is_action_pressed("ui_left"):
+		_change_render_scale(-1)
+		return true
+
+	if event.is_action_pressed("move_right") or event.is_action_pressed("ui_right"):
+		_change_render_scale(1)
+		return true
+
+	if event.is_action_pressed("ui_accept") and settings_close_button.has_focus():
+		_hide_settings()
+		return true
+
+	return false
 
 
 func _mark_input_handled() -> void:

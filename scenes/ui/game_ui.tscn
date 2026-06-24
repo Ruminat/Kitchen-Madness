@@ -110,6 +110,17 @@ size_flags_vertical = 4
 max_value = 20.0
 show_percentage = false
 
+[node name="SettingsButton" type="Button" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 48.0
+grow_horizontal = 0
+text = "Settings"
+
 [node name="Overlay" type="ColorRect" parent="."]
 visible = false
 anchors_preset = 15
@@ -381,3 +392,73 @@ theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 3
 
+[node name="SettingsOverlay" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.58)
+
+[node name="CenterContainer" type="CenterContainer" parent="SettingsOverlay"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="SettingsOverlay/CenterContainer"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SettingsOverlay/CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="RenderScaleRow" type="HBoxContainer" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/RenderScaleRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+text = "Render Scale"
+vertical_alignment = 1
+
+[node name="DecreaseButton" type="Button" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/RenderScaleRow"]
+custom_minimum_size = Vector2(44, 40)
+layout_mode = 2
+text = "<"
+
+[node name="ValueLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/RenderScaleRow"]
+custom_minimum_size = Vector2(156, 40)
+layout_mode = 2
+text = "Native (100%)"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IncreaseButton" type="Button" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/RenderScaleRow"]
+custom_minimum_size = Vector2(44, 40)
+layout_mode = 2
+text = ">"
+
+[node name="CloseButton" type="Button" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Close"
