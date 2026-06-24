@@ -37,8 +37,8 @@ static func get_weapon_icon(offer: WeaponShopOffer) -> Texture2D:
 
 static func format_price(cost: int, can_afford: bool) -> String:
 	if can_afford:
-		return "🪙 %d" % cost
-	return "🪙 %d" % cost
+		return "Grease %d" % cost
+	return "Grease %d" % cost
 
 
 static func format_card_text(offer: Resource, hotkey: String) -> String:

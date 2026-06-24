@@ -2,12 +2,13 @@ extends CanvasLayer
 
 signal upgrade_selected(upgrade: Resource)
 signal shop_purchase_requested(upgrade: Resource)
+signal shop_reroll_requested
 signal shop_continue_requested
 signal character_selected(definition: CharacterDefinition)
 
 const COLOR_TEXT := Color(0.92, 0.94, 0.97, 1.0)
 const COLOR_MUTED := Color(0.62, 0.66, 0.74, 1.0)
-const COLOR_GOLD := Color(0.95, 0.82, 0.35, 1.0)
+const COLOR_GREASE := Color(0.76, 0.84, 0.34, 1.0)
 const COLOR_PANEL := Color(0.07, 0.08, 0.11, 0.82)
 const COLOR_BAR_BG := Color(0.14, 0.15, 0.19, 1.0)
 const COLOR_BAR_FILL := Color(0.78, 0.22, 0.28, 1.0)
@@ -23,6 +24,8 @@ const SHOP_HINT_TEXT := (
 	"W/S between rows  ·  A/D or ←/→ between cards  ·  " + "1–4 buy  ·  Enter continue"
 )
 
+const SHOP_HINT_TEXT_FIXED := "W/S rows  |  A/D cards  |  1-5 buy  |  R reroll  |  Enter continue"
+
 var _kills := 0
 var _current_wave := 1
 var _current_gold := 0
@@ -32,6 +35,8 @@ var _upgrade_buttons: Array[Button] = []
 var _upgrade_choices: Array[Resource] = []
 var _shop_cards: Array[Button] = []
 var _shop_upgrades: Array[Resource] = []
+var _shop_sold_slots: Array[bool] = []
+var _current_reroll_cost := 0
 var _character_buttons: Array[Button] = []
 var _character_choices: Array[CharacterDefinition] = []
 var _settings_paused_tree := false
@@ -128,8 +133,34 @@ var _settings_paused_tree := false
 	)
 	as ShopCard
 )
+@onready var shop_card_5: ShopCard = (
+	get_node(
+		"ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ShopGrid/ShopCard5"
+	)
+	as ShopCard
+)
+@onready var shop_reroll_button: Button = (
+	get_node(
+		(
+			"ShopOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/ActionsRow/RerollButton"
+		)
+	)
+	as Button
+)
+@onready var shop_reroll_cost_label: Label = (
+	get_node(
+		"ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ActionsRow/RerollCost"
+	)
+	as Label
+)
 @onready var shop_continue_button: Button = (
-	get_node("ShopOverlay/CenterContainer/PanelContainer/" + "MarginContainer/VBox/ContinueButton")
+	get_node(
+		(
+			"ShopOverlay/CenterContainer/PanelContainer/"
+			+ "MarginContainer/VBox/ActionsRow/ContinueButton"
+		)
+	)
 	as Button
 )
 @onready var character_select_overlay: ColorRect = $CharacterSelectOverlay
@@ -229,7 +260,7 @@ var _settings_paused_tree := false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_upgrade_buttons = [upgrade_button_1, upgrade_button_2, upgrade_button_3]
-	_shop_cards = [shop_card_1, shop_card_2, shop_card_3, shop_card_4]
+	_shop_cards = [shop_card_1, shop_card_2, shop_card_3, shop_card_4, shop_card_5]
 	_apply_hud_theme()
 	overlay.visible = false
 	level_up_overlay.visible = false
@@ -241,6 +272,7 @@ func _ready() -> void:
 	render_scale_decrease_button.pressed.connect(_on_render_scale_decrease_pressed)
 	render_scale_increase_button.pressed.connect(_on_render_scale_increase_pressed)
 	settings_close_button.pressed.connect(_hide_settings)
+	shop_reroll_button.pressed.connect(_on_shop_reroll_pressed)
 	shop_continue_button.pressed.connect(_on_shop_continue_pressed)
 	for index in _upgrade_buttons.size():
 		_upgrade_buttons[index].pressed.connect(_on_upgrade_button_pressed.bind(index))
@@ -265,7 +297,7 @@ func _apply_hud_theme() -> void:
 	level_up_panel.add_theme_stylebox_override(
 		"panel", _make_overlay_panel_style(COLOR_LEVEL_UP_ACCENT)
 	)
-	shop_panel.add_theme_stylebox_override("panel", _make_overlay_panel_style(COLOR_GOLD))
+	shop_panel.add_theme_stylebox_override("panel", _make_overlay_panel_style(COLOR_GREASE))
 	character_select_panel.add_theme_stylebox_override(
 		"panel", _make_overlay_panel_style(COLOR_CHARACTER_ACCENT)
 	)
@@ -291,8 +323,10 @@ func _apply_hud_theme() -> void:
 		label.add_theme_color_override("font_color", COLOR_TEXT)
 		label.add_theme_font_size_override("font_size", 14)
 
-	gold_label.add_theme_color_override("font_color", COLOR_GOLD)
-	shop_gold_label.add_theme_color_override("font_color", COLOR_GOLD)
+	gold_label.add_theme_color_override("font_color", COLOR_GREASE)
+	shop_gold_label.add_theme_color_override("font_color", COLOR_GREASE)
+	shop_reroll_cost_label.add_theme_color_override("font_color", COLOR_MUTED)
+	shop_reroll_cost_label.add_theme_font_size_override("font_size", 14)
 
 	restart_button.add_theme_font_size_override("font_size", 16)
 	settings_button.add_theme_font_size_override("font_size", 14)
@@ -305,7 +339,7 @@ func _apply_hud_theme() -> void:
 	for button in _upgrade_buttons:
 		button.add_theme_font_size_override("font_size", 17)
 
-	shop_title_label.add_theme_color_override("font_color", COLOR_GOLD)
+	shop_title_label.add_theme_color_override("font_color", COLOR_GREASE)
 	shop_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
 	shop_hint_label.add_theme_font_size_override("font_size", 14)
 	level_up_title_label.add_theme_color_override("font_color", COLOR_LEVEL_UP_ACCENT)
@@ -504,12 +538,15 @@ func _handle_character_select_keyboard(event: InputEventKey) -> bool:
 
 
 func _handle_shop_keyboard(event: InputEventKey) -> bool:
-	var index := _number_key_index(event, 4)
+	var index := _number_key_index(event, 5)
 	if index >= 0:
 		return _try_press_shop_button(index)
 
 	var handled := false
-	if event.is_action_pressed("move_up") or event.is_action_pressed("ui_up"):
+	if event.keycode == KEY_R:
+		_on_shop_reroll_pressed()
+		handled = true
+	elif event.is_action_pressed("move_up") or event.is_action_pressed("ui_up"):
 		_navigate_shop_grid(-1)
 		handled = true
 	elif event.is_action_pressed("move_down") or event.is_action_pressed("ui_down"):
@@ -562,6 +599,8 @@ func _navigate_shop_grid_horizontal(column_direction: int) -> void:
 func _try_press_shop_button(index: int) -> bool:
 	if index >= _shop_upgrades.size():
 		return false
+	if _is_shop_slot_sold(index):
+		return false
 
 	var card: Button = _shop_cards[index]
 	if not card.visible or card.disabled:
@@ -572,6 +611,10 @@ func _try_press_shop_button(index: int) -> bool:
 
 
 func _handle_shop_accept() -> void:
+	if shop_reroll_button.has_focus():
+		_on_shop_reroll_pressed()
+		return
+
 	if shop_continue_button.has_focus():
 		_on_shop_continue_pressed()
 		return
@@ -636,7 +679,7 @@ func _on_player_health_changed(current: int, maximum: int) -> void:
 
 func _on_xp_changed(current: int, to_next: int, level: int) -> void:
 	xp_bar.set_value_smooth(float(current), float(maxi(to_next, 1)))
-	level_label.text = "Lv %d" % level
+	level_label.text = "LV %d  |  XP %d/%d" % [level, current, maxi(to_next, 1)]
 
 
 func _on_level_up(_level: int) -> void:
@@ -651,7 +694,7 @@ func _on_level_up(_level: int) -> void:
 
 func _on_wave_time_changed(seconds_remaining: float) -> void:
 	var seconds := ceili(maxf(seconds_remaining, 0.0))
-	timer_label.text = "W%d · %ds" % [_current_wave, seconds]
+	timer_label.text = "WAVE %d  |  %ds" % [_current_wave, seconds]
 
 	var urgent := seconds <= 10
 	timer_label.add_theme_color_override(
@@ -678,17 +721,17 @@ func _update_timer_pulse(urgent: bool) -> void:
 
 func _on_enemy_killed(_enemy: Node, _killer: Node) -> void:
 	_kills += 1
-	kill_label.text = "%d kills" % _kills
+	kill_label.text = "KILLS %d" % _kills
 
 
 func _on_gold_changed(gold: int) -> void:
 	_current_gold = gold
-	gold_label.text = "%d gold" % gold
+	gold_label.text = "GREASE %d" % gold
 
 
 func _on_wave_index_changed(wave: int) -> void:
 	_current_wave = wave
-	shop_title_label.text = "Wave %d Complete — Weapon Shop" % wave
+	shop_title_label.text = "Wave %d Complete - Weapon Shop" % wave
 
 
 func show_wave_complete() -> void:
@@ -732,19 +775,26 @@ func hide_level_up_options() -> void:
 	_upgrade_choices.clear()
 
 
-func show_shop(offers: Array[Resource], gold: int) -> void:
+func show_shop(
+	offers: Array[Resource], gold: int, sold_slots: Array[bool] = [], reroll_cost: int = 0
+) -> void:
 	_shop_upgrades = offers
+	_shop_sold_slots = sold_slots
 	_current_gold = gold
+	_current_reroll_cost = reroll_cost
 	shop_overlay.visible = true
-	shop_gold_label.text = "🪙 %d gold  ·  stat upgrades come from level-ups" % gold
-	shop_hint_label.text = SHOP_HINT_TEXT
+	shop_hint_label.text = SHOP_HINT_TEXT_FIXED
 	_update_shop_buttons()
 	shop_continue_button.grab_focus()
 
 
-func refresh_shop(offers: Array[Resource], gold: int) -> void:
+func refresh_shop(
+	offers: Array[Resource], gold: int, sold_slots: Array[bool] = [], reroll_cost: int = 0
+) -> void:
 	_shop_upgrades = offers
+	_shop_sold_slots = sold_slots
 	_current_gold = gold
+	_current_reroll_cost = reroll_cost
 	_update_shop_buttons()
 
 
@@ -756,6 +806,7 @@ func update_shop_gold(gold: int) -> void:
 func hide_shop() -> void:
 	shop_overlay.visible = false
 	_shop_upgrades.clear()
+	_shop_sold_slots.clear()
 
 
 func request_character_selection(characters: Array[CharacterDefinition]) -> CharacterDefinition:
@@ -858,25 +909,36 @@ func _on_character_button_pressed(index: int) -> void:
 
 
 func _update_shop_buttons() -> void:
-	shop_gold_label.text = "🪙 %d gold  ·  stat upgrades come from level-ups" % _current_gold
+	shop_gold_label.text = (
+		"%d Grease available  |  Stat upgrades come from level-ups" % _current_gold
+	)
+	shop_reroll_cost_label.text = (
+		"Reroll cost: %s"
+		% ShopDisplay.format_price(_current_reroll_cost, _current_gold >= _current_reroll_cost)
+	)
+	shop_reroll_button.disabled = _current_reroll_cost > _current_gold
 
 	for index in _shop_cards.size():
 		var card: Button = _shop_cards[index]
-		var has_offer := index < _shop_upgrades.size()
-		card.visible = has_offer
-		if not has_offer:
-			card.disabled = true
-			continue
+		var offer: Resource = _shop_upgrades[index] if index < _shop_upgrades.size() else null
+		(card as ShopCard).configure(offer, index, _current_gold, _is_shop_slot_sold(index))
 
-		var offer: Resource = _shop_upgrades[index]
-		(card as ShopCard).configure(offer, index, _current_gold)
+
+func _is_shop_slot_sold(index: int) -> bool:
+	return index >= 0 and index < _shop_sold_slots.size() and _shop_sold_slots[index]
 
 
 func _on_shop_button_pressed(index: int) -> void:
 	if index < 0 or index >= _shop_upgrades.size():
 		return
+	if _is_shop_slot_sold(index):
+		return
 
 	shop_purchase_requested.emit(_shop_upgrades[index])
+
+
+func _on_shop_reroll_pressed() -> void:
+	shop_reroll_requested.emit()
 
 
 func _on_shop_continue_pressed() -> void:

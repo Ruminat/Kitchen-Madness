@@ -21,8 +21,8 @@ script = ExtResource("2_floating")
 [node name="HudPanel" type="PanelContainer" parent="."]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 320.0
-offset_bottom = 96.0
+offset_right = 460.0
+offset_bottom = 122.0
 
 [node name="MarginContainer" type="MarginContainer" parent="HudPanel"]
 layout_mode = 2
@@ -39,8 +39,14 @@ theme_override_constants/separation = 8
 layout_mode = 2
 theme_override_constants/separation = 8
 
+[node name="HPLabel" type="Label" parent="HudPanel/MarginContainer/VBox/HPRow"]
+custom_minimum_size = Vector2(62, 0)
+layout_mode = 2
+text = "HEALTH"
+vertical_alignment = 1
+
 [node name="HPBar" type="ProgressBar" parent="HudPanel/MarginContainer/VBox/HPRow"]
-custom_minimum_size = Vector2(120, 8)
+custom_minimum_size = Vector2(190, 10)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
@@ -49,7 +55,7 @@ value = 100.0
 show_percentage = false
 
 [node name="HPValue" type="Label" parent="HudPanel/MarginContainer/VBox/HPRow"]
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(92, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "100 / 100"
@@ -57,21 +63,24 @@ horizontal_alignment = 2
 
 [node name="StatsRow" type="HBoxContainer" parent="HudPanel/MarginContainer/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="TimerLabel" type="Label" parent="HudPanel/MarginContainer/VBox/StatsRow"]
+custom_minimum_size = Vector2(142, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "30s"
+text = "WAVE 1  |  30s"
 
 [node name="KillLabel" type="Label" parent="HudPanel/MarginContainer/VBox/StatsRow"]
+custom_minimum_size = Vector2(94, 0)
 layout_mode = 2
-text = "0 kills"
+text = "KILLS 0"
 horizontal_alignment = 2
 
 [node name="GoldLabel" type="Label" parent="HudPanel/MarginContainer/VBox/StatsRow"]
+custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
-text = "0 gold"
+text = "GREASE 0"
 horizontal_alignment = 2
 
 [node name="XpPanel" type="PanelContainer" parent="."]
@@ -98,9 +107,9 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="LevelLabel" type="Label" parent="XpPanel/MarginContainer/HBox"]
-custom_minimum_size = Vector2(44, 0)
+custom_minimum_size = Vector2(128, 0)
 layout_mode = 2
-text = "Lv 1"
+text = "LV 1  |  XP 0/20"
 
 [node name="XpBar" type="ProgressBar" parent="XpPanel/MarginContainer/HBox"]
 custom_minimum_size = Vector2(0, 8)
@@ -251,7 +260,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="ShopOverlay/CenterContainer"]
-custom_minimum_size = Vector2(620, 0)
+custom_minimum_size = Vector2(1320, 0)
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="ShopOverlay/CenterContainer/PanelContainer"]
@@ -268,26 +277,26 @@ theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
-text = "Wave Complete — Shop"
+text = "Wave Complete - Shop"
 horizontal_alignment = 1
 
 [node name="GoldLabel" type="Label" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "0 gold available"
+text = "0 Grease available"
 horizontal_alignment = 1
 
 [node name="HintLabel" type="Label" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "W/S or ↑/↓ between rows  ·  1–4 buy  ·  Enter continue"
+text = "W/S rows  |  A/D cards  |  1-5 buy  |  R reroll  |  Enter continue"
 horizontal_alignment = 1
 
 [node name="ShopGrid" type="GridContainer" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_constants/h_separation = 14
 theme_override_constants/v_separation = 14
-columns = 2
+columns = 5
 
 [node name="ShopCard1" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopGrid"]
 layout_mode = 2
@@ -305,10 +314,29 @@ script = ExtResource("3_shop_card")
 layout_mode = 2
 script = ExtResource("3_shop_card")
 
-[node name="ContinueButton" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 44)
+[node name="ShopCard5" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ShopGrid"]
 layout_mode = 2
-size_flags_horizontal = 4
+script = ExtResource("3_shop_card")
+
+[node name="ActionsRow" type="HBoxContainer" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="RerollButton" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ActionsRow"]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Reroll"
+
+[node name="RerollCost" type="Label" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ActionsRow"]
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Reroll cost: Grease 6"
+vertical_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="ShopOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/ActionsRow"]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
 text = "Continue"
 
 [node name="CharacterSelectOverlay" type="ColorRect" parent="."]

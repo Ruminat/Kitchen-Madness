@@ -3,8 +3,8 @@ extends Button
 
 const COLOR_TEXT := Color(0.92, 0.94, 0.97, 1.0)
 const COLOR_MUTED := Color(0.62, 0.66, 0.74, 1.0)
-const COLOR_GOLD := Color(0.95, 0.82, 0.35, 1.0)
-const COLOR_GOLD_DIM := Color(0.58, 0.5, 0.22, 1.0)
+const COLOR_GREASE := Color(0.76, 0.84, 0.34, 1.0)
+const COLOR_GREASE_DIM := Color(0.44, 0.48, 0.26, 1.0)
 
 var _icon_rect: TextureRect
 var _type_badge: Label
@@ -19,22 +19,35 @@ func _ready() -> void:
 	text = ""
 	alignment = HORIZONTAL_ALIGNMENT_LEFT
 	focus_mode = Control.FOCUS_ALL
-	custom_minimum_size = Vector2(268, 118)
+	custom_minimum_size = Vector2(244, 126)
 	_build_layout()
 
 
-func configure(offer: Resource, slot_index: int, player_gold: int) -> void:
+func configure(offer: Resource, slot_index: int, player_gold: int, is_sold: bool = false) -> void:
 	_offer = offer
 	if offer == null:
-		visible = false
+		visible = true
 		disabled = true
 		tooltip_text = ""
+		modulate = Color(0.62, 0.62, 0.66, 1.0)
+		_title_label.text = "Empty Slot"
+		_desc_label.text = "No offer available."
+		_type_badge.text = "-"
+		_icon_rect.texture = null
+		_hotkey_label.text = "[%d]" % (slot_index + 1)
+		_hotkey_label.visible = true
+		_price_label.text = "-"
 		return
 
 	var cost := int(offer.get("gold_cost"))
 	var can_afford := player_gold >= cost
-	disabled = not can_afford
-	modulate = Color.WHITE if can_afford else Color(0.72, 0.72, 0.76, 1.0)
+	disabled = is_sold or not can_afford
+	if is_sold:
+		modulate = Color(0.68, 0.7, 0.72, 1.0)
+	elif can_afford:
+		modulate = Color.WHITE
+	else:
+		modulate = Color(0.72, 0.72, 0.76, 1.0)
 	tooltip_text = str(offer.get("description"))
 
 	if offer is WeaponShopOffer:
@@ -54,11 +67,11 @@ func configure(offer: Resource, slot_index: int, player_gold: int) -> void:
 		_icon_rect.texture = null
 		ShopDisplay.apply_card_style(self, offer)
 
-	_hotkey_label.text = "[%d]" % (slot_index + 1) if slot_index < 4 else ""
-	_hotkey_label.visible = slot_index < 4
-	_price_label.text = ShopDisplay.format_price(cost, can_afford)
+	_hotkey_label.text = "[%d]" % (slot_index + 1)
+	_hotkey_label.visible = true
+	_price_label.text = "SOLD" if is_sold else ShopDisplay.format_price(cost, can_afford)
 	_price_label.add_theme_color_override(
-		"font_color", COLOR_GOLD if can_afford else COLOR_GOLD_DIM
+		"font_color", COLOR_GREASE if can_afford and not is_sold else COLOR_GREASE_DIM
 	)
 
 
@@ -117,7 +130,7 @@ func _build_layout() -> void:
 
 	_hotkey_label = Label.new()
 	_hotkey_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_hotkey_label.add_theme_color_override("font_color", COLOR_GOLD)
+	_hotkey_label.add_theme_color_override("font_color", COLOR_GREASE)
 	_hotkey_label.add_theme_font_size_override("font_size", 15)
 	title_row.add_child(_hotkey_label)
 

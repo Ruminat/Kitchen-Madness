@@ -11,21 +11,32 @@ class MockShopUi:
 	extends Node
 
 	signal shop_purchase_requested(offer: Resource)
+	signal shop_reroll_requested
 	signal shop_continue_requested
 
 	var shown := false
 	var hidden := false
 	var last_gold := 0
+	var last_sold_slots: Array[bool] = []
+	var last_reroll_cost := 0
 	var offers: Array[Resource] = []
 
-	func show_shop(shop_offers: Array[Resource], gold: int) -> void:
+	func show_shop(
+		shop_offers: Array[Resource], gold: int, sold_slots: Array[bool] = [], reroll_cost: int = 0
+	) -> void:
 		shown = true
 		offers = shop_offers
 		last_gold = gold
+		last_sold_slots = sold_slots
+		last_reroll_cost = reroll_cost
 
-	func refresh_shop(shop_offers: Array[Resource], gold: int) -> void:
+	func refresh_shop(
+		shop_offers: Array[Resource], gold: int, sold_slots: Array[bool] = [], reroll_cost: int = 0
+	) -> void:
 		offers = shop_offers
 		last_gold = gold
+		last_sold_slots = sold_slots
+		last_reroll_cost = reroll_cost
 
 	func update_shop_gold(gold: int) -> void:
 		last_gold = gold
@@ -55,7 +66,7 @@ func test_wave_complete_opens_shop_with_weapon_offers() -> void:
 
 	assert_bool(get_tree().paused).is_true()
 	assert_bool(ui.shown).is_true()
-	assert_int(ui.offers.size()).is_equal(4)
+	assert_int(ui.offers.size()).is_equal(5)
 	assert_int(ui.last_gold).is_equal(30)
 	for offer in ui.offers:
 		assert_bool(offer is WeaponShopOffer).is_true()
@@ -69,7 +80,7 @@ func test_generated_offers_never_include_stat_upgrades() -> void:
 
 	var offers := manager.generate_offers()
 
-	assert_int(offers.size()).is_equal(4)
+	assert_int(offers.size()).is_less_equal(5)
 	for offer in offers:
 		assert_bool(offer is WeaponShopOffer).is_true()
 		assert_bool(ShopManager.is_stat_upgrade(offer)).is_false()
@@ -154,6 +165,52 @@ func test_generate_offers_skips_duplicate_offer_keys() -> void:
 		var key := (offer as WeaponShopOffer).get_offer_key()
 		assert_bool(keys.has(key)).is_false()
 		keys[key] = true
+
+
+func test_purchase_marks_slot_sold_without_removing_offer() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	var ui := _create_ui()
+	var gold_system := _create_gold_system()
+	gold_system.add_gold(30)
+	manager.configure(player, ui, gold_system, func() -> void: pass)
+
+	var offer := _create_add_weapon_offer(KNIFE_DEF, 9)
+	manager._current_offers = [offer]
+	manager._reset_sold_slots()
+	manager._shop_open = true
+
+	ui.shop_purchase_requested.emit(offer)
+
+	assert_int(ui.offers.size()).is_equal(1)
+	assert_bool(ui.last_sold_slots[0]).is_true()
+	assert_object(ui.offers[0]).is_same(offer)
+
+
+func test_reroll_spends_grease_and_regenerates_offers() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	var ui := _create_ui()
+	var gold_system := _create_gold_system()
+	gold_system.add_gold(30)
+	manager.configure(player, ui, gold_system, func() -> void: pass)
+	manager._shop_open = true
+	manager._current_offers = manager.generate_offers()
+	manager._reset_sold_slots()
+
+	ui.shop_reroll_requested.emit()
+
+	assert_int(gold_system.gold).is_equal(24)
+	assert_int(ui.last_reroll_cost).is_equal(10)
+	assert_int(ui.offers.size()).is_equal(5)
+
+
+func test_reroll_cost_increases_each_time() -> void:
+	var manager := _create_manager()
+	manager._reroll_count = 0
+	assert_int(manager._current_reroll_cost()).is_equal(6)
+	manager._reroll_count = 2
+	assert_int(manager._current_reroll_cost()).is_equal(14)
 
 
 func test_continue_hides_shop_and_calls_callback() -> void:

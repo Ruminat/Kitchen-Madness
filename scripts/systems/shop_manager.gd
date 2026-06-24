@@ -20,8 +20,10 @@ const DAMAGE_UPGRADE_PERCENT := 0.1
 const ATTACK_SPEED_UPGRADE_PERCENT := 0.1
 const PELLET_UPGRADE_AMOUNT := 1
 const MAX_PELLET_COUNT := 8
+const REROLL_BASE_COST := 6
+const REROLL_COST_STEP := 4
 
-@export var offer_count := 4
+@export var offer_count := 5
 
 var _player: Node
 var _ui: Node
@@ -30,6 +32,8 @@ var _on_continue := Callable()
 var _shop_open := false
 var _current_wave := 1
 var _current_offers: Array[Resource] = []
+var _sold_slots: Array[bool] = []
+var _reroll_count := 0
 
 
 func _ready() -> void:
@@ -47,6 +51,8 @@ func configure(
 
 	if _ui and _ui.has_signal("shop_purchase_requested"):
 		_ui.shop_purchase_requested.connect(_on_shop_purchase)
+	if _ui and _ui.has_signal("shop_reroll_requested"):
+		_ui.shop_reroll_requested.connect(_on_shop_reroll)
 	if _ui and _ui.has_signal("shop_continue_requested"):
 		_ui.shop_continue_requested.connect(_on_shop_continue)
 
@@ -57,29 +63,47 @@ func _on_wave_index_changed(wave: int) -> void:
 
 func _on_wave_completed() -> void:
 	_shop_open = true
+	_reroll_count = 0
 	_current_offers = generate_offers()
+	_reset_sold_slots()
 	get_tree().paused = true
-	if _ui and _ui.has_method("show_shop"):
-		_ui.show_shop(_current_offers, _current_gold())
+	_refresh_ui(true)
 
 
 func _on_shop_purchase(offer: Resource) -> void:
 	if not _shop_open or offer == null or _gold_system == null:
 		return
 
+	var slot_index := _current_offers.find(offer)
+	if slot_index < 0 or _is_slot_sold(slot_index):
+		return
+	_ensure_sold_slots()
+
 	var cost := int(offer.get("gold_cost"))
 	if not _gold_system.spend_gold(cost):
 		return
 
 	if offer.has_method("apply") and offer.apply(_player):
-		_current_offers.erase(offer)
+		_sold_slots[slot_index] = true
 	elif offer.has_method("apply"):
 		_gold_system.add_gold(cost)
 
-	if _ui and _ui.has_method("refresh_shop"):
-		_ui.refresh_shop(_current_offers, _current_gold())
-	elif _ui and _ui.has_method("update_shop_gold"):
-		_ui.update_shop_gold(_current_gold())
+	_refresh_ui()
+
+
+func _on_shop_reroll() -> void:
+	if not _shop_open or _gold_system == null:
+		return
+
+	var cost := _current_reroll_cost()
+	if not _gold_system.spend_gold(cost):
+		_refresh_ui()
+		return
+
+	_reroll_count += 1
+	_current_offers = generate_offers()
+	_reset_sold_slots()
+	_refresh_ui()
 
 
 func _on_shop_continue() -> void:
@@ -88,6 +112,7 @@ func _on_shop_continue() -> void:
 
 	_shop_open = false
 	_current_offers.clear()
+	_sold_slots.clear()
 	if _ui and _ui.has_method("hide_shop"):
 		_ui.hide_shop()
 
@@ -114,6 +139,33 @@ func generate_offers() -> Array[Resource]:
 		selected.append(candidate)
 
 	return selected
+
+
+func _reset_sold_slots() -> void:
+	_sold_slots.clear()
+	for _index in offer_count:
+		_sold_slots.append(false)
+
+
+func _ensure_sold_slots() -> void:
+	while _sold_slots.size() < offer_count:
+		_sold_slots.append(false)
+
+
+func _is_slot_sold(slot_index: int) -> bool:
+	return slot_index >= 0 and slot_index < _sold_slots.size() and _sold_slots[slot_index]
+
+
+func _refresh_ui(opening: bool = false) -> void:
+	if _ui == null:
+		return
+
+	if opening and _ui.has_method("show_shop"):
+		_ui.show_shop(_current_offers, _current_gold(), _sold_slots, _current_reroll_cost())
+	elif _ui.has_method("refresh_shop"):
+		_ui.refresh_shop(_current_offers, _current_gold(), _sold_slots, _current_reroll_cost())
+	elif _ui.has_method("update_shop_gold"):
+		_ui.update_shop_gold(_current_gold())
 
 
 func _build_offer_candidates() -> Array[WeaponShopOffer]:
@@ -220,6 +272,10 @@ func _current_gold() -> int:
 	if _gold_system:
 		return _gold_system.gold
 	return 0
+
+
+func _current_reroll_cost() -> int:
+	return REROLL_BASE_COST + REROLL_COST_STEP * _reroll_count
 
 
 static func is_stat_upgrade(resource: Resource) -> bool:

@@ -183,7 +183,7 @@ static func format_balance_report(report: Dictionary) -> String:
 		for wave_data in report.get("waves", []):
 			lines.append(
 				(
-					"Wave %d: %d kills, DPS=%.1f, Gold=%d, XP=%d"
+					"Wave %d: %d kills, DPS=%.1f, Grease=%d, XP=%d"
 					% [
 						wave_data.get("wave_number", 0),
 						wave_data.get("total_kills", 0),

@@ -6,7 +6,7 @@
 script = ExtResource("1")
 id = "luck"
 title = "Lucky Charm"
-description = "+2 luck — better drops, gold, XP, level-up rolls"
+description = "+2 luck - better drops, Grease, XP, level-up rolls"
 effect = &"luck_flat"
 amount = 2.0
 gold_cost = 22

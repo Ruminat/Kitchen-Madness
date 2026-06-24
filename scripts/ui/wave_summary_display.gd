@@ -55,9 +55,9 @@ func _update_display() -> void:
 		_add_stat_row("Damage Dealt", "%d" % _summary_data.get("damage_dealt", 0))
 		_add_stat_row("Damage Taken", "%d" % _summary_data.get("damage_taken", 0))
 		_add_stat_row("XP Collected", "%d" % _summary_data.get("xp_collected", 0))
-		_add_stat_row("Gold Earned", "%d" % _summary_data.get("gold_earned", 0))
+		_add_stat_row("Grease Earned", "%d" % _summary_data.get("gold_earned", 0))
 		_add_stat_row("Kills/Min", "%.1f" % _summary_data.get("kills_per_minute", 0.0))
-		_add_stat_row("Gold/Min", "%.1f" % _summary_data.get("gold_per_minute", 0.0))
+		_add_stat_row("Grease/Min", "%.1f" % _summary_data.get("gold_per_minute", 0.0))
 		_add_stat_row(
 			"Player Level",
 			(

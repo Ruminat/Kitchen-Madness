@@ -273,7 +273,7 @@ func _on_pickup_collected_metrics(type: StringName, _world_pos: Vector2, value: 
 func _on_wave_metrics_ready(report: Dictionary) -> void:
 	print(
 		(
-			"Wave %d Metrics: DPS=%.1f, Kills=%d, Damage Dealt=%d, Damage Taken=%d, XP=%d, Gold=%d"
+			"Wave %d Metrics: DPS=%.1f, Kills=%d, Damage Dealt=%d, Damage Taken=%d, XP=%d, Grease=%d"
 			% [
 				report.get("wave_number", 0),
 				report.get("effective_dps", 0.0),
