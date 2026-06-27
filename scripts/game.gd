@@ -41,6 +41,7 @@ func _ready() -> void:
 	_arena_bounds = arena.get_global_bounds()
 	await _apply_starting_character()
 	player.setup(_arena_bounds, projectile_container)
+	_refresh_ui_weapon_loadout()
 	_fit_camera_to_play_area()
 	_follow_player_camera()
 	_configure_current_wave()
@@ -192,6 +193,7 @@ func start_next_wave() -> void:
 	is_wave_complete = false
 	current_wave += 1
 	_clear_wave_entities()
+	_refresh_ui_weapon_loadout()
 	EventBus.wave_index_changed.emit(current_wave)
 	_configure_current_wave()
 	get_tree().paused = false
@@ -317,6 +319,25 @@ func _get_player_weapon_ids() -> Array[String]:
 	if player == null or player.weapon_controller == null:
 		return []
 	return player.weapon_controller.get_owned_weapon_ids()
+
+
+func _refresh_ui_weapon_loadout() -> void:
+	if ui == null or not ui.has_method("update_weapon_loadout"):
+		return
+
+	ui.update_weapon_loadout(_get_player_weapon_definitions())
+
+
+func _get_player_weapon_definitions() -> Array[WeaponDefinition]:
+	var definitions: Array[WeaponDefinition] = []
+	if player == null or player.weapon_controller == null:
+		return definitions
+
+	for child in player.weapon_controller.get_children():
+		var weapon := child as BaseWeapon
+		if weapon and weapon.definition:
+			definitions.append(weapon.definition)
+	return definitions
 
 
 func _start_metrics_tracking() -> void:

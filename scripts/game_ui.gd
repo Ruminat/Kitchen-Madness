@@ -6,23 +6,28 @@ signal shop_reroll_requested
 signal shop_continue_requested
 signal character_selected(definition: CharacterDefinition)
 
-const COLOR_TEXT := Color(0.92, 0.94, 0.97, 1.0)
-const COLOR_MUTED := Color(0.62, 0.66, 0.74, 1.0)
-const COLOR_GREASE := Color(0.76, 0.84, 0.34, 1.0)
-const COLOR_PANEL := Color(0.07, 0.08, 0.11, 0.82)
-const COLOR_BAR_BG := Color(0.14, 0.15, 0.19, 1.0)
-const COLOR_BAR_FILL := Color(0.78, 0.22, 0.28, 1.0)
-const COLOR_BAR_FILL_LOW := Color(0.95, 0.42, 0.18, 1.0)
-const COLOR_XP_FILL := Color(0.28, 0.62, 0.95, 1.0)
-const COLOR_XP_FLASH := Color(0.55, 0.88, 1.0, 1.0)
-const COLOR_LEVEL_UP_ACCENT := Color(0.55, 0.88, 1.0, 1.0)
-const COLOR_CHARACTER_ACCENT := Color(0.95, 0.72, 0.28, 1.0)
-const COLOR_SETTINGS_ACCENT := Color(0.36, 0.78, 0.58, 1.0)
+const COLOR_TEXT := Color(0.12, 0.08, 0.045, 1.0)
+const COLOR_MUTED := Color(0.38, 0.28, 0.18, 1.0)
+const COLOR_GREASE := Color(0.98, 0.72, 0.13, 1.0)
+const COLOR_PARCHMENT := Color(0.78, 0.67, 0.46, 0.98)
+const COLOR_PARCHMENT_DARK := Color(0.48, 0.37, 0.23, 1.0)
+const COLOR_METAL := Color(0.16, 0.15, 0.13, 0.94)
+const COLOR_BAR_BG := Color(0.18, 0.12, 0.07, 1.0)
+const COLOR_BAR_FILL := Color(0.78, 0.12, 0.08, 1.0)
+const COLOR_BAR_FILL_LOW := Color(0.96, 0.36, 0.12, 1.0)
+const COLOR_XP_FILL := Color(0.74, 0.13, 0.07, 1.0)
+const COLOR_XP_FLASH := Color(1.0, 0.44, 0.18, 1.0)
+const COLOR_LEVEL_UP_ACCENT := Color(0.37, 0.66, 0.21, 1.0)
+const COLOR_CHARACTER_ACCENT := Color(0.86, 0.61, 0.18, 1.0)
+const COLOR_SETTINGS_ACCENT := Color(0.28, 0.49, 0.46, 1.0)
+const DISPLAY_FONT := preload("res://assets/fonts/bangers.ttf")
+const BODY_FONT := preload("res://assets/fonts/jersey15.ttf")
 const STAT_BAR_SCRIPT := preload("res://scripts/ui/stat_bar.gd")
 const ShopCard = preload("res://scripts/ui/shop_card.gd")
-const SHOP_HINT_TEXT := (
-	"W/S between rows  ·  A/D or ←/→ between cards  ·  " + "1–4 buy  ·  Enter continue"
-)
+const HudThemeScript = preload("res://scripts/ui/hud_theme.gd")
+const WeaponBeltScript = preload("res://scripts/ui/weapon_belt.gd")
+const ReferenceHudLayoutScript = preload("res://scripts/ui/reference_hud_layout.gd")
+const SHOP_HINT_TEXT := "W/S between rows  |  A/D between cards  |  1-4 buy  |  Enter continue"
 
 const SHOP_HINT_TEXT_FIXED := "W/S rows  |  A/D cards  |  1-5 buy  |  R reroll  |  Enter continue"
 const SHOP_TRANSITION_DURATION := 0.5
@@ -41,6 +46,7 @@ var _current_reroll_cost := 0
 var _character_buttons: Array[Button] = []
 var _character_choices: Array[CharacterDefinition] = []
 var _settings_paused_tree := false
+var _weapon_belt: PanelContainer
 
 @onready var hp_bar: ProgressBar = $HudPanel/MarginContainer/VBox/HPRow/HPBar
 @onready var hp_value_label: Label = $HudPanel/MarginContainer/VBox/HPRow/HPValue
@@ -262,6 +268,9 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_upgrade_buttons = [upgrade_button_1, upgrade_button_2, upgrade_button_3]
 	_shop_cards = [shop_card_1, shop_card_2, shop_card_3, shop_card_4, shop_card_5]
+	_weapon_belt = WeaponBeltScript.new()
+	add_child(_weapon_belt)
+	_apply_reference_layout()
 	_apply_hud_theme()
 	overlay.visible = false
 	level_up_overlay.visible = false
@@ -287,87 +296,24 @@ func _ready() -> void:
 	EventBus.level_up.connect(_on_level_up)
 	EventBus.gold_changed.connect(_on_gold_changed)
 	EventBus.wave_index_changed.connect(_on_wave_index_changed)
+	get_viewport().size_changed.connect(_apply_reference_layout)
+
+
+func _apply_reference_layout() -> void:
+	ReferenceHudLayoutScript.apply(
+		get_viewport().get_visible_rect().size,
+		hud_panel,
+		settings_button,
+		xp_panel,
+		_weapon_belt,
+		shop_panel,
+		shop_grid,
+		_shop_cards
+	)
 
 
 func _apply_hud_theme() -> void:
-	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = COLOR_PANEL
-	panel_style.set_corner_radius_all(8)
-	hud_panel.add_theme_stylebox_override("panel", panel_style)
-	xp_panel.add_theme_stylebox_override("panel", panel_style)
-	level_up_panel.add_theme_stylebox_override(
-		"panel", _make_overlay_panel_style(COLOR_LEVEL_UP_ACCENT)
-	)
-	shop_panel.add_theme_stylebox_override("panel", _make_overlay_panel_style(COLOR_GREASE))
-	character_select_panel.add_theme_stylebox_override(
-		"panel", _make_overlay_panel_style(COLOR_CHARACTER_ACCENT)
-	)
-	settings_panel.add_theme_stylebox_override(
-		"panel", _make_overlay_panel_style(COLOR_SETTINGS_ACCENT)
-	)
-	var preview_style := StyleBoxFlat.new()
-	preview_style.bg_color = Color(0.1, 0.11, 0.14, 1.0)
-	preview_style.border_width_left = 2
-	preview_style.border_width_top = 2
-	preview_style.border_width_right = 2
-	preview_style.border_width_bottom = 2
-	preview_style.border_color = COLOR_CHARACTER_ACCENT.darkened(0.25)
-	preview_style.set_corner_radius_all(10)
-	character_preview_panel.add_theme_stylebox_override("panel", preview_style)
-
-	hp_bar.set_script(STAT_BAR_SCRIPT)
-	hp_bar.setup_bar(COLOR_BAR_BG, COLOR_BAR_FILL, 8.0)
-	xp_bar.set_script(STAT_BAR_SCRIPT)
-	xp_bar.setup_bar(COLOR_BAR_BG, COLOR_XP_FILL, 8.0)
-
-	for label in [timer_label, kill_label, hp_value_label, level_label, gold_label]:
-		label.add_theme_color_override("font_color", COLOR_TEXT)
-		label.add_theme_font_size_override("font_size", 14)
-
-	gold_label.add_theme_color_override("font_color", COLOR_GREASE)
-	shop_gold_label.add_theme_color_override("font_color", COLOR_GREASE)
-	shop_reroll_cost_label.add_theme_color_override("font_color", COLOR_MUTED)
-	shop_reroll_cost_label.add_theme_font_size_override("font_size", 14)
-
-	restart_button.add_theme_font_size_override("font_size", 16)
-	settings_button.add_theme_font_size_override("font_size", 14)
-	shop_continue_button.add_theme_font_size_override("font_size", 16)
-	settings_close_button.add_theme_font_size_override("font_size", 16)
-	overlay_label.add_theme_font_size_override("font_size", 48)
-	restart_hint.add_theme_color_override("font_color", COLOR_MUTED)
-	restart_hint.add_theme_font_size_override("font_size", 18)
-
-	for button in _upgrade_buttons:
-		button.add_theme_font_size_override("font_size", 17)
-
-	shop_title_label.add_theme_color_override("font_color", COLOR_GREASE)
-	shop_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
-	shop_hint_label.add_theme_font_size_override("font_size", 14)
-	level_up_title_label.add_theme_color_override("font_color", COLOR_LEVEL_UP_ACCENT)
-	level_up_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
-	level_up_hint_label.add_theme_font_size_override("font_size", 14)
-	character_select_title_label.add_theme_color_override("font_color", COLOR_CHARACTER_ACCENT)
-	character_select_hint_label.add_theme_color_override("font_color", COLOR_MUTED)
-	character_select_hint_label.add_theme_font_size_override("font_size", 14)
-	character_detail_label.add_theme_color_override("font_color", COLOR_TEXT)
-	settings_title_label.add_theme_color_override("font_color", COLOR_SETTINGS_ACCENT)
-	render_scale_value_label.add_theme_color_override("font_color", COLOR_TEXT)
-	render_scale_value_label.add_theme_font_size_override("font_size", 18)
-
-
-func _make_overlay_panel_style(accent: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.06, 0.07, 0.1, 0.96)
-	style.border_width_top = 3
-	style.border_color = accent
-	style.set_corner_radius_all(14)
-	style.content_margin_left = 4
-	style.content_margin_right = 4
-	style.content_margin_top = 4
-	style.content_margin_bottom = 4
-	style.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
-	style.shadow_size = 12
-	return style
+	HudThemeScript.apply_game_ui_theme(self)
 
 
 func _on_restart_pressed() -> void:
@@ -680,7 +626,7 @@ func _on_player_health_changed(current: int, maximum: int) -> void:
 
 func _on_xp_changed(current: int, to_next: int, level: int) -> void:
 	xp_bar.set_value_smooth(float(current), float(maxi(to_next, 1)))
-	level_label.text = "LV %d  |  XP %d/%d" % [level, current, maxi(to_next, 1)]
+	level_label.text = "XP   %d / %d      LVL %d" % [current, maxi(to_next, 1), level]
 
 
 func _on_level_up(_level: int) -> void:
@@ -695,7 +641,9 @@ func _on_level_up(_level: int) -> void:
 
 func _on_wave_time_changed(seconds_remaining: float) -> void:
 	var seconds := ceili(maxf(seconds_remaining, 0.0))
-	timer_label.text = "WAVE %d  |  %ds" % [_current_wave, seconds]
+	var minutes := seconds / 60
+	var seconds_part := seconds % 60
+	timer_label.text = "WAVE %02d      %02d:%02d" % [_current_wave, minutes, seconds_part]
 
 	var urgent := seconds <= 10
 	timer_label.add_theme_color_override(
@@ -722,17 +670,17 @@ func _update_timer_pulse(urgent: bool) -> void:
 
 func _on_enemy_killed(_enemy: Node, _killer: Node) -> void:
 	_kills += 1
-	kill_label.text = "KILLS %d" % _kills
+	kill_label.text = "KILLS  %d" % _kills
 
 
 func _on_gold_changed(gold: int) -> void:
 	_current_gold = gold
-	gold_label.text = "GREASE %d" % gold
+	gold_label.text = "GREASE  %d" % gold
 
 
 func _on_wave_index_changed(wave: int) -> void:
 	_current_wave = wave
-	shop_title_label.text = "Wave %d Complete - Weapon Shop" % wave
+	shop_title_label.text = "WAVE %d CLEAR - KITCHEN SHOP" % wave
 
 
 func show_wave_complete() -> void:
@@ -755,8 +703,8 @@ func show_game_over() -> void:
 func show_level_up_options(upgrades: Array[Resource]) -> void:
 	_upgrade_choices = upgrades
 	level_up_overlay.visible = true
-	level_up_title_label.text = "⭐  Level Up!"
-	level_up_hint_label.text = "W/S or ↑/↓ navigate  ·  1/2/3 or Enter pick  ·  Click to choose"
+	level_up_title_label.text = "LEVEL UP!"
+	level_up_hint_label.text = "W/S navigate  |  1/2/3 or Enter pick  |  Click to choose"
 	AudioManager.duck_music()
 
 	for index in _upgrade_buttons.size():
@@ -836,6 +784,11 @@ func refresh_shop(
 func update_shop_gold(gold: int) -> void:
 	_current_gold = gold
 	_update_shop_buttons()
+
+
+func update_weapon_loadout(weapons: Array[WeaponDefinition]) -> void:
+	if _weapon_belt:
+		_weapon_belt.update_loadout(weapons)
 
 
 func hide_shop() -> void:
@@ -926,7 +879,7 @@ func _format_character_detail(character: CharacterDefinition) -> String:
 		else character.starting_weapon.id if character.starting_weapon else "none"
 	)
 	return (
-		"%s — %s\nHP %d  ·  Speed %.0f  ·  Luck %d  ·  Starts with %s"
+		"%s - %s\nHP %d  |  Speed %.0f  |  Luck %d  |  Starts with %s"
 		% [
 			character.display_name,
 			character.description,
@@ -948,11 +901,9 @@ func _on_character_button_pressed(index: int) -> void:
 
 
 func _update_shop_buttons() -> void:
-	shop_gold_label.text = (
-		"%d Grease available  |  Stat upgrades come from level-ups" % _current_gold
-	)
+	shop_gold_label.text = ("GREASE  %d" % _current_gold)
 	shop_reroll_cost_label.text = (
-		"Reroll cost: %s"
+		"REROLL COST  %s"
 		% ShopDisplay.format_price(_current_reroll_cost, _current_gold >= _current_reroll_cost)
 	)
 	shop_reroll_button.disabled = _current_reroll_cost > _current_gold

@@ -56,6 +56,7 @@ func configure(
 		_ui.shop_reroll_requested.connect(_on_shop_reroll)
 	if _ui and _ui.has_signal("shop_continue_requested"):
 		_ui.shop_continue_requested.connect(_on_shop_continue)
+	_sync_weapon_loadout_ui()
 
 
 func _on_wave_index_changed(wave: int) -> void:
@@ -98,6 +99,7 @@ func _on_shop_purchase(offer: Resource) -> void:
 
 	if offer.has_method("apply") and offer.apply(_player):
 		_sold_slots[slot_index] = true
+		_sync_weapon_loadout_ui()
 	elif offer.has_method("apply"):
 		_gold_system.add_gold(cost)
 
@@ -288,6 +290,23 @@ func _current_gold() -> int:
 
 func _current_reroll_cost() -> int:
 	return REROLL_BASE_COST + REROLL_COST_STEP * _reroll_count
+
+
+func _sync_weapon_loadout_ui() -> void:
+	if _ui == null or not _ui.has_method("update_weapon_loadout"):
+		return
+
+	var definitions: Array[WeaponDefinition] = []
+	var controller := _get_weapon_controller()
+	if controller == null:
+		_ui.update_weapon_loadout(definitions)
+		return
+
+	for child in controller.get_children():
+		var weapon := child as BaseWeapon
+		if weapon and weapon.definition:
+			definitions.append(weapon.definition)
+	_ui.update_weapon_loadout(definitions)
 
 
 static func is_stat_upgrade(resource: Resource) -> bool:
