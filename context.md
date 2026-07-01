@@ -4,13 +4,13 @@
 
 ## Current status
 
-**Phases 7A–7D + 7F done.** Latest: **7D** — music-forward audio mix + distance falloff.
+**Active roadmap 7A–7F complete.** Latest: **7E** — idle squash animations.
 
 **Loop:** character select → swarm waves → weapon shop → repeat. Level-ups = stat/crit upgrades. SFX + run stats to `ignored/stats/`.
 
-**Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers.
+**Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers · idle squash bob.
 
-**Next:** Phase 7E (idle squash animations, Brotato-style).
+**Next:** open — pick from optimizations backlog or add a new phase in [plans.md](plans.md).
 
 ---
 
@@ -41,6 +41,7 @@
 | **FloatingTextManager** | UI `Control` on `CanvasLayer`; world anchor + per-frame canvas sync (true 36px screen text) |
 | **Crit** | Player → `WeaponController.sync_all_crit_stats()` → weapons |
 | **AudioManager** | Music-forward mix; `play_sfx_at(name, world_pos)` = distance falloff from `"player"` group; per-sound trims (`SFX_VOLUME_SCALE`) |
+| **IdleSquash** | `scripts/components/idle_squash.gd` on a `Visual` Node2D; squash+bob transform only, added in `base_enemy`/`player` `_ready` |
 
 **Main scene:** `res://scenes/main/game.tscn`
 

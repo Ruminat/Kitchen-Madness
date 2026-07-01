@@ -28,8 +28,14 @@ var _is_render_active := true
 func _ready() -> void:
 	add_to_group("enemies")
 	_setup_collision()
+	_attach_idle_squash()
 	if definition:
 		_apply_definition()
+
+
+func _attach_idle_squash() -> void:
+	if visual:
+		visual.add_child(IdleSquash.new())
 
 
 func configure(enemy_definition: EnemyDefinition) -> void:

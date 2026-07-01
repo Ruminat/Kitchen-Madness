@@ -33,6 +33,8 @@ func _ready() -> void:
 	motion_mode = MOTION_MODE_FLOATING
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_died)
+	if visual:
+		visual.add_child(IdleSquash.new())
 	call_deferred("_emit_initial_health")
 
 

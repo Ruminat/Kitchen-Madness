@@ -95,6 +95,8 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 | Performance | Keep off-screen enemies on cheap/no animation path if needed |
 | Tests | Optional unit test for animation component setup |
 
+**Done:** Reusable `IdleSquash` component animates a `Visual` node's transform (volume-preserving squash + small bob), attached in `base_enemy`/`player` `_ready`. Never touches the body/collision; skips hidden (off-screen) targets; instances desynced by id. Component tests added.
+
 ---
 
 ## Definition of done

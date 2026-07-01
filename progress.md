@@ -2,13 +2,13 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 7D audio mix and distance falloff
+**Last updated:** Phase 7E idle squash animations · suite 273 tests green
 
 ---
 
 ## Unfinished
 
-- [ ] **Phase 7E - Idle squash animations** — research Godot/Brotato-style approach, then add a shared ~1s squash idle to player and enemies without affecting collision shapes. Keep off-screen enemies on a cheap path.
+_Active roadmap (7A–7F) complete. Next work is open — see backlog or add a new phase in [plans.md](plans.md)._
 
 ### Backlog (from optimizations.md)
 
@@ -50,6 +50,7 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 - [x] **Phase 7C - Combat balance tuning** — 10% density growth (interval-only), smaller swarms, wave-scaled enemy HP/damage (+12%/+8%), +5% combat upgrades, calculator/metrics fixes.
 - [x] **Phase 7F - Economy and XP rebalance** — 40% XP / 50% Grease drops, smaller orbs, 240+65 XP curve, +15%/wave shop prices, `estimate_wave_affordability()`.
 - [x] **Phase 7D - Audio mix and distance falloff** — music-forward defaults (music 0.7 / SFX 0.32), one-shot SFX distance falloff from the player via `play_sfx_at()` (enemy hit/death), per-sound trims with player hurt at 0.5×, volume + falloff tests.
+- [x] **Phase 7E - Idle squash animations** — reusable `IdleSquash` component (volume-preserving squash + bob on the `Visual` node), attached in `base_enemy`/`player`; leaves body/collision untouched, skips hidden off-screen targets, id-desynced; component tests.
 - [x] **Test suite repair** — fixed the missing-`panel_style` parse error, `pepper_grinder_gun` UID references, `clear_weapons()` deferred-free bug, and a batch of stale/pre-existing broken tests (GdUnit API, Godot 4.7 coroutine handling, RNG determinism, orphan cleanup). Suite: 270 tests, 0 failures, 0 orphans.
 
 ---
