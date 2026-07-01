@@ -28,18 +28,15 @@ func test_request_character_selection_shows_nine_buttons() -> void:
 	await _wait_ready(ui)
 
 	var roster := CharacterRoster.load_roster()
-	var selection_task: Variant = ui.request_character_selection(roster)
-	await get_tree().process_frame
+	# The overlay clears its choices array (shared by reference with `roster`) once a
+	# selection is made, so capture the expected character before awaiting.
+	var expected_first := roster[0]
+	# Godot 4.7 forbids capturing a typed coroutine without awaiting it, so drive
+	# the button press from a concurrent Callable while the request awaits.
+	Callable(self, "_press_button_when_ready").call(ui, 0, 9)
+	var selected: CharacterDefinition = await ui.request_character_selection(roster)
 
-	var overlay: ColorRect = ui.get_node("CharacterSelectOverlay") as ColorRect
-	var grid: GridContainer = ui.get_node(CHARACTER_GRID_PATH) as GridContainer
-
-	assert_bool(overlay.visible).is_true()
-	assert_int(grid.get_child_count()).is_equal(9)
-
-	(grid.get_child(0) as Button).emit_signal("pressed")
-	var selected: CharacterDefinition = await selection_task
-	assert_object(selected).is_same(roster[0])
+	assert_object(selected).is_same(expected_first)
 
 
 func test_selecting_character_returns_definition_and_hides_overlay() -> void:
@@ -48,15 +45,10 @@ func test_selecting_character_returns_definition_and_hides_overlay() -> void:
 	await _wait_ready(ui)
 
 	var roster := CharacterRoster.load_roster()
-	var selection_task: Variant = ui.request_character_selection(roster)
-	await get_tree().process_frame
+	Callable(self, "_press_button_when_ready").call(ui, 1, 0)
+	var selected: CharacterDefinition = await ui.request_character_selection(roster)
 
-	var grid: GridContainer = ui.get_node(CHARACTER_GRID_PATH) as GridContainer
-	(grid.get_child(1) as Button).emit_signal("pressed")
-
-	var selected: CharacterDefinition = await selection_task
 	var overlay: ColorRect = ui.get_node("CharacterSelectOverlay") as ColorRect
-
 	assert_object(selected).is_same(GOBLIN_DEF)
 	assert_bool(overlay.visible).is_false()
 
@@ -67,7 +59,24 @@ func test_character_preview_updates_when_focus_changes() -> void:
 	await _wait_ready(ui)
 
 	var roster := CharacterRoster.load_roster()
-	var selection_task: Variant = ui.request_character_selection(roster)
+	Callable(self, "_preview_focus_then_select").call(ui)
+	await ui.request_character_selection(roster)
+
+
+func _press_button_when_ready(ui: CanvasLayer, index: int, expected_count: int) -> void:
+	await get_tree().process_frame
+
+	var overlay: ColorRect = ui.get_node("CharacterSelectOverlay") as ColorRect
+	var grid: GridContainer = ui.get_node(CHARACTER_GRID_PATH) as GridContainer
+
+	if expected_count > 0:
+		assert_bool(overlay.visible).is_true()
+		assert_int(grid.get_child_count()).is_equal(expected_count)
+
+	(grid.get_child(index) as Button).emit_signal("pressed")
+
+
+func _preview_focus_then_select(ui: CanvasLayer) -> void:
 	await get_tree().process_frame
 
 	var preview: TextureRect = ui.get_node(CHARACTER_PREVIEW_PATH) as TextureRect
@@ -79,7 +88,6 @@ func test_character_preview_updates_when_focus_changes() -> void:
 	assert_object(preview.texture).is_same(GOBLIN_DEF.sprite)
 
 	(grid.get_child(0) as Button).emit_signal("pressed")
-	await selection_task
 
 
 func _wait_ready(node: Node) -> void:

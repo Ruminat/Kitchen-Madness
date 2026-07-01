@@ -19,7 +19,9 @@ func configure_weapons(starting: WeaponDefinition) -> void:
 
 func clear_weapons() -> void:
 	for weapon in _weapons:
-		weapon.queue_free()
+		if is_instance_valid(weapon):
+			remove_child(weapon)
+			weapon.queue_free()
 	_weapons.clear()
 
 

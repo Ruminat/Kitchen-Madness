@@ -163,6 +163,8 @@ func test_later_wave_shop_costs_scale_up() -> void:
 	var player := await _create_player()
 	manager.configure(player, _create_ui(), _create_gold_system())
 	manager._current_wave = 4
+	# Include every candidate so the (shuffled) weapon-damage offer is always present.
+	manager.offer_count = 20
 
 	var offers := manager.generate_offers()
 	assert_int(offers.size()).is_greater(0)

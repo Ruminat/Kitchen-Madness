@@ -3,8 +3,6 @@ extends Control
 
 ## Debug display for end-of-wave balance metrics.
 
-const PanelStyle := preload("res://scripts/ui/panel_style.gd")
-
 var _summary_data: Dictionary = {}
 
 @onready var panel: Panel = $Panel

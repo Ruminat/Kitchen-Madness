@@ -165,8 +165,8 @@ func test_spawner_swarm_spawns_multiple_enemies() -> void:
 	wave.swarm_size_min = 4
 	wave.swarm_size_max = 4
 
+	# configure() already triggers one initial swarm spawn.
 	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
-	spawner._spawn_enemy()
 	assert_int(container.get_child_count()).is_equal(4)
 
 
@@ -188,7 +188,9 @@ func test_spawner_clamps_spawn_positions_to_arena_bounds() -> void:
 
 	for _attempt in 20:
 		var position := spawner._clamp_spawn_position(Vector2(9999.0, -9999.0))
-		assert_bool(inner_bounds.has_point(position)).is_true()
+		# Rect2.has_point() excludes the far edge, but clamping legitimately lands
+		# exactly on it, so grow slightly to treat the boundary as inside.
+		assert_bool(inner_bounds.grow(0.01).has_point(position)).is_true()
 
 
 func test_spawner_swarm_respects_alive_cap() -> void:
@@ -229,8 +231,8 @@ func test_spawner_elite_swarm_spawns_one_enemy() -> void:
 	wave.swarm_size_min = 5
 	wave.swarm_size_max = 5
 
+	# configure() already triggers one initial spawn; an elite swarm yields one enemy.
 	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
-	spawner._spawn_enemy()
 	assert_int(container.get_child_count()).is_equal(1)
 
 

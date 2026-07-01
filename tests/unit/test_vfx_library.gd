@@ -9,7 +9,7 @@ func test_creates_particle_texture_once() -> void:
 
 
 func test_death_burst_uses_one_shot_particles() -> void:
-	var particles := GPUParticles2D.new()
+	var particles := auto_free(GPUParticles2D.new()) as GPUParticles2D
 	VfxLibrary.configure_death_burst(particles, Color.RED)
 
 	assert_int(particles.amount).is_equal(VfxLibrary.DEATH_PARTICLE_AMOUNT)
@@ -18,7 +18,7 @@ func test_death_burst_uses_one_shot_particles() -> void:
 
 
 func test_impact_spark_aligns_to_direction() -> void:
-	var particles := GPUParticles2D.new()
+	var particles := auto_free(GPUParticles2D.new()) as GPUParticles2D
 	VfxLibrary.configure_impact_spark(particles, Color.YELLOW, Vector2.RIGHT)
 
 	var material := particles.process_material as ParticleProcessMaterial
@@ -27,6 +27,6 @@ func test_impact_spark_aligns_to_direction() -> void:
 
 
 func test_trail_uses_world_space_coords() -> void:
-	var trail := VfxLibrary.create_trail(Color.ORANGE)
+	var trail := auto_free(VfxLibrary.create_trail(Color.ORANGE)) as GPUParticles2D
 	assert_bool(trail.local_coords).is_false()
 	assert_bool(trail.emitting).is_true()

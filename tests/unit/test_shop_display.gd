@@ -60,7 +60,8 @@ func test_format_price_uses_grease_label() -> void:
 func test_shop_card_configures_title_price_and_hotkey() -> void:
 	var card: ShopCard = auto_free(ShopCard.new()) as ShopCard
 	add_child(card)
-	await card.ready
+	if not card.is_node_ready():
+		await card.ready
 
 	var offer := WeaponShopOffer.new()
 	offer.offer_type = WeaponShopOffer.OfferType.ADD_WEAPON
@@ -78,7 +79,8 @@ func test_shop_card_configures_title_price_and_hotkey() -> void:
 func test_shop_card_shows_sold_state() -> void:
 	var card: ShopCard = auto_free(ShopCard.new()) as ShopCard
 	add_child(card)
-	await card.ready
+	if not card.is_node_ready():
+		await card.ready
 
 	var offer := WeaponShopOffer.new()
 	offer.offer_type = WeaponShopOffer.OfferType.ADD_WEAPON

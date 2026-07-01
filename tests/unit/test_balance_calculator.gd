@@ -98,8 +98,8 @@ func test_compare_weapon_dps_returns_dictionary() -> void:
 	var weapons: Array[WeaponDefinition] = [PEPPER_DEF, KNIFE_DEF]
 	var comparison := BalanceCalculator.compare_weapon_dps(weapons)
 	assert_dict(comparison).is_not_empty()
-	assert_dict(comparison).contains_key("pepper_grinder_gun")
-	assert_dict(comparison).contains_key("kitchen_knife")
+	assert_dict(comparison).contains_keys(["pepper_grinder_gun"])
+	assert_dict(comparison).contains_keys(["kitchen_knife"])
 
 
 func test_compare_wave_budgets_returns_dictionary() -> void:
@@ -148,6 +148,9 @@ func test_wave_2_duration_matches_target() -> void:
 func test_kitchen_weapons_have_reasonable_dps() -> void:
 	var weapons: Array[WeaponDefinition] = [PEPPER_DEF, SOUP_DEF, ONION_RING_DEF, KNIFE_DEF]
 	for weapon in weapons:
-		var dps := BalanceCalculator.calculate_effective_dps(weapon)
+		var w_path := weapon.weapon_script.get_path() if weapon.weapon_script else ""
+		var is_orbit := w_path.contains("orbit")
+		var is_burst := w_path.contains("burst")
+		var dps := BalanceCalculator.calculate_effective_dps(weapon, is_orbit, is_burst)
 		assert_float(dps).is_greater(10.0)
 		assert_float(dps).is_less(200.0)

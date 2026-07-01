@@ -78,7 +78,7 @@ func test_save_run_disabled_skips_write() -> void:
 
 
 func test_balance_metrics_aggregates_totals_across_waves() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("chef")
 
 	metrics.start_wave(1, 1)

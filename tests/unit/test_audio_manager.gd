@@ -2,14 +2,14 @@
 extends GdUnitTestSuite
 
 
-func before() -> void:
+func before_test() -> void:
 	AudioManager._music_duck_depth = 0
 	AudioManager.music_volume = 0.4
 	AudioManager.master_volume = 0.7
 	AudioManager._apply_music_volume()
 
 
-func after() -> void:
+func after_test() -> void:
 	AudioManager._music_duck_depth = 0
 	AudioManager._apply_music_volume()
 

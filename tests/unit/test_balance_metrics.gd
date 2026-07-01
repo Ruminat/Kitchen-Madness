@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 
 
 func test_balance_metrics_tracks_kills() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("chef")
 	metrics.start_wave(1, 1)
 
@@ -20,7 +20,7 @@ func test_balance_metrics_tracks_kills() -> void:
 
 
 func test_balance_metrics_tracks_damage() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("goblin")
 	metrics.start_wave(1, 1)
 
@@ -37,7 +37,7 @@ func test_balance_metrics_tracks_damage() -> void:
 
 
 func test_balance_metrics_tracks_damage_taken() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("onion")
 	metrics.start_wave(1, 1)
 
@@ -50,7 +50,7 @@ func test_balance_metrics_tracks_damage_taken() -> void:
 
 
 func test_balance_metrics_tracks_economy() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("cookie")
 	metrics.start_wave(1, 1)
 
@@ -66,7 +66,7 @@ func test_balance_metrics_tracks_economy() -> void:
 
 
 func test_balance_metrics_calculates_effective_dps() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("mushroom")
 	metrics.start_wave(1, 1)
 	await get_tree().create_timer(0.05).timeout
@@ -78,7 +78,7 @@ func test_balance_metrics_calculates_effective_dps() -> void:
 
 
 func test_balance_metrics_tracks_health_pickups() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("vampire")
 	metrics.start_wave(1, 1)
 
@@ -90,15 +90,15 @@ func test_balance_metrics_tracks_health_pickups() -> void:
 
 
 func test_balance_metrics_tracks_player_levels() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("witch")
 	metrics.start_wave(1, 1)
 
-	assert_dict(metrics.get_current_wave_summary()).contains_key("player_level_start")
+	assert_dict(metrics.get_current_wave_summary()).contains_keys(["player_level_start"])
 
 
 func test_balance_metrics_run_summary_includes_waves() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	metrics.start_run("dumpling")
 
 	metrics.start_wave(1, 1)
@@ -111,7 +111,7 @@ func test_balance_metrics_run_summary_includes_waves() -> void:
 
 
 func test_balance_metrics_is_tracking_returns_expected() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	assert_bool(metrics.is_tracking()).is_false()
 
 	metrics.start_run("snowman")
@@ -119,6 +119,6 @@ func test_balance_metrics_is_tracking_returns_expected() -> void:
 
 
 func test_balance_metrics_without_start_returns_empty() -> void:
-	var metrics := BalanceMetrics.new()
+	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
 	assert_dict(metrics.get_current_wave_summary()).is_empty()
 	assert_dict(metrics.get_run_summary()).is_empty()

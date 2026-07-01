@@ -10,12 +10,18 @@ class MockEnemy:
 	extends Node2D
 
 	var health_component := HealthComponent.new()
+	var _alive := true
 
 	func _init(alive: bool = true) -> void:
+		_alive = alive
 		add_child(health_component)
 		health_component.name = "HealthComponent"
 		health_component.max_health = 10
-		health_component.current_health = 10 if alive else 0
+
+	func _ready() -> void:
+		# HealthComponent._ready() resets current_health to max_health, so apply the
+		# desired (possibly dead) state after it has entered the tree.
+		health_component.current_health = 10 if _alive else 0
 
 
 func test_get_owned_weapon_ids_returns_starting_weapon() -> void:
