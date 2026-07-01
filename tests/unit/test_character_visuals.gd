@@ -23,7 +23,7 @@ const SNOWMAN_TEXTURE := preload("res://assets/characters/player/snowman.png")
 const COCKROACH_TEXTURE := preload("res://assets/characters/enemies/cockroach.png")
 const RAT_TEXTURE := preload("res://assets/characters/enemies/rat.png")
 const FLY_TEXTURE := preload("res://assets/characters/enemies/fly.png")
-const FLOOR_TEXTURE := preload("res://assets/arena/dirty_kitchen_tile.png")
+const FLOOR_TEXTURE := preload("res://assets/arena/kitchen_tile.png")
 const PROJECTILE_TEXTURE_PATH := "res://assets/effects/projectile_bolt.png"
 const XP_ORB_TEXTURE_PATH := "res://assets/effects/xp_orb.png"
 const HEALTH_PICKUP_TEXTURE_PATH := "res://assets/effects/health_pickup.png"
@@ -99,7 +99,7 @@ func test_enemy_visual_stays_unrotated_while_chasing() -> void:
 	assert_float(enemy.visual.rotation).is_equal(0.0)
 
 
-func test_arena_uses_dirty_kitchen_floor_tiles() -> void:
+func test_arena_uses_kitchen_floor_tiles() -> void:
 	var arena: Node2D = auto_free(ARENA_SCENE.instantiate()) as Node2D
 	add_child(arena)
 	await _wait_ready(arena)

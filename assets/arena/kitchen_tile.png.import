@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwjt8cwrl1vdc"
-path="res://.godot/imported/dirty_kitchen_tile.png-6d7e43ee76768c679d1a1827557ac5ef.ctex"
+uid="uid://dllb2icqmityh"
+path="res://.godot/imported/kitchen_tile.png-8bb29becc40269f8d1070d9075eb955e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/arena/dirty_kitchen_tile.png"
-dest_files=["res://.godot/imported/dirty_kitchen_tile.png-6d7e43ee76768c679d1a1827557ac5ef.ctex"]
+source_file="res://assets/arena/kitchen_tile.png"
+dest_files=["res://.godot/imported/kitchen_tile.png-8bb29becc40269f8d1070d9075eb955e.ctex"]
 
 [params]
 
