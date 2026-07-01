@@ -22,14 +22,28 @@ const SFX_PATHS := {
 const MUSIC_PATH := "res://assets/audio/music/jrpg_battle_loop.mp3"
 const MENU_DUCK_FACTOR := 0.5
 
-# Volume settings (0.0 to 1.0), default 70% for comfortable listening
+# Shipped mix: music dominates, gameplay SFX sit under it (Music > SFX).
+const DEFAULT_MUSIC_VOLUME := 0.7
+const DEFAULT_SFX_VOLUME := 0.32
+
+# Per-sound volume trims (1.0 = default) so the harshest hits do not dominate.
+const SFX_VOLUME_SCALE := {
+	"player_hurt": 0.5,
+}
+
+# One-shot SFX distance attenuation, in world units from the player/listener.
+const SFX_FALLOFF_NEAR := 300.0
+const SFX_FALLOFF_FAR := 1150.0
+const SFX_MIN_DISTANCE_VOLUME := 0.2
+
+# Volume settings (0.0 to 1.0), default 70% master for comfortable listening.
 var master_volume := 0.7:
 	set(value):
 		master_volume = clampf(value, 0.0, 1.0)
 		_update_all_volumes()
 
-var music_volume := 0.4
-var sfx_volume := 0.5
+var music_volume := DEFAULT_MUSIC_VOLUME
+var sfx_volume := DEFAULT_SFX_VOLUME
 
 # AudioStreamPlayers pool for SFX
 var _sfx_players: Array[AudioStreamPlayer] = []
@@ -43,6 +57,9 @@ var _sfx_cache: Dictionary = {}
 
 # Track gold changes for shop buy sound
 var _last_gold := 0
+
+# Cached player node used as the listener for positional SFX falloff
+var _cached_listener: Node2D
 
 
 func _ready() -> void:
@@ -181,7 +198,7 @@ func _generate_arpeggio(freqs: Array, total_dur: float) -> AudioStreamWAV:
 	return wav
 
 
-func play_sfx(sound_name: StringName) -> void:
+func play_sfx(sound_name: StringName, volume_scale := 1.0) -> void:
 	if _available_players.is_empty():
 		return
 
@@ -191,8 +208,13 @@ func play_sfx(sound_name: StringName) -> void:
 
 	var player: AudioStreamPlayer = _available_players.pop_back()
 	player.stream = stream
-	player.volume_db = linear_to_db(master_volume * sfx_volume)
+	player.volume_db = linear_to_db(_get_effective_sfx_volume(sound_name, volume_scale))
 	player.play()
+
+
+## Plays a one-shot SFX attenuated by the listener's distance from world_pos.
+func play_sfx_at(sound_name: StringName, world_pos: Vector2, volume_scale := 1.0) -> void:
+	play_sfx(sound_name, volume_scale * _distance_attenuation(world_pos))
 
 
 func play_shoot_sound(weapon_type: String = "default") -> void:
@@ -237,6 +259,33 @@ func _get_effective_music_volume() -> float:
 	if _music_duck_depth > 0:
 		volume *= MENU_DUCK_FACTOR
 	return master_volume * volume
+
+
+func _get_effective_sfx_volume(sound_name: StringName = &"", volume_scale := 1.0) -> float:
+	var scale := volume_scale * float(SFX_VOLUME_SCALE.get(sound_name, 1.0))
+	return maxf(master_volume * sfx_volume * scale, 0.00001)
+
+
+func _distance_attenuation(world_pos: Vector2) -> float:
+	var listener := _get_listener()
+	if listener == null:
+		return 1.0
+	return _falloff_for_distance(listener.global_position.distance_to(world_pos))
+
+
+func _falloff_for_distance(distance: float) -> float:
+	if distance <= SFX_FALLOFF_NEAR:
+		return 1.0
+	if distance >= SFX_FALLOFF_FAR:
+		return SFX_MIN_DISTANCE_VOLUME
+	var t := (distance - SFX_FALLOFF_NEAR) / (SFX_FALLOFF_FAR - SFX_FALLOFF_NEAR)
+	return lerpf(1.0, SFX_MIN_DISTANCE_VOLUME, t)
+
+
+func _get_listener() -> Node2D:
+	if not is_instance_valid(_cached_listener):
+		_cached_listener = get_tree().get_first_node_in_group("player") as Node2D
+	return _cached_listener
 
 
 func duck_music(fade_duration := 0.0) -> void:
@@ -295,13 +344,17 @@ func set_master_volume(volume: float) -> void:
 # Signal handlers
 
 
-func _on_damage_dealt(_world_pos: Vector2, _amount: int, is_crit: bool) -> void:
+func _on_damage_dealt(world_pos: Vector2, _amount: int, is_crit: bool) -> void:
 	if is_crit:
-		play_sfx("enemy_hit")
+		play_sfx_at("enemy_hit", world_pos)
 
 
-func _on_enemy_killed(_enemy: Node, _killer: Node) -> void:
-	play_sfx("enemy_death")
+func _on_enemy_killed(enemy: Node, _killer: Node) -> void:
+	var enemy_node := enemy as Node2D
+	if enemy_node:
+		play_sfx_at("enemy_death", enemy_node.global_position)
+	else:
+		play_sfx("enemy_death")
 
 
 func _on_player_health_changed(current: int, maximum: int) -> void:

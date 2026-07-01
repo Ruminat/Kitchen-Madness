@@ -2,147 +2,63 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 7F economy and XP rebalance
+**Last updated:** Phase 7D audio mix and distance falloff
 
 ---
 
-## Active tasks
+## Unfinished
 
-### Phase 7D - Audio mix and distance falloff
+- [ ] **Phase 7E - Idle squash animations** — research Godot/Brotato-style approach, then add a shared ~1s squash idle to player and enemies without affecting collision shapes. Keep off-screen enemies on a cheap path.
 
-Pending. Louder music, quieter SFX, distance attenuation, quieter player hurt sound.
+### Backlog (from optimizations.md)
 
-### Phase 7E - Idle squash animations
+- [ ] In-game profiler overlay (active/full-detail enemies, projectiles, particles, frame time)
+- [ ] Pool enemies/projectiles if instantiation spikes appear in profiling
+- [ ] Quality presets that also control particles and projectile trails
 
-Pending. Research Godot/Brotato-style approach first, then add simple ~1s squash idle to player and enemies.
+---
+
+## Done
+
+- [x] **Phase 2A - Foundation refactor** — EventBus, HealthComponent, Arena, WaveManager, EnemySpawner, WeaponController, data resources, codecheck.
+- [x] **Phase 2B - Enemies, guns, drops** — chaser/tank/sprinter, weighted spawning, pistol/shotgun/orbit blade, XP orbs, health/loot.
+- [x] **Phase 2C - UI polish** — EventBus HUD, floating damage text, XP bar, HP bar, pickup feedback, timer pulse.
+- [x] **Phase 2D - XP and progression loop** — XP bar, level-up pause, 1-of-3 stat upgrades.
+- [x] **Phase 2E - Tests and codecheck** — GdUnit4 coverage + lint/format/boot/test pipeline.
+- [x] **Phase 3A - Gold and between-wave shop** — gold rewards, HUD display, shop, Continue flow.
+- [x] **Phase 3B - Visual placeholders and wave ramp** — sprites, wave_01–03, spawner reconfiguration.
+- [x] **Phase 3C - Larger map and off-camera spawns** — 2640×1440 arena, camera follow, off-camera spawn ring.
+- [x] **Phase 3D - Visual review and spawn tuning** — screenshots, 100px spawn margin, tuned caps/intervals.
+- [x] **Phase 4A - Playable character roster** — 9 `CharacterDefinition`s, select overlay, `player.configure()`, tests.
+- [x] **Phase 4B - Kitchen weapon roster** — 8 weapons, WeaponRoster, burst/boomerang/turret, starter mapping.
+- [x] **Phase 4C - Weapon-focused shop** — dynamic weapon offers, level-up-only stat upgrades, WeaponShopOffer/ShopDisplay.
+- [x] **Phase 4D - VFX pass** — VfxLibrary + pooled VfxManager, death bursts, projectile trails, impact sparks.
+- [x] **Phase 4E - Wave pacing and enemy density** — 12s/17s/22s waves, contact slow, +5s per wave after roster.
+- [x] **Phase 4F - Balance metrics and tuning** — BalanceMetrics, BalanceCalculator, WaveSummaryDisplay, balance model doc.
+- [x] **Phase 5A - Critical damage system** — crit stats, projectile crit rolls, Precision/Devastation upgrades, yellow crit numbers.
+- [x] **Phase 5B - Enhanced damage number visuals** — pooled labels, bounce/pop, 1.5× crit scale, weapon color field.
+- [x] **Phase 5C - Projectile visuals fix** — default bolt sprites + VFX tint; ladle keeps projectile texture.
+- [x] **Phase 5D - Basic sound effects** — AudioManager autoload, 12 placeholder SFX, EventBus integration.
+- [x] **Phase 5E - Statistics persistence** — run summaries to `ignored/stats/` JSON, quit-save, headless disabled.
+- [x] **Phase 5F - Melee weapons** — kitchen knife + frying pan, arc hits, knockback, swing VFX.
+- [x] **Phase 6A - Enemy variety and swarm spawning** — ant/moth, burst swarms, cluster radius, balance estimates.
+- [x] **Post-6A tuning** — 3× density, global bounds, camera/spawner clamp, no enemy stacking.
+- [x] **Phase 6B - Shop UI overhaul** — ShopCard grid, icons, badges, tooltips, keyboard nav.
+- [x] **Performance optimization pass** — off-screen culling, VFX throttling, render-scale settings, swarm cap fix, `optimizations.md`.
+- [x] **Phase 7A - HUD, Grease currency, shop layout** — structured HUD, Grease rebrand, 5 fixed shop slots with sold-state, escalating reroll cost, restored enemy sprite imports.
+- [x] **Phase 7B - World-space damage numbers** — `FloatingTextManager` as world `Node2D`; labels anchored at hit `world_pos`; pooling unchanged.
+- [x] **Phase 7C - Combat balance tuning** — 10% density growth (interval-only), smaller swarms, wave-scaled enemy HP/damage (+12%/+8%), +5% combat upgrades, calculator/metrics fixes.
+- [x] **Phase 7F - Economy and XP rebalance** — 40% XP / 50% Grease drops, smaller orbs, 240+65 XP curve, +15%/wave shop prices, `estimate_wave_affordability()`.
+- [x] **Phase 7D - Audio mix and distance falloff** — music-forward defaults (music 0.7 / SFX 0.32), one-shot SFX distance falloff from the player via `play_sfx_at()` (enemy hit/death), per-sound trims with player hurt at 0.5×, volume + falloff tests.
+- [x] **Test suite repair** — fixed the missing-`panel_style` parse error, `pepper_grinder_gun` UID references, `clear_weapons()` deferred-free bug, and a batch of stale/pre-existing broken tests (GdUnit API, Godot 4.7 coroutine handling, RNG determinism, orphan cleanup). Suite: 270 tests, 0 failures, 0 orphans.
 
 ---
 
 ## How to try it
 
-1. Open the project in Godot 4.6+ and press **F5**.
+1. Open the project in Godot 4.7 and press **F5**.
 2. Kill enemies to gain XP and Grease.
 3. Survive the wave to open the shop (5 fixed slots, R to reroll), then continue to the next wave.
 4. Level up from XP orbs to choose free stat upgrades.
 5. Run `.\tools\codecheck.ps1` before handoff.
 6. Run tests only with `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode`.
-
----
-
-## Completed work summary
-
-### Phase 2A - Foundation refactor
-
-Modular systems: EventBus, HealthComponent, Arena, WaveManager, EnemySpawner, WeaponController, data resources, codecheck scripts.
-
-### Phase 2B - Enemies, guns, drops
-
-Chaser/tank/sprinter enemies, weighted spawning, pistol/shotgun/orbit blade, XP orbs, health pickups, loot.
-
-### Phase 2C - UI polish
-
-EventBus-driven HUD, floating damage text, XP bar, level label, HP bar, pickup feedback, timer pulse.
-
-### Phase 2D - XP and progression loop
-
-XP bar, level-up pause, 1-of-3 stat upgrade choice.
-
-### Phase 2E - Tests and codecheck
-
-GdUnit4 coverage + lint/format/boot/test pipeline.
-
-### Phase 3A - Gold and between-wave shop
-
-Enemy gold rewards, HUD display, between-wave shop, Continue flow.
-
-### Phase 3B - Visual placeholders and wave ramp
-
-Sprite placeholders replaced, wave_01–03 authored, spawner reconfiguration.
-
-### Phase 3C - Larger map and off-camera spawns
-
-2640×1440 arena, camera follow, off-camera spawn ring.
-
-### Phase 3D - Visual review and spawn tuning
-
-Screenshots, 100px spawn margin, tuned caps/intervals.
-
-### Phase 4A - Playable character roster
-
-9 `CharacterDefinition` resources, character select overlay, `player.configure()`, tests.
-
-### Phase 4B - Kitchen weapon roster
-
-8 kitchen weapons, WeaponRoster, burst/boomerang/turret behaviors, starter mapping.
-
-### Phase 4C - Weapon-focused shop
-
-4 dynamic weapon offers, level-up-only stat upgrades, WeaponShopOffer/ShopDisplay.
-
-### Phase 4D - VFX pass
-
-VfxLibrary + pooled VfxManager, death bursts, projectile trails, impact sparks.
-
-### Phase 4E - Wave pacing and enemy density
-
-12s/17s/22s waves, contact slow, +5s per wave after roster.
-
-### Phase 4F - Balance metrics and tuning
-
-BalanceMetrics, BalanceCalculator, WaveSummaryDisplay, balance model doc.
-
-### Phase 5A - Critical damage system
-
-Crit stats, projectile crit rolls, Precision/Devastation upgrades, yellow crit numbers.
-
-### Phase 5B - Enhanced damage number visuals
-
-Pooled labels, bounce/pop, 1.5× crit scale, weapon color field.
-
-### Phase 5C - Projectile visuals fix
-
-Default bolt sprites + VFX tint; ladle keeps projectile texture.
-
-### Phase 5D - Basic sound effects
-
-AudioManager autoload, 12 placeholder SFX, EventBus integration.
-
-### Phase 5E - Statistics persistence
-
-Run summaries to `ignored/stats/` JSON, quit-save, headless disabled.
-
-### Phase 5F - Melee weapons
-
-Kitchen knife + frying pan, arc hits, knockback, swing VFX.
-
-### Phase 6A - Enemy variety and swarm spawning
-
-Ant/moth enemies, burst swarms, cluster radius, balance estimates.
-
-### Post-6A tuning - Density, bounds, collisions
-
-3× density, global bounds, camera/spawner clamp, no enemy stacking.
-
-### Phase 6B - Shop UI overhaul
-
-2×2 ShopCard grid, icons, badges, tooltips, keyboard nav.
-
-### Performance optimization pass
-
-Off-screen culling, VFX throttling, render-scale settings, swarm cap fix, `optimizations.md`.
-
-### Phase 7A - HUD, Grease currency, shop layout
-
-Structured HUD (HP bar + value, wave timer, kills, Grease label, bottom XP panel). Grease rebrand in player-facing UI. Shop: 5 fixed slots in a row, sold cards stay in place, reroll with escalating cost (6 + 4× reroll count). Enemy sprite imports restored to full size (`size_limit=0`). Tests updated for 5-offer shop and Grease formatting.
-
-### Phase 7B - World-space damage numbers
-
-Moved `FloatingTextManager` from UI `CanvasLayer` to game-world `Node2D`. Labels spawn at hit `world_pos` and stay anchored as the camera moves. Pooling unchanged. Tests for world position and camera independence.
-
-### Phase 7C - Combat balance tuning
-
-Reduced compounding spawn pressure (10% density growth, interval-only scaling), smaller authored swarms, wave-scaled enemy HP/contact damage (+12%/+8% per wave), combat upgrades trimmed to +5%, `BalanceCalculator` uses wave index + drop rates, `BalanceMetrics` wave duration fixed. Tests updated.
-
-### Phase 7F - Economy and XP rebalance
-
-Lowered XP (40%) and Grease (50%) drop rates, smaller XP orbs, slower level curve (240 + 65/level), wave-scaled shop prices (+15%/wave), `BalanceCalculator.estimate_wave_affordability()`. Tests updated.

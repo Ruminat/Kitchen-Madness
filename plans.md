@@ -79,6 +79,8 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 | Volume hierarchy | Music > gameplay SFX > ambient/distant hits |
 | Tests | Smoke-test `AudioManager` volume and falloff helpers if added |
 
+**Done:** Music-forward mix (music 0.7 / SFX 0.32 defaults); one-shot SFX distance falloff from the player (enemy hit/death) via `play_sfx_at()`; per-sound trims with player hurt at 0.5×; volume + falloff tests.
+
 ---
 
 ### Phase 7E - Idle squash animations (Brotato-style)

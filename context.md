@@ -4,13 +4,13 @@
 
 ## Current status
 
-**Phase 7B done** · **Phase 7C done** · **Phase 7F done** — economy and XP rebalance.
+**Phases 7A–7D + 7F done.** Latest: **7D** — music-forward audio mix + distance falloff.
 
 **Loop:** character select → swarm waves → weapon shop → repeat. Level-ups = stat/crit upgrades. SFX + run stats to `ignored/stats/`.
 
 **Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers.
 
-**Next:** Phase 7D (audio mix and distance falloff).
+**Next:** Phase 7E (idle squash animations, Brotato-style).
 
 ---
 
@@ -21,7 +21,7 @@
 3. Update [progress.md](progress.md) after a phase/slice
 4. Never commit `.vscode/`
 
-**Godot 4.6+** · `gdtoolkit` on PATH.
+**Godot 4.7** · `gdtoolkit` on PATH.
 
 ---
 
@@ -40,6 +40,7 @@
 | **LevelUpManager** | 1-of-3 stat upgrades only |
 | **FloatingTextManager** | UI `Control` on `CanvasLayer`; world anchor + per-frame canvas sync (true 36px screen text) |
 | **Crit** | Player → `WeaponController.sync_all_crit_stats()` → weapons |
+| **AudioManager** | Music-forward mix; `play_sfx_at(name, world_pos)` = distance falloff from `"player"` group; per-sound trims (`SFX_VOLUME_SCALE`) |
 
 **Main scene:** `res://scenes/main/game.tscn`
 
