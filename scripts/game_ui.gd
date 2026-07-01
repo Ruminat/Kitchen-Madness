@@ -27,6 +27,7 @@ const ShopCard = preload("res://scripts/ui/shop_card.gd")
 const HudThemeScript = preload("res://scripts/ui/hud_theme.gd")
 const WeaponBeltScript = preload("res://scripts/ui/weapon_belt.gd")
 const ReferenceHudLayoutScript = preload("res://scripts/ui/reference_hud_layout.gd")
+const CompactNumberFormat = preload("res://scripts/compact_number_format.gd")
 const SHOP_HINT_TEXT := "W/S between rows  |  A/D between cards  |  1-4 buy  |  Enter continue"
 
 const SHOP_HINT_TEXT_FIXED := "W/S rows  |  A/D cards  |  1-5 buy  |  R reroll  |  Enter continue"
@@ -49,10 +50,13 @@ var _settings_paused_tree := false
 var _weapon_belt: PanelContainer
 
 @onready var hp_bar: ProgressBar = $HudPanel/MarginContainer/VBox/HPRow/HPBar
+@onready var hp_label: Label = $HudPanel/MarginContainer/VBox/HPRow/HPLabel
 @onready var hp_value_label: Label = $HudPanel/MarginContainer/VBox/HPRow/HPValue
 @onready var timer_label: Label = $HudPanel/MarginContainer/VBox/StatsRow/TimerLabel
 @onready var kill_label: Label = $HudPanel/MarginContainer/VBox/StatsRow/KillLabel
-@onready var gold_label: Label = $HudPanel/MarginContainer/VBox/StatsRow/GoldLabel
+@onready var grease_counter: Control = $GreaseCounter
+@onready var grease_title_label: Label = $GreaseCounter/Content/Row/TextStack/GreaseTitleLabel
+@onready var gold_label: Label = $GreaseCounter/Content/Row/TextStack/GoldLabel
 @onready var hud_panel: PanelContainer = $HudPanel
 @onready var xp_panel: PanelContainer = $XpPanel
 @onready var xp_bar: ProgressBar = $XpPanel/MarginContainer/HBox/XpBar
@@ -304,6 +308,7 @@ func _apply_reference_layout() -> void:
 		get_viewport().get_visible_rect().size,
 		hud_panel,
 		settings_button,
+		grease_counter,
 		xp_panel,
 		_weapon_belt,
 		shop_panel,
@@ -675,7 +680,7 @@ func _on_enemy_killed(_enemy: Node, _killer: Node) -> void:
 
 func _on_gold_changed(gold: int) -> void:
 	_current_gold = gold
-	gold_label.text = "GREASE  %d" % gold
+	gold_label.text = CompactNumberFormat.format(gold)
 
 
 func _on_wave_index_changed(wave: int) -> void:

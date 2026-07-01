@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://gameui001"]
+[gd_scene load_steps=6 format=3 uid="uid://gameui001"]
 
 [ext_resource type="Script" path="res://scripts/game_ui.gd" id="1_ui"]
 [ext_resource type="Script" path="res://scripts/ui/floating_text_manager.gd" id="2_floating"]
 [ext_resource type="Script" path="res://scripts/ui/shop_card.gd" id="3_shop_card"]
+[ext_resource type="Texture2D" path="res://assets/ui/grease_counter_badge.png" id="4_grease_badge"]
+[ext_resource type="Texture2D" path="res://assets/ui/grease_counter_drop.png" id="5_grease_drop"]
 
 [node name="UI" type="CanvasLayer"]
 process_mode = 3
@@ -77,12 +79,6 @@ layout_mode = 2
 text = "KILLS 0"
 horizontal_alignment = 2
 
-[node name="GoldLabel" type="Label" parent="HudPanel/MarginContainer/VBox/StatsRow"]
-custom_minimum_size = Vector2(112, 0)
-layout_mode = 2
-text = "GREASE 0"
-horizontal_alignment = 2
-
 [node name="XpPanel" type="PanelContainer" parent="."]
 anchors_preset = 12
 anchor_top = 1.0
@@ -129,6 +125,62 @@ offset_right = -16.0
 offset_bottom = 48.0
 grow_horizontal = 0
 text = "Settings"
+
+[node name="GreaseCounter" type="Control" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -336.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 144.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="Badge" type="TextureRect" parent="GreaseCounter"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_grease_badge")
+expand_mode = 1
+
+[node name="Content" type="MarginContainer" parent="GreaseCounter"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+
+[node name="Row" type="HBoxContainer" parent="GreaseCounter/Content"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="GreaseDrop" type="TextureRect" parent="GreaseCounter/Content/Row"]
+layout_mode = 2
+custom_minimum_size = Vector2(52, 75)
+texture = ExtResource("5_grease_drop")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextStack" type="VBoxContainer" parent="GreaseCounter/Content/Row"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="GreaseTitleLabel" type="Label" parent="GreaseCounter/Content/Row/TextStack"]
+layout_mode = 2
+text = "GREASE"
+
+[node name="GoldLabel" type="Label" parent="GreaseCounter/Content/Row/TextStack"]
+layout_mode = 2
+text = "0"
 
 [node name="Overlay" type="ColorRect" parent="."]
 visible = false

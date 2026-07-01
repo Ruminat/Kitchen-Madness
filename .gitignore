@@ -6,4 +6,4 @@ reports/
 # Editor config — never commit (local Godot path, personal settings)
 .vscode/
 
-ignored
+ignored/
