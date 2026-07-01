@@ -1,6 +1,6 @@
 # Kitchen Madness - development plan
 
-Roadmap for **Kitchen Madness**, a top-down roguelite arena survivor in Godot 4.
+Roadmap for the **Kitchen Madness**, a top-down roguelite arena survivor in Godot 4.
 
 See also: [context.md](context.md) for current project state and iteration rules, [progress.md](progress.md) for task status, and [game-setting.md](game-setting.md) for theme and content direction.
 
@@ -10,7 +10,7 @@ See also: [context.md](context.md) for current project state and iteration rules
 
 **Data-driven content, thin scenes, testable logic, readable chaos.**
 
-Designers should add characters, enemies, weapons, drops, waves, and upgrades through `.tres` resources and focused scenes, not by hardcoding individual content into gameplay systems.
+Designers should add characters, enemies, weapons, drops, levels, and upgrades through `.tres` resources and focused scenes, not by hardcoding individual content into gameplay systems.
 
 Every player-facing action must support both mouse and keyboard. WASD and arrow keys are always interchangeable for movement and menus.
 
@@ -18,84 +18,48 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 
 ## Active roadmap
 
-### Phase 7B - World-space damage numbers
+### Phase 8A — Remove waves; time-based levels
 
-**Goal:** Damage numbers stay where they appear in the world instead of following the camera/player.
+**Goal:** Replace the wave loop with a single timed survival level. No between-wave breaks.
 
 | Task | Details |
 |---|---|
-| World positioning | Spawn floating text in world space (or convert screen position once at spawn) so numbers remain at the hit location |
-| Camera independence | Ensure numbers do not re-anchor to the player or HUD each frame |
-| Pooling | Keep existing `FloatingTextManager` pool; only change coordinate handling |
-| Tests | Verify spawn position uses world/global coordinates |
-
-**Done:** Manager is a `Node2D` child of `Game`; labels use world coordinates directly.
+| Remove wave concept | Retire wave transitions, wave-end shop pause, and wave-index-driven flow in `WaveManager` / `EventBus` |
+| Level timer | A level is a fixed-duration map run. Level 1 = **10 minutes**. Survive the full timer → **win**; player death → **lose** |
+| Time-scaled spawning | Enemy count and/or spawn rate increases continuously over elapsed level time (not wave number) |
+| Win/lose flow | Replace “continue to next wave” with run-end screens driven by timer completion or death |
+| HUD | Show level elapsed / remaining time instead of wave number |
+| Data | Replace or repurpose `WaveDefinition` resources as `LevelDefinition` (duration, spawn curves) |
+| Tests | Timer win/lose, spawner scaling over time, no wave-end shop auto-open |
 
 ---
 
-### Phase 7C - Combat balance tuning from run statistics
+### Phase 8B — On-demand shop and upgrades
 
-**Goal:** Use persisted run stats to reduce combat snowballing — the player becomes overpowered too quickly after a few waves.
+**Goal:** Shop and level-up choices open only when the player asks — no automatic menus.
 
 | Task | Details |
 |---|---|
-| Analyze stats | Review `ignored/stats/` JSON for DPS, kills, damage taken, and wave timing curves |
-| Enemy scaling | Tune wave density, enemy HP/damage, or spawn pacing based on findings |
-| Upgrade potency | Adjust level-up upgrade values if they outpace enemy growth |
-| Validation | Compare predicted DPS (`BalanceCalculator`) vs. actual metrics after changes |
-| Tests | Update balance calculator / wave pacing tests if formulas change |
-
-**Done:** 10% density growth on spawn interval only; smaller swarms; wave HP/damage scaling; +5% combat upgrades; calculator/metrics fixes.
+| Shop on demand | Remove end-of-wave shop open. Player opens shop anytime with **`E`** or the **Shop** button (bottom-right HUD) |
+| Upgrades on demand | Every level-up still grants an upgrade choice, but **do not** auto-open the menu. Bank pending picks; open with **`Q`** or the **Upgrades** button (bottom-left HUD) |
+| Pause / input | Match shop and upgrade overlays: mouse + keyboard nav, game paused while open |
+| HUD buttons | Add persistent bottom-left (Upgrades) and bottom-right (Shop) controls with visible pending counts if useful |
+| Tests | Level-up banks without pause; E/Q and buttons open correct overlays; no wave-end shop trigger |
 
 ---
 
-### Phase 7F - Economy and XP rebalance
+### Phase 8C — Weapon balance and 6-slot loadout
 
-**Goal:** Tighten Grease and XP income so each shop visit supports ~1–2 purchases, not clearing the whole board. Scale shop prices with wave number; let higher enemy counts restore total income without restoring today's per-kill flood.
-
-| Task | Details |
-|---|---|
-| Drop probability | Lower XP orb and Grease drop rates significantly (data-driven via enemy/drop `.tres` or spawn logic) |
-| Shop affordability target | Tune so a typical wave earns enough Grease for **1–2 shop items**, not all 5 slots + rerolls |
-| Wave-scaled prices | Increase shop offer costs each wave (extend or replace early-wave discount in `ShopManager._scaled_cost`) |
-| Volume compensation | Later waves spawn more enemies; total Grease/XP per wave may rise from kill count while **per-enemy** drop rate stays low |
-| XP pacing | Slow level-ups to match — fewer orbs, lower XP per orb, or higher XP-to-level curve |
-| Stats validation | Compare `ignored/stats/` Grease earned, shop spend, and levels per wave before/after |
-| Tests | Update gold/XP/drop and shop cost tests; add affordability estimate if useful |
-
-**Done:** 40% XP / 50% Grease drops, smaller orbs, 240+65 XP curve, +15%/wave shop costs, affordability helper.
-
----
-
-### Phase 7D - Audio mix and distance falloff
-
-**Goal:** Music should dominate the mix; SFX should be quieter overall and attenuate with distance.
+**Goal:** Equal base weapon DPS, six weapon slots, and full buy/sell/upgrade shop economy.
 
 | Task | Details |
 |---|---|
-| Music louder | Raise music bus volume relative to SFX |
-| Distance falloff | Attenuate one-shot SFX by distance from player (e.g. far projectile hits) |
-| Player hurt | Make player damage sound ~2× quieter; replace placeholder if a better clip is available |
-| Volume hierarchy | Music > gameplay SFX > ambient/distant hits |
-| Tests | Smoke-test `AudioManager` volume and falloff helpers if added |
-
-**Done:** Music-forward mix (music 0.7 / SFX 0.32 defaults); one-shot SFX distance falloff from the player (enemy hit/death) via `play_sfx_at()`; per-sound trims with player hurt at 0.5×; volume + falloff tests.
-
----
-
-### Phase 7E - Idle squash animations (Brotato-style)
-
-**Goal:** Simple idle motion so player and enemies feel alive, not like static sprites.
-
-| Task | Details |
-|---|---|
-| Research | Study Brotato-style idle motion and Godot best practices (child `Sprite2D` + `AnimationPlayer`/`Tween`, or shader; avoid fighting physics/collision transforms) |
-| Shared component | Reusable idle bob/squash script or scene (e.g. ~1s vertical squash cycle) |
-| Player + enemies | Apply to player sprite and enemy sprites without affecting collision shapes |
-| Performance | Keep off-screen enemies on cheap/no animation path if needed |
-| Tests | Optional unit test for animation component setup |
-
-**Done:** Reusable `IdleSquash` component animates a `Visual` node's transform (volume-preserving squash + small bob), attached in `base_enemy`/`player` `_ready`. Never touches the body/collision; skips hidden (off-screen) targets; instances desynced by id. Component tests added.
+| Base DPS parity | Tune all weapons so **basic (tier-1) versions deal equal DPS** — adjust damage, fire rate, projectile count, and melee cadence in `.tres` |
+| Six weapon slots | Expand loadout from current cap to **6 simultaneous weapons** |
+| Shop upgrades | Player can buy **weapon tier upgrades** for owned guns in the shop (existing or extended offer types) |
+| Sell weapons | Player can sell owned weapons for **50% of purchase price** |
+| Last-gun rule | **Cannot sell** the last weapon remaining in the loadout |
+| Tests | DPS parity checks via `BalanceCalculator`; sell price; sell blocked at 1 weapon; 6-slot equip limits |
 
 ---
 
@@ -135,4 +99,18 @@ Every iteration should end with:
 
 **Performance optimization pass:** Off-screen enemy/VFX culling, particle throttling, render-scale settings, swarm cap fix, `optimizations.md`.
 
-**Phase 7A — HUD, Grease currency, shop layout:** Structured HUD panels (HP, wave timer, XP, Grease), Grease rebrand in UI text, 5 fixed shop slots with sold-state (no reflow), reroll with escalating cost, restored enemy sprite import sizes.
+**Phase 7A — HUD, Grease currency, shop layout:** Structured HUD panels, Grease rebrand, 5 fixed shop slots with sold-state, escalating reroll cost.
+
+**Phase 7B — World-space damage numbers:** `FloatingTextManager` as world `Node2D`; labels stay at hit location; pooling unchanged.
+
+**Phase 7C — Combat balance tuning:** 10% density growth (interval-only), smaller swarms, wave-scaled enemy HP/damage, +5% combat upgrades, calculator/metrics fixes.
+
+**Phase 7D — Audio mix and distance falloff:** Music-forward defaults; `play_sfx_at()` distance falloff; per-sound trims; player hurt quieter.
+
+**Phase 7E — Idle squash animations:** Reusable `IdleSquash` component on player/enemy `Visual` nodes; collision untouched.
+
+**Phase 7F — Economy and XP rebalance:** Lower drop rates, 240+65 XP curve, +15%/wave shop costs, affordability helper.
+
+**Settings overlay:** Pause-safe settings menu (resolution, audio, mute), persisted config, E2E layout coverage.
+
+**Test suite repair:** 270 tests green; fixed stale references, GdUnit/Godot 4.7 coroutine issues, orphan cleanup.

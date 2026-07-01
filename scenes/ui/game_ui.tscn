@@ -1,10 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://gameui001"]
+[gd_scene load_steps=11 format=3 uid="uid://gameui001"]
 
 [ext_resource type="Script" path="res://scripts/game_ui.gd" id="1_ui"]
 [ext_resource type="Script" path="res://scripts/ui/floating_text_manager.gd" id="2_floating"]
 [ext_resource type="Script" path="res://scripts/ui/shop_card.gd" id="3_shop_card"]
 [ext_resource type="Texture2D" path="res://assets/ui/grease_counter_badge.png" id="4_grease_badge"]
 [ext_resource type="Texture2D" path="res://assets/ui/grease_counter_drop.png" id="5_grease_drop"]
+[ext_resource type="Texture2D" path="res://assets/ui/settings_gear.png" id="6_settings_gear"]
+[ext_resource type="Texture2D" path="res://assets/ui/settings_background_v2.png" id="7_settings_panel"]
+[ext_resource type="Texture2D" path="res://assets/ui/settings_button_neutral.png" id="8_settings_button_neutral"]
+[ext_resource type="Texture2D" path="res://assets/ui/settings_button_red.png" id="9_settings_button_red"]
 
 [node name="UI" type="CanvasLayer"]
 process_mode = 3
@@ -115,16 +119,19 @@ size_flags_vertical = 4
 max_value = 20.0
 show_percentage = false
 
-[node name="SettingsButton" type="Button" parent="."]
+[node name="SettingsButton" type="TextureButton" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -120.0
+offset_left = -92.0
 offset_top = 16.0
 offset_right = -16.0
-offset_bottom = 48.0
+offset_bottom = 92.0
 grow_horizontal = 0
-text = "Settings"
+tooltip_text = "Settings"
+texture_normal = ExtResource("6_settings_gear")
+ignore_texture_size = true
+stretch_mode = 5
 
 [node name="GreaseCounter" type="Control" parent="."]
 anchors_preset = 1
@@ -489,56 +496,192 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="SettingsOverlay/CenterContainer"]
-custom_minimum_size = Vector2(420, 0)
+custom_minimum_size = Vector2(900, 560)
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="SettingsOverlay/CenterContainer/PanelContainer"]
+[node name="PanelArt" type="TextureRect" parent="SettingsOverlay/CenterContainer/PanelContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 22
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
+mouse_filter = 2
+texture = ExtResource("7_settings_panel")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="VBox" type="VBoxContainer" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer"]
+[node name="SettingsContent" type="Control" parent="SettingsOverlay/CenterContainer/PanelContainer"]
 layout_mode = 2
-theme_override_constants/separation = 16
+mouse_filter = 2
 
-[node name="TitleLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
+[node name="TitleLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+visible = false
+layout_mode = 0
+offset_left = 280.0
+offset_top = 62.0
+offset_right = 620.0
+offset_bottom = 118.0
+theme_override_font_sizes/font_size = 44
 text = "Settings"
 horizontal_alignment = 1
-
-[node name="RenderScaleRow" type="HBoxContainer" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="NameLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/RenderScaleRow"]
-custom_minimum_size = Vector2(110, 0)
-layout_mode = 2
-text = "Render Scale"
 vertical_alignment = 1
 
-[node name="DecreaseButton" type="Button" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/RenderScaleRow"]
-custom_minimum_size = Vector2(44, 40)
-layout_mode = 2
-text = "<"
+[node name="ResolutionRowBg" type="Panel" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 170.0
+offset_top = 148.0
+offset_right = 730.0
+offset_bottom = 202.0
+mouse_filter = 2
 
-[node name="ValueLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/RenderScaleRow"]
-custom_minimum_size = Vector2(156, 40)
+[node name="ResolutionRow" type="HBoxContainer" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 186.0
+offset_top = 148.0
+offset_right = 714.0
+offset_bottom = 202.0
+theme_override_constants/separation = 16
+
+[node name="NameLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/ResolutionRow"]
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
-text = "Native (100%)"
-horizontal_alignment = 1
+text = "Resolution"
 vertical_alignment = 1
 
-[node name="IncreaseButton" type="Button" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/RenderScaleRow"]
-custom_minimum_size = Vector2(44, 40)
+[node name="ResolutionOption" type="OptionButton" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/ResolutionRow"]
+custom_minimum_size = Vector2(320, 40)
 layout_mode = 2
-text = ">"
+size_flags_horizontal = 3
 
-[node name="CloseButton" type="Button" parent="SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox"]
-custom_minimum_size = Vector2(180, 42)
+[node name="MusicVolumeRowBg" type="Panel" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 170.0
+offset_top = 220.0
+offset_right = 730.0
+offset_bottom = 274.0
+mouse_filter = 2
+
+[node name="MusicVolumeRow" type="HBoxContainer" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 186.0
+offset_top = 220.0
+offset_right = 714.0
+offset_bottom = 274.0
+theme_override_constants/separation = 16
+
+[node name="NameLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MusicVolumeRow"]
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
-size_flags_horizontal = 4
-text = "Close"
+text = "Music Volume"
+vertical_alignment = 1
+
+[node name="Slider" type="HSlider" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MusicVolumeRow"]
+custom_minimum_size = Vector2(220, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+step = 1.0
+
+[node name="ValueLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MusicVolumeRow"]
+custom_minimum_size = Vector2(56, 40)
+layout_mode = 2
+text = "70%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SoundVolumeRowBg" type="Panel" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 170.0
+offset_top = 292.0
+offset_right = 730.0
+offset_bottom = 346.0
+mouse_filter = 2
+
+[node name="SoundVolumeRow" type="HBoxContainer" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 186.0
+offset_top = 292.0
+offset_right = 714.0
+offset_bottom = 346.0
+theme_override_constants/separation = 16
+
+[node name="NameLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/SoundVolumeRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+text = "Sound Volume"
+vertical_alignment = 1
+
+[node name="Slider" type="HSlider" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/SoundVolumeRow"]
+custom_minimum_size = Vector2(220, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+step = 1.0
+
+[node name="ValueLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/SoundVolumeRow"]
+custom_minimum_size = Vector2(56, 40)
+layout_mode = 2
+text = "32%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MuteRowBg" type="Panel" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 170.0
+offset_top = 364.0
+offset_right = 730.0
+offset_bottom = 418.0
+mouse_filter = 2
+
+[node name="MuteRow" type="HBoxContainer" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 186.0
+offset_top = 364.0
+offset_right = 714.0
+offset_bottom = 418.0
+theme_override_constants/separation = 16
+
+[node name="NameLabel" type="Label" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MuteRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+text = "Mute All"
+vertical_alignment = 1
+
+[node name="MuteCheckBox" type="CheckBox" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MuteRow"]
+custom_minimum_size = Vector2(250, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ApplyButtonArt" type="TextureRect" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 500.0
+offset_right = 425.0
+offset_bottom = 552.0
+mouse_filter = 2
+texture = ExtResource("8_settings_button_neutral")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ApplyButton" type="Button" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 500.0
+offset_right = 425.0
+offset_bottom = 552.0
+text = "Apply"
+
+[node name="BackButtonArt" type="TextureRect" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 475.0
+offset_top = 500.0
+offset_right = 645.0
+offset_bottom = 552.0
+mouse_filter = 2
+texture = ExtResource("9_settings_button_red")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CloseButton" type="Button" parent="SettingsOverlay/CenterContainer/PanelContainer/SettingsContent"]
+layout_mode = 0
+offset_left = 475.0
+offset_top = 500.0
+offset_right = 645.0
+offset_bottom = 552.0
+text = "Back"

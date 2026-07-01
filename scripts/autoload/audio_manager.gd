@@ -21,6 +21,11 @@ const SFX_PATHS := {
 
 const MUSIC_PATH := "res://assets/audio/music/jrpg_battle_loop.mp3"
 const MENU_DUCK_FACTOR := 0.5
+const CONFIG_PATH := "user://settings.cfg"
+const CONFIG_SECTION := "audio"
+const CONFIG_MUSIC_VOLUME := "music_volume"
+const CONFIG_SFX_VOLUME := "sfx_volume"
+const CONFIG_MUTE_ALL := "mute_all"
 
 # Shipped mix: music dominates, gameplay SFX sit under it (Music > SFX).
 const DEFAULT_MUSIC_VOLUME := 0.7
@@ -42,8 +47,20 @@ var master_volume := 0.7:
 		master_volume = clampf(value, 0.0, 1.0)
 		_update_all_volumes()
 
-var music_volume := DEFAULT_MUSIC_VOLUME
-var sfx_volume := DEFAULT_SFX_VOLUME
+var music_volume := DEFAULT_MUSIC_VOLUME:
+	set(value):
+		music_volume = clampf(value, 0.0, 1.0)
+		_update_all_volumes()
+
+var sfx_volume := DEFAULT_SFX_VOLUME:
+	set(value):
+		sfx_volume = clampf(value, 0.0, 1.0)
+		_update_all_volumes()
+
+var mute_all := false:
+	set(value):
+		mute_all = value
+		_update_all_volumes()
 
 # AudioStreamPlayers pool for SFX
 var _sfx_players: Array[AudioStreamPlayer] = []
@@ -64,6 +81,7 @@ var _cached_listener: Node2D
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_load_settings()
 	_initialize_sfx_players()
 	_connect_signals()
 	_generate_placeholder_sounds()
@@ -255,6 +273,8 @@ func _update_all_volumes() -> void:
 
 
 func _get_effective_music_volume() -> float:
+	if mute_all:
+		return 0.0
 	var volume := music_volume
 	if _music_duck_depth > 0:
 		volume *= MENU_DUCK_FACTOR
@@ -262,6 +282,8 @@ func _get_effective_music_volume() -> float:
 
 
 func _get_effective_sfx_volume(sound_name: StringName = &"", volume_scale := 1.0) -> float:
+	if mute_all:
+		return 0.00001
 	var scale := volume_scale * float(SFX_VOLUME_SCALE.get(sound_name, 1.0))
 	return maxf(master_volume * sfx_volume * scale, 0.00001)
 
@@ -302,7 +324,7 @@ func _apply_music_volume(fade_duration := 0.0) -> void:
 	if _music_player == null:
 		return
 
-	var target_db := linear_to_db(_get_effective_music_volume())
+	var target_db := linear_to_db(maxf(_get_effective_music_volume(), 0.00001))
 	if fade_duration > 0.0:
 		if _music_volume_tween and _music_volume_tween.is_valid():
 			_music_volume_tween.kill()
@@ -339,6 +361,44 @@ func _start_music() -> void:
 
 func set_master_volume(volume: float) -> void:
 	master_volume = clampf(volume, 0.0, 1.0)
+
+
+func set_music_volume(volume: float, save := true) -> void:
+	music_volume = volume
+	if save:
+		_save_settings()
+
+
+func set_sfx_volume(volume: float, save := true) -> void:
+	sfx_volume = volume
+	if save:
+		_save_settings()
+
+
+func set_mute_all(enabled: bool, save := true) -> void:
+	mute_all = enabled
+	if save:
+		_save_settings()
+
+
+func _load_settings() -> void:
+	var config := ConfigFile.new()
+	var result := config.load(CONFIG_PATH)
+	if result != OK:
+		return
+
+	music_volume = float(config.get_value(CONFIG_SECTION, CONFIG_MUSIC_VOLUME, music_volume))
+	sfx_volume = float(config.get_value(CONFIG_SECTION, CONFIG_SFX_VOLUME, sfx_volume))
+	mute_all = bool(config.get_value(CONFIG_SECTION, CONFIG_MUTE_ALL, mute_all))
+
+
+func _save_settings() -> void:
+	var config := ConfigFile.new()
+	config.load(CONFIG_PATH)
+	config.set_value(CONFIG_SECTION, CONFIG_MUSIC_VOLUME, music_volume)
+	config.set_value(CONFIG_SECTION, CONFIG_SFX_VOLUME, sfx_volume)
+	config.set_value(CONFIG_SECTION, CONFIG_MUTE_ALL, mute_all)
+	config.save(CONFIG_PATH)
 
 
 # Signal handlers

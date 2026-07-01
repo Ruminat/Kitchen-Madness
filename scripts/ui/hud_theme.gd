@@ -96,6 +96,95 @@ static func make_button_style(accent: Color, bg: Color) -> StyleBoxFlat:
 	return style
 
 
+static func make_settings_field_style() -> StyleBoxFlat:
+	var style := make_button_style(Color(0.13, 0.09, 0.05, 1.0), Color(0.66, 0.55, 0.36, 0.92))
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	return style
+
+
+static func make_settings_row_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.66, 0.55, 0.36, 0.5)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.2, 0.13, 0.06, 0.72)
+	style.set_corner_radius_all(5)
+	return style
+
+
+static func make_transparent_button_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0, 0, 0, 0)
+	style.border_width_left = 0
+	style.border_width_top = 0
+	style.border_width_right = 0
+	style.border_width_bottom = 0
+	return style
+
+
+static func make_settings_slider_track(fill: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = fill
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.08, 0.055, 0.03, 1.0)
+	style.set_corner_radius_all(5)
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	return style
+
+
+static func make_settings_slider_grabber() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.62, 0.58, 0.49, 1.0)
+	style.border_width_left = 3
+	style.border_width_top = 3
+	style.border_width_right = 3
+	style.border_width_bottom = 3
+	style.border_color = Color(0.12, 0.09, 0.055, 1.0)
+	style.set_corner_radius_all(4)
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 12
+	style.content_margin_bottom = 12
+	return style
+
+
+static func apply_settings_slider_style(slider: HSlider) -> void:
+	slider.add_theme_stylebox_override(
+		"slider", make_settings_slider_track(Color(0.18, 0.15, 0.11, 1.0))
+	)
+	slider.add_theme_stylebox_override(
+		"grabber_area", make_settings_slider_track(Color(0.78, 0.54, 0.04, 1.0))
+	)
+	slider.add_theme_stylebox_override(
+		"grabber_area_highlight", make_settings_slider_track(Color(0.9, 0.64, 0.08, 1.0))
+	)
+	slider.add_theme_stylebox_override("grabber", make_settings_slider_grabber())
+	slider.add_theme_stylebox_override("grabber_highlight", make_settings_slider_grabber())
+
+
+static func apply_transparent_button_style(button: Button) -> void:
+	var transparent := make_transparent_button_style()
+	button.add_theme_font_override("font", DISPLAY_FONT)
+	button.add_theme_font_size_override("font_size", 24)
+	button.add_theme_stylebox_override("normal", transparent)
+	button.add_theme_stylebox_override("hover", transparent)
+	button.add_theme_stylebox_override("focus", transparent)
+	button.add_theme_stylebox_override("pressed", transparent)
+	button.add_theme_color_override("font_color", COLOR_TEXT)
+	button.add_theme_color_override("font_hover_color", COLOR_TEXT.lightened(0.08))
+	button.add_theme_color_override("font_focus_color", COLOR_TEXT)
+	button.add_theme_color_override("font_pressed_color", Color(0.18, 0.1, 0.04, 1.0))
+
+
 static func apply_action_button_style(button: Button, accent: Color) -> void:
 	button.add_theme_font_override("font", DISPLAY_FONT)
 	button.add_theme_font_size_override("font_size", 22)
@@ -119,12 +208,18 @@ static func apply_action_button_style(button: Button, accent: Color) -> void:
 	button.add_theme_color_override("font_disabled_color", Color(0.37, 0.31, 0.24, 1.0))
 
 
-static func apply_settings_button_style(button: Button) -> void:
-	button.text = "SET"
+static func apply_settings_button_style(button: BaseButton) -> void:
 	button.tooltip_text = "Settings"
-	apply_action_button_style(button, Color(0.84, 0.59, 0.16, 1.0))
-	button.custom_minimum_size = Vector2(70, 42)
-	button.add_theme_font_size_override("font_size", 19)
+	if button is TextureButton:
+		button.custom_minimum_size = Vector2(76, 76)
+		return
+	var text_button := button as Button
+	if text_button == null:
+		return
+	text_button.text = "SET"
+	apply_action_button_style(text_button, Color(0.84, 0.59, 0.16, 1.0))
+	text_button.custom_minimum_size = Vector2(70, 42)
+	text_button.add_theme_font_size_override("font_size", 19)
 
 
 static func apply_game_ui_theme(ui: CanvasLayer) -> void:
@@ -150,9 +245,7 @@ static func apply_game_ui_theme(ui: CanvasLayer) -> void:
 	ui.character_select_panel.add_theme_stylebox_override(
 		"panel", make_paper_panel_style(COLOR_CHARACTER_ACCENT)
 	)
-	ui.settings_panel.add_theme_stylebox_override(
-		"panel", make_paper_panel_style(COLOR_SETTINGS_ACCENT)
-	)
+	ui.settings_panel.add_theme_stylebox_override("panel", make_transparent_button_style())
 	var preview_style := StyleBoxFlat.new()
 	preview_style.bg_color = Color(0.58, 0.47, 0.31, 1.0)
 	preview_style.border_width_left = 2
@@ -199,7 +292,34 @@ static func apply_game_ui_theme(ui: CanvasLayer) -> void:
 	apply_settings_button_style(ui.settings_button)
 	apply_action_button_style(ui.shop_reroll_button, COLOR_GREASE)
 	apply_action_button_style(ui.shop_continue_button, COLOR_LEVEL_UP_ACCENT)
-	apply_action_button_style(ui.settings_close_button, COLOR_SETTINGS_ACCENT)
+	apply_transparent_button_style(ui.settings_apply_button)
+	apply_transparent_button_style(ui.settings_close_button)
+	for row_bg_path in [
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/ResolutionRowBg",
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MusicVolumeRowBg",
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/SoundVolumeRowBg",
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MuteRowBg",
+	]:
+		var row_bg := ui.get_node_or_null(row_bg_path) as Panel
+		if row_bg:
+			row_bg.add_theme_stylebox_override("panel", make_settings_row_style())
+	ui.resolution_option.add_theme_font_override("font", BODY_FONT)
+	ui.resolution_option.add_theme_font_size_override("font_size", 20)
+	ui.resolution_option.add_theme_stylebox_override("normal", make_settings_field_style())
+	ui.resolution_option.add_theme_stylebox_override(
+		"hover", make_button_style(Color(0.18, 0.1, 0.04, 1.0), Color(0.78, 0.65, 0.42, 1.0))
+	)
+	ui.resolution_option.add_theme_stylebox_override(
+		"focus", make_button_style(Color(0.74, 0.46, 0.1, 1.0), Color(0.82, 0.7, 0.46, 1.0))
+	)
+	ui.resolution_option.add_theme_color_override("font_color", COLOR_TEXT)
+	ui.resolution_option.add_theme_color_override("font_hover_color", COLOR_TEXT)
+	ui.resolution_option.add_theme_color_override("font_focus_color", COLOR_TEXT)
+	apply_settings_slider_style(ui.music_volume_slider)
+	apply_settings_slider_style(ui.sound_volume_slider)
+	ui.mute_all_checkbox.add_theme_font_override("font", BODY_FONT)
+	ui.mute_all_checkbox.add_theme_font_size_override("font_size", 20)
+	ui.mute_all_checkbox.add_theme_color_override("font_color", COLOR_TEXT)
 	var grease_badge := ui.get_node_or_null("GreaseCounter/Badge") as TextureRect
 	if grease_badge:
 		grease_badge.texture = GREASE_COUNTER_BADGE_TEXTURE
@@ -239,5 +359,16 @@ static func apply_game_ui_theme(ui: CanvasLayer) -> void:
 	ui.character_select_hint_label.add_theme_font_size_override("font_size", 14)
 	ui.character_detail_label.add_theme_color_override("font_color", COLOR_TEXT)
 	ui.settings_title_label.add_theme_color_override("font_color", COLOR_SETTINGS_ACCENT)
-	ui.render_scale_value_label.add_theme_color_override("font_color", COLOR_TEXT)
-	ui.render_scale_value_label.add_theme_font_size_override("font_size", 18)
+	for label_path in [
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/ResolutionRow/NameLabel",
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MusicVolumeRow/NameLabel",
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MusicVolumeRow/ValueLabel",
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/SoundVolumeRow/NameLabel",
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/SoundVolumeRow/ValueLabel",
+		"SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/MuteRow/NameLabel",
+	]:
+		var label := ui.get_node_or_null(label_path) as Label
+		if label:
+			label.add_theme_color_override("font_color", COLOR_TEXT)
+			label.add_theme_font_override("font", BODY_FONT)
+			label.add_theme_font_size_override("font_size", 20)

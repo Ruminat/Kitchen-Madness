@@ -226,45 +226,64 @@ var _weapon_belt: PanelContainer
 	)
 	as Label
 )
-@onready var settings_button: Button = $SettingsButton
+@onready var settings_button: BaseButton = $SettingsButton
 @onready var settings_overlay: ColorRect = $SettingsOverlay
 @onready var settings_panel: PanelContainer = (
 	$SettingsOverlay/CenterContainer/PanelContainer as PanelContainer
 )
 @onready var settings_title_label: Label = (
-	get_node("SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/TitleLabel")
-	as Label
+	get_node("SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/TitleLabel") as Label
 )
-@onready var render_scale_value_label: Label = (
+@onready var resolution_option: OptionButton = (
 	get_node(
 		(
 			"SettingsOverlay/CenterContainer/PanelContainer/"
-			+ "MarginContainer/VBox/RenderScaleRow/ValueLabel"
+			+ "SettingsContent/ResolutionRow/ResolutionOption"
+		)
+	)
+	as OptionButton
+)
+@onready var music_volume_slider: HSlider = (
+	get_node(
+		"SettingsOverlay/CenterContainer/PanelContainer/" + "SettingsContent/MusicVolumeRow/Slider"
+	)
+	as HSlider
+)
+@onready var music_volume_value_label: Label = (
+	get_node(
+		(
+			"SettingsOverlay/CenterContainer/PanelContainer/"
+			+ "SettingsContent/MusicVolumeRow/ValueLabel"
 		)
 	)
 	as Label
 )
-@onready var render_scale_decrease_button: Button = (
+@onready var sound_volume_slider: HSlider = (
 	get_node(
-		(
-			"SettingsOverlay/CenterContainer/PanelContainer/"
-			+ "MarginContainer/VBox/RenderScaleRow/DecreaseButton"
-		)
+		"SettingsOverlay/CenterContainer/PanelContainer/" + "SettingsContent/SoundVolumeRow/Slider"
 	)
-	as Button
+	as HSlider
 )
-@onready var render_scale_increase_button: Button = (
+@onready var sound_volume_value_label: Label = (
 	get_node(
 		(
 			"SettingsOverlay/CenterContainer/PanelContainer/"
-			+ "MarginContainer/VBox/RenderScaleRow/IncreaseButton"
+			+ "SettingsContent/SoundVolumeRow/ValueLabel"
 		)
 	)
-	as Button
+	as Label
+)
+@onready var mute_all_checkbox: CheckBox = (
+	get_node(
+		"SettingsOverlay/CenterContainer/PanelContainer/" + "SettingsContent/MuteRow/MuteCheckBox"
+	)
+	as CheckBox
+)
+@onready var settings_apply_button: Button = (
+	get_node("SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/ApplyButton") as Button
 )
 @onready var settings_close_button: Button = (
-	get_node("SettingsOverlay/CenterContainer/PanelContainer/MarginContainer/VBox/CloseButton")
-	as Button
+	get_node("SettingsOverlay/CenterContainer/PanelContainer/SettingsContent/CloseButton") as Button
 )
 
 
@@ -283,9 +302,13 @@ func _ready() -> void:
 	settings_overlay.visible = false
 	restart_button.pressed.connect(_on_restart_pressed)
 	settings_button.pressed.connect(_on_settings_button_pressed)
-	render_scale_decrease_button.pressed.connect(_on_render_scale_decrease_pressed)
-	render_scale_increase_button.pressed.connect(_on_render_scale_increase_pressed)
+	resolution_option.item_selected.connect(_on_resolution_selected)
+	music_volume_slider.value_changed.connect(_on_music_volume_changed)
+	sound_volume_slider.value_changed.connect(_on_sound_volume_changed)
+	mute_all_checkbox.toggled.connect(_on_mute_all_toggled)
+	settings_apply_button.pressed.connect(_hide_settings)
 	settings_close_button.pressed.connect(_hide_settings)
+	_populate_resolution_options()
 	shop_reroll_button.pressed.connect(_on_shop_reroll_pressed)
 	shop_continue_button.pressed.connect(_on_shop_continue_pressed)
 	for index in _upgrade_buttons.size():
@@ -344,7 +367,7 @@ func _show_settings() -> void:
 
 	settings_overlay.visible = true
 	_refresh_settings()
-	settings_close_button.grab_focus()
+	resolution_option.grab_focus()
 
 
 func _hide_settings() -> void:
@@ -354,21 +377,44 @@ func _hide_settings() -> void:
 	_settings_paused_tree = false
 
 
-func _on_render_scale_decrease_pressed() -> void:
-	_change_render_scale(-1)
-
-
-func _on_render_scale_increase_pressed() -> void:
-	_change_render_scale(1)
-
-
-func _change_render_scale(direction: int) -> void:
-	PerformanceSettings.cycle_render_scale(direction)
+func _on_resolution_selected(index: int) -> void:
+	PerformanceSettings.set_resolution_index(index)
 	_refresh_settings()
 
 
+func _on_music_volume_changed(value: float) -> void:
+	AudioManager.set_music_volume(value / 100.0)
+	_refresh_settings_labels()
+
+
+func _on_sound_volume_changed(value: float) -> void:
+	AudioManager.set_sfx_volume(value / 100.0)
+	_refresh_settings_labels()
+
+
+func _on_mute_all_toggled(enabled: bool) -> void:
+	AudioManager.set_mute_all(enabled)
+
+
+func _populate_resolution_options() -> void:
+	resolution_option.clear()
+	for option in PerformanceSettings.get_resolution_options():
+		resolution_option.add_item(str(option.get("label", "1920 x 1080")))
+
+
 func _refresh_settings() -> void:
-	render_scale_value_label.text = PerformanceSettings.get_render_scale_label()
+	if resolution_option.item_count != PerformanceSettings.get_resolution_options().size():
+		_populate_resolution_options()
+	resolution_option.select(PerformanceSettings.resolution_index)
+	music_volume_slider.value = roundi(AudioManager.music_volume * 100.0)
+	sound_volume_slider.value = roundi(AudioManager.sfx_volume * 100.0)
+	mute_all_checkbox.button_pressed = AudioManager.mute_all
+	_refresh_settings_labels()
+
+
+func _refresh_settings_labels() -> void:
+	music_volume_value_label.text = "%d%%" % roundi(AudioManager.music_volume * 100.0)
+	sound_volume_value_label.text = "%d%%" % roundi(AudioManager.sfx_volume * 100.0)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -418,14 +464,6 @@ func _is_modal_overlay_open() -> bool:
 func _handle_settings_keyboard(event: InputEventKey) -> bool:
 	if _is_settings_toggle(event):
 		_hide_settings()
-		return true
-
-	if event.is_action_pressed("move_left") or event.is_action_pressed("ui_left"):
-		_change_render_scale(-1)
-		return true
-
-	if event.is_action_pressed("move_right") or event.is_action_pressed("ui_right"):
-		_change_render_scale(1)
 		return true
 
 	if event.is_action_pressed("ui_accept") and settings_close_button.has_focus():

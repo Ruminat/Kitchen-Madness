@@ -7,11 +7,13 @@ func before_test() -> void:
 	AudioManager.music_volume = 0.4
 	AudioManager.master_volume = 0.7
 	AudioManager.sfx_volume = 0.5
+	AudioManager.mute_all = false
 	AudioManager._apply_music_volume()
 
 
 func after_test() -> void:
 	AudioManager._music_duck_depth = 0
+	AudioManager.mute_all = false
 	AudioManager._apply_music_volume()
 
 
@@ -71,3 +73,20 @@ func test_distance_falloff_decreases_monotonically() -> void:
 
 	assert_float(near).is_greater(mid)
 	assert_float(mid).is_greater(far)
+
+
+func test_music_and_sfx_volume_setters_clamp_values() -> void:
+	AudioManager.set_music_volume(1.5, false)
+	AudioManager.set_sfx_volume(-0.25, false)
+
+	assert_float(AudioManager.music_volume).is_equal(1.0)
+	assert_float(AudioManager.sfx_volume).is_equal(0.0)
+
+
+func test_mute_all_silences_effective_mix() -> void:
+	AudioManager.set_mute_all(true, false)
+
+	assert_float(AudioManager._get_effective_music_volume()).is_equal(0.0)
+	assert_float(AudioManager._get_effective_sfx_volume(&"enemy_hit")).is_equal_approx(
+		0.00001, 0.000001
+	)
