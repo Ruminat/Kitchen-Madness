@@ -80,6 +80,44 @@ func test_level_completed_does_not_open_shop() -> void:
 	assert_bool((ui.get_node("ShopOverlay") as CanvasItem).visible).is_false()
 
 
+func test_level_up_banks_upgrade_without_opening_menu() -> void:
+	var game: Node2D = auto_free(GAME_SCENE.instantiate())
+	add_child(game)
+	await _wait_ready(game)
+	var ui: CanvasLayer = game.get_node("UI") as CanvasLayer
+
+	EventBus.level_up.emit(2)
+
+	assert_bool((ui.get_node("LevelUpOverlay") as CanvasItem).visible).is_false()
+	assert_bool(get_tree().paused).is_false()
+	assert_int((game.get_node("LevelUpManager") as LevelUpManager).pending_count()).is_equal(1)
+
+
+func test_upgrades_open_request_shows_menu_and_pauses() -> void:
+	var game: Node2D = auto_free(GAME_SCENE.instantiate())
+	add_child(game)
+	await _wait_ready(game)
+	var ui: CanvasLayer = game.get_node("UI") as CanvasLayer
+
+	EventBus.level_up.emit(2)
+	ui.upgrades_open_requested.emit()
+
+	assert_bool((ui.get_node("LevelUpOverlay") as CanvasItem).visible).is_true()
+	assert_bool(get_tree().paused).is_true()
+
+
+func test_shop_open_request_shows_shop_and_pauses() -> void:
+	var game: Node2D = auto_free(GAME_SCENE.instantiate())
+	add_child(game)
+	await _wait_ready(game)
+	var ui: CanvasLayer = game.get_node("UI") as CanvasLayer
+
+	ui.shop_open_requested.emit()
+
+	assert_bool((ui.get_node("ShopOverlay") as CanvasItem).visible).is_true()
+	assert_bool(get_tree().paused).is_true()
+
+
 func test_game_includes_xp_and_floating_text_ui() -> void:
 	var game: Node2D = auto_free(GAME_SCENE.instantiate())
 	add_child(game)

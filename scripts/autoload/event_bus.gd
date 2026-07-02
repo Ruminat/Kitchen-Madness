@@ -12,6 +12,7 @@ signal pickup_collected(type: StringName, world_pos: Vector2, value: int)
 signal level_time_changed(elapsed_seconds: float, seconds_remaining: float)
 signal level_completed
 signal gold_changed(gold: int)
+signal upgrades_pending_changed(count: int)
 
 # Balance metrics signals
 signal metrics_damage_dealt(amount: int, weapon_id: String)

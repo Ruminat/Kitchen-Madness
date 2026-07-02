@@ -55,6 +55,8 @@ func configure(
 		_ui.shop_reroll_requested.connect(_on_shop_reroll)
 	if _ui and _ui.has_signal("shop_continue_requested"):
 		_ui.shop_continue_requested.connect(_on_shop_continue)
+	if _ui and _ui.has_signal("shop_open_requested"):
+		_ui.shop_open_requested.connect(open_shop)
 	_sync_weapon_loadout_ui()
 
 

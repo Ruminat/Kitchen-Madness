@@ -13,6 +13,7 @@ class MockShopUi:
 	signal shop_purchase_requested(offer: Resource)
 	signal shop_reroll_requested
 	signal shop_continue_requested
+	signal shop_open_requested
 
 	var shown := false
 	var hidden := false
@@ -82,6 +83,19 @@ func test_level_completed_does_not_auto_open_shop() -> void:
 
 	assert_bool(ui.shown).is_false()
 	assert_bool(manager._shop_open).is_false()
+
+
+func test_ui_open_signal_opens_shop() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	var ui := _create_ui()
+	manager.configure(player, ui, _create_gold_system(), func() -> void: pass)
+
+	ui.shop_open_requested.emit()
+
+	assert_bool(manager._shop_open).is_true()
+	assert_bool(ui.shown).is_true()
+	assert_bool(get_tree().paused).is_true()
 
 
 func test_level_time_signal_updates_price_scaling() -> void:

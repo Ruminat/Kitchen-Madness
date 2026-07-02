@@ -4,13 +4,13 @@
 
 ## Current status
 
-**Latest: Phase 8A** — waves removed; level 1 is a single **10-minute survival run** (survive → win, die → lose).
+**Latest: Phase 8B** — on-demand shop (`E` / Shop button) and banked level-up upgrades (`Q` / Upgrades button); no auto-opening menus.
 
-**Loop:** character select → survive the level timer while pressure ramps → level-ups grant stat/crit upgrades. SFX + run stats to `ignored/stats/`.
+**Loop:** character select → survive the 10-minute level while pressure ramps → level-ups bank upgrade picks (open on demand) → shop weapons anytime. Survive → win, die → lose. SFX + run stats to `ignored/stats/`.
 
 **Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers · idle squash bob · settings overlay.
 
-**Next: Phase 8B** — on-demand shop (`E`) and banked upgrades (`Q`). `ShopManager.open_shop()` already exists but nothing calls it yet — the shop is unreachable in-game until 8B.
+**Next: Phase 8C** — equal base-tier weapon DPS, 6 weapon slots, buy/sell weapon upgrades.
 
 ---
 
@@ -37,8 +37,9 @@
 | **CollisionLayers** | Player mask = wall+enemy; enemy mask = wall+enemy+player; `MOTION_MODE_FLOATING` |
 | **BaseEnemy** | Contact slow · knockback · collision radius from `EnemyDefinition` · time-scaled HP/damage |
 | **MeleeWeapon** | Arc hits · crit · knockback via `.tres` fields |
-| **GoldSystem / ShopManager** | `open_shop()` is on-demand only (no auto-open); prices +15%/elapsed minute via `scaled_cost_for_time()` |
-| **LevelUpManager** | 1-of-3 stat upgrades only |
+| **GoldSystem / ShopManager** | `open_shop()` is on-demand only (connects to `ui.shop_open_requested`); prices +15%/elapsed minute via `scaled_cost_for_time()` |
+| **LevelUpManager** | Level-ups bank pending picks (`EventBus.upgrades_pending_changed`); `open_upgrades()` (via `ui.upgrades_open_requested`) shows 1-of-3 stat upgrades; chains remaining pending before unpausing |
+| **HudActionBar** | `scripts/ui/hud_action_bar.gd` + `hud_action_button.gd` — bottom-corner Upgrades/Shop buttons; built by `game_ui` beneath the modal overlays; Upgrades badge = pending count |
 | **FloatingTextManager** | UI `Control` on `CanvasLayer`; world anchor + per-frame canvas sync |
 | **Crit** | Player → `WeaponController.sync_all_crit_stats()` → weapons |
 | **AudioManager** | Music-forward mix; `play_sfx_at(name, world_pos)` distance falloff; "victory" jingle on `level_completed` |
@@ -56,8 +57,9 @@
 |---|---|
 | Move | WASD / arrows |
 | Character select | W/S · 1–9 · Enter |
+| Open upgrades / shop | **Q** upgrades · **E** shop (or HUD buttons) |
 | Level-up | W/S · 1/2/3 · Enter |
-| Shop (unreachable until 8B) | W/S · 1–5 buy · R reroll · Enter continue |
+| Shop | W/S · 1–5 buy · R reroll · Enter continue |
 | Game over / victory | R / Enter |
 | Settings | Esc |
 
@@ -71,7 +73,7 @@ scripts/enemies/     base_enemy.gd, moth_enemy.gd
 scripts/data/        level_definition.gd, collision_layers.gd
 resources/levels/    level_01.tres (10 min, full enemy roster, 1×→6× spawn ramp)
 resources/enemies/   chaser, sprinter, tank, ant, moth
-tests/               unit + integration (GdUnit4) — 282 tests
+tests/               unit + integration (GdUnit4) — 291 tests
 tools/codecheck.sh   (codecheck.ps1 on Windows)
 ```
 

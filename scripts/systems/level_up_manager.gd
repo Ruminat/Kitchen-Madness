@@ -16,13 +16,12 @@ const DEFAULT_UPGRADE_PATHS: Array[String] = [
 
 @export var upgrades: Array[Resource] = []
 @export var choice_count := 3
-@export var delay_seconds := 0.5
 
 var _player: Node
 var _ui: Node
 var _can_resume := Callable()
 var _pending_levels := 0
-var _waiting_for_choice := false
+var _menu_open := false
 
 
 func _ready() -> void:
@@ -37,33 +36,39 @@ func configure(player: Node, ui: Node, can_resume: Callable = Callable()) -> voi
 
 	if _ui and _ui.has_signal("upgrade_selected"):
 		_ui.upgrade_selected.connect(_on_upgrade_selected)
+	if _ui and _ui.has_signal("upgrades_open_requested"):
+		_ui.upgrades_open_requested.connect(open_upgrades)
+	EventBus.upgrades_pending_changed.emit(_pending_levels)
+
+
+func has_pending() -> bool:
+	return _pending_levels > 0
+
+
+func pending_count() -> int:
+	return _pending_levels
 
 
 func _on_level_up(_level: int) -> void:
+	## Level-ups bank an upgrade choice without interrupting the run.
 	_pending_levels += 1
-	if not _waiting_for_choice:
-		_show_next_choice()
+	EventBus.upgrades_pending_changed.emit(_pending_levels)
 
 
-func _show_next_choice() -> void:
-	if _pending_levels <= 0 or _ui == null:
+func open_upgrades() -> void:
+	if _menu_open or _pending_levels <= 0 or _ui == null:
 		return
-
-	_waiting_for_choice = true
-	if delay_seconds > 0.0:
-		await get_tree().create_timer(delay_seconds).timeout
-
 	if not _can_resume_run():
-		_waiting_for_choice = false
 		return
 
+	_menu_open = true
 	get_tree().paused = true
 	if _ui.has_method("show_level_up_options"):
 		_ui.show_level_up_options(_pick_choices())
 
 
 func _on_upgrade_selected(upgrade: Resource) -> void:
-	if not _waiting_for_choice or upgrade == null:
+	if not _menu_open or upgrade == null:
 		return
 
 	if upgrade.has_method("apply"):
@@ -71,17 +76,20 @@ func _on_upgrade_selected(upgrade: Resource) -> void:
 	if upgrade.get("id"):
 		EventBus.upgrade_applied.emit(String(upgrade.id))
 	_pending_levels -= 1
-	_waiting_for_choice = false
+	EventBus.upgrades_pending_changed.emit(_pending_levels)
 
-	if _ui and _ui.has_method("hide_level_up_options"):
-		_ui.hide_level_up_options()
-
-	if not _can_resume_run():
+	if _pending_levels > 0:
+		# Keep the overlay up (still paused) to spend the next banked choice.
+		if _ui.has_method("show_level_up_options"):
+			_ui.show_level_up_options(_pick_choices())
 		return
 
-	get_tree().paused = false
-	if _pending_levels > 0:
-		_show_next_choice()
+	_menu_open = false
+	if _ui.has_method("hide_level_up_options"):
+		_ui.hide_level_up_options()
+
+	if _can_resume_run():
+		get_tree().paused = false
 
 
 func _pick_choices() -> Array[Resource]:

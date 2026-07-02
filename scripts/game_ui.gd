@@ -4,31 +4,21 @@ signal upgrade_selected(upgrade: Resource)
 signal shop_purchase_requested(upgrade: Resource)
 signal shop_reroll_requested
 signal shop_continue_requested
+signal shop_open_requested
+signal upgrades_open_requested
 signal character_selected(definition: CharacterDefinition)
 
 const COLOR_TEXT := Color(0.12, 0.08, 0.045, 1.0)
-const COLOR_MUTED := Color(0.38, 0.28, 0.18, 1.0)
-const COLOR_GREASE := Color(0.98, 0.72, 0.13, 1.0)
-const COLOR_PARCHMENT := Color(0.78, 0.67, 0.46, 0.98)
-const COLOR_PARCHMENT_DARK := Color(0.48, 0.37, 0.23, 1.0)
-const COLOR_METAL := Color(0.16, 0.15, 0.13, 0.94)
-const COLOR_BAR_BG := Color(0.18, 0.12, 0.07, 1.0)
 const COLOR_BAR_FILL := Color(0.78, 0.12, 0.08, 1.0)
 const COLOR_BAR_FILL_LOW := Color(0.96, 0.36, 0.12, 1.0)
 const COLOR_XP_FILL := Color(0.74, 0.13, 0.07, 1.0)
 const COLOR_XP_FLASH := Color(1.0, 0.44, 0.18, 1.0)
-const COLOR_LEVEL_UP_ACCENT := Color(0.37, 0.66, 0.21, 1.0)
-const COLOR_CHARACTER_ACCENT := Color(0.86, 0.61, 0.18, 1.0)
-const COLOR_SETTINGS_ACCENT := Color(0.28, 0.49, 0.46, 1.0)
-const DISPLAY_FONT := preload("res://assets/fonts/bangers.ttf")
-const BODY_FONT := preload("res://assets/fonts/jersey15.ttf")
-const STAT_BAR_SCRIPT := preload("res://scripts/ui/stat_bar.gd")
 const ShopCard = preload("res://scripts/ui/shop_card.gd")
 const HudThemeScript = preload("res://scripts/ui/hud_theme.gd")
 const WeaponBeltScript = preload("res://scripts/ui/weapon_belt.gd")
+const HudActionBarScript = preload("res://scripts/ui/hud_action_bar.gd")
 const ReferenceHudLayoutScript = preload("res://scripts/ui/reference_hud_layout.gd")
 const CompactNumberFormat = preload("res://scripts/compact_number_format.gd")
-const SHOP_HINT_TEXT := "W/S between rows  |  A/D between cards  |  1-4 buy  |  Enter continue"
 
 const SHOP_HINT_TEXT_FIXED := "W/S rows  |  A/D cards  |  1-5 buy  |  R reroll  |  Enter continue"
 const SHOP_TRANSITION_DURATION := 0.5
@@ -47,6 +37,7 @@ var _character_buttons: Array[Button] = []
 var _character_choices: Array[CharacterDefinition] = []
 var _settings_paused_tree := false
 var _weapon_belt: PanelContainer
+var _action_bar: HudActionBar
 
 @onready var hp_bar: ProgressBar = $HudPanel/MarginContainer/VBox/HPRow/HPBar
 @onready var hp_label: Label = $HudPanel/MarginContainer/VBox/HPRow/HPLabel
@@ -292,6 +283,11 @@ func _ready() -> void:
 	_shop_cards = [shop_card_1, shop_card_2, shop_card_3, shop_card_4, shop_card_5]
 	_weapon_belt = WeaponBeltScript.new()
 	add_child(_weapon_belt)
+	_action_bar = HudActionBarScript.new()
+	add_child(_action_bar)
+	_action_bar.build(self, overlay.get_index())
+	_action_bar.shop_pressed.connect(_request_shop_open)
+	_action_bar.upgrades_pressed.connect(_request_upgrades_open)
 	_apply_reference_layout()
 	_apply_hud_theme()
 	overlay.visible = false
@@ -314,7 +310,6 @@ func _ready() -> void:
 		_upgrade_buttons[index].pressed.connect(_on_upgrade_button_pressed.bind(index))
 	for index in _shop_cards.size():
 		_shop_cards[index].pressed.connect(_on_shop_button_pressed.bind(index))
-
 	EventBus.player_health_changed.connect(_on_player_health_changed)
 	EventBus.level_time_changed.connect(_on_level_time_changed)
 	EventBus.enemy_killed.connect(_on_enemy_killed)
@@ -337,6 +332,18 @@ func _apply_reference_layout() -> void:
 		shop_grid,
 		_shop_cards
 	)
+	if _action_bar:
+		_action_bar.layout()
+
+
+func _request_shop_open() -> void:
+	if not _is_modal_overlay_open():
+		shop_open_requested.emit()
+
+
+func _request_upgrades_open() -> void:
+	if not _is_modal_overlay_open():
+		upgrades_open_requested.emit()
 
 
 func _apply_hud_theme() -> void:
@@ -430,6 +437,12 @@ func _handle_overlay_keyboard(event: InputEventKey) -> bool:
 		handled = _handle_settings_keyboard(event)
 	elif _is_settings_toggle(event) and not _is_modal_overlay_open():
 		_show_settings()
+		handled = true
+	elif not _is_modal_overlay_open() and event.keycode == KEY_E:
+		_request_shop_open()
+		handled = true
+	elif not _is_modal_overlay_open() and event.keycode == KEY_Q:
+		_request_upgrades_open()
 		handled = true
 	elif level_up_overlay.visible:
 		handled = _handle_level_up_keyboard(event)

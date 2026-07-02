@@ -18,20 +18,6 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 
 ## Active roadmap
 
-### Phase 8B — On-demand shop and upgrades
-
-**Goal:** Shop and level-up choices open only when the player asks — no automatic menus.
-
-| Task | Details |
-|---|---|
-| Shop on demand | Remove end-of-wave shop open. Player opens shop anytime with **`E`** or the **Shop** button (bottom-right HUD) |
-| Upgrades on demand | Every level-up still grants an upgrade choice, but **do not** auto-open the menu. Bank pending picks; open with **`Q`** or the **Upgrades** button (bottom-left HUD) |
-| Pause / input | Match shop and upgrade overlays: mouse + keyboard nav, game paused while open |
-| HUD buttons | Add persistent bottom-left (Upgrades) and bottom-right (Shop) controls with visible pending counts if useful |
-| Tests | Level-up banks without pause; E/Q and buttons open correct overlays; no wave-end shop trigger |
-
----
-
 ### Phase 8C — Weapon balance and 6-slot loadout
 
 **Goal:** Equal base weapon DPS, six weapon slots, and full buy/sell/upgrade shop economy.
@@ -100,3 +86,5 @@ Every iteration should end with:
 **Test suite repair:** 270 tests green; fixed stale references, GdUnit/Godot 4.7 coroutine issues, orphan cleanup.
 
 **Phase 8A — Remove waves; time-based levels:** `LevelDefinition`/`LevelManager` replace `WaveDefinition`/`WaveManager`; single 10-minute survival level (`level_01.tres`) with continuous spawn-rate/cap ramps and per-minute enemy HP/damage scaling; survive → victory screen, death → game over; shop no longer auto-opens (on-demand hook `ShopManager.open_shop()` ready for 8B); shop prices scale per elapsed minute; 282 tests green.
+
+**Phase 8B — On-demand shop and upgrades:** level-ups bank a pending choice (`EventBus.upgrades_pending_changed`) instead of auto-opening; player opens the shop with **`E`** / bottom-right Shop button and banked upgrades with **`Q`** / bottom-left Upgrades button (shows pending count, disabled at 0); both overlays pause and support mouse + keyboard; HUD action bar (`hud_action_bar.gd` + `hud_action_button.gd`) sits beneath modal overlays; 291 tests green.

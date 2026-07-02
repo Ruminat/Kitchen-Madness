@@ -19,45 +19,101 @@ class MockUpgradeUi:
 	extends Node
 
 	signal upgrade_selected(upgrade: Resource)
+	signal upgrades_open_requested
 
 	var shown := false
 	var hidden := false
+	var show_count := 0
 	var choices: Array[Resource] = []
 
 	func show_level_up_options(upgrades: Array[Resource]) -> void:
 		shown = true
+		show_count += 1
 		choices = upgrades
 
 	func hide_level_up_options() -> void:
 		hidden = true
 
 
-func before() -> void:
+func before_test() -> void:
 	get_tree().paused = false
 
 
-func after() -> void:
+func after_test() -> void:
 	get_tree().paused = false
 
 
-func test_level_up_pauses_and_shows_three_upgrade_choices() -> void:
-	var upgrade_a := _create_damage_upgrade(0.1)
-	var upgrade_b := _create_damage_upgrade(0.2)
-	var upgrade_c := _create_damage_upgrade(0.3)
-	var upgrade_d := _create_damage_upgrade(0.4)
-	var manager := _create_manager([upgrade_a, upgrade_b, upgrade_c, upgrade_d])
-	var player := _create_player()
+func test_level_up_banks_choice_without_pausing_or_showing() -> void:
+	var manager := _create_manager([_create_damage_upgrade(0.1)])
 	var ui := _create_ui()
-	manager.configure(player, ui, func() -> bool: return true)
+	manager.configure(_create_player(), ui, func() -> bool: return true)
 
 	EventBus.level_up.emit(2)
+	EventBus.level_up.emit(3)
+
+	assert_bool(get_tree().paused).is_false()
+	assert_bool(ui.shown).is_false()
+	assert_int(manager.pending_count()).is_equal(2)
+	assert_bool(manager.has_pending()).is_true()
+
+
+func test_level_up_emits_pending_count() -> void:
+	var manager := _create_manager([_create_damage_upgrade(0.1)])
+	manager.configure(_create_player(), _create_ui(), func() -> bool: return true)
+
+	var counts: Array[int] = []
+	var handler := func(count: int) -> void: counts.append(count)
+	EventBus.upgrades_pending_changed.connect(handler)
+	EventBus.level_up.emit(2)
+	EventBus.level_up.emit(3)
+	EventBus.upgrades_pending_changed.disconnect(handler)
+
+	assert_array(counts).is_equal([1, 2])
+
+
+func test_open_upgrades_pauses_and_shows_three_choices() -> void:
+	var upgrades: Array[Resource] = [
+		_create_damage_upgrade(0.1),
+		_create_damage_upgrade(0.2),
+		_create_damage_upgrade(0.3),
+		_create_damage_upgrade(0.4),
+	]
+	var manager := _create_manager(upgrades)
+	var ui := _create_ui()
+	manager.configure(_create_player(), ui, func() -> bool: return true)
+
+	EventBus.level_up.emit(2)
+	manager.open_upgrades()
 
 	assert_bool(get_tree().paused).is_true()
 	assert_bool(ui.shown).is_true()
 	assert_int(ui.choices.size()).is_equal(3)
 
 
-func test_selecting_upgrade_applies_effect_hides_ui_and_resumes() -> void:
+func test_open_upgrades_responds_to_ui_signal() -> void:
+	var manager := _create_manager([_create_damage_upgrade(0.1)])
+	var ui := _create_ui()
+	manager.configure(_create_player(), ui, func() -> bool: return true)
+
+	EventBus.level_up.emit(2)
+	ui.upgrades_open_requested.emit()
+
+	assert_bool(ui.shown).is_true()
+	assert_bool(get_tree().paused).is_true()
+
+
+func test_open_upgrades_does_nothing_without_pending() -> void:
+	var manager := _create_manager([_create_damage_upgrade(0.1)])
+	var ui := _create_ui()
+	manager.configure(_create_player(), ui, func() -> bool: return true)
+
+	manager.open_upgrades()
+
+	assert_bool(ui.shown).is_false()
+	assert_bool(get_tree().paused).is_false()
+
+
+func test_selecting_last_pending_upgrade_applies_hides_and_resumes() -> void:
 	var upgrade := _create_damage_upgrade(0.1)
 	var manager := _create_manager([upgrade])
 	var player := _create_player()
@@ -65,21 +121,39 @@ func test_selecting_upgrade_applies_effect_hides_ui_and_resumes() -> void:
 	manager.configure(player, ui, func() -> bool: return true)
 
 	EventBus.level_up.emit(2)
+	manager.open_upgrades()
 	ui.upgrade_selected.emit(upgrade)
 
 	assert_float(player.damage_percent).is_equal(0.1)
 	assert_bool(ui.hidden).is_true()
 	assert_bool(get_tree().paused).is_false()
+	assert_int(manager.pending_count()).is_equal(0)
 
 
-func test_level_up_does_not_show_choices_when_run_is_inactive() -> void:
+func test_selecting_with_remaining_pending_keeps_menu_open() -> void:
 	var upgrade := _create_damage_upgrade(0.1)
 	var manager := _create_manager([upgrade])
-	var player := _create_player()
 	var ui := _create_ui()
-	manager.configure(player, ui, func() -> bool: return false)
+	manager.configure(_create_player(), ui, func() -> bool: return true)
 
 	EventBus.level_up.emit(2)
+	EventBus.level_up.emit(3)
+	manager.open_upgrades()
+	ui.upgrade_selected.emit(upgrade)
+
+	assert_bool(ui.hidden).is_false()
+	assert_bool(get_tree().paused).is_true()
+	assert_int(manager.pending_count()).is_equal(1)
+	assert_int(ui.show_count).is_equal(2)
+
+
+func test_open_upgrades_does_not_show_when_run_is_inactive() -> void:
+	var manager := _create_manager([_create_damage_upgrade(0.1)])
+	var ui := _create_ui()
+	manager.configure(_create_player(), ui, func() -> bool: return false)
+
+	EventBus.level_up.emit(2)
+	manager.open_upgrades()
 
 	assert_bool(ui.shown).is_false()
 	assert_bool(get_tree().paused).is_false()
@@ -96,6 +170,7 @@ func test_lucky_player_expands_upgrade_candidate_pool() -> void:
 	manager.configure(player, ui, func() -> bool: return true)
 
 	EventBus.level_up.emit(2)
+	manager.open_upgrades()
 
 	assert_int(ui.choices.size()).is_equal(3)
 	var amounts: Array[float] = []
@@ -107,7 +182,6 @@ func test_lucky_player_expands_upgrade_candidate_pool() -> void:
 func _create_manager(upgrades: Array[Resource]) -> LevelUpManager:
 	var manager: LevelUpManager = auto_free(LevelUpManager.new()) as LevelUpManager
 	manager.upgrades = upgrades
-	manager.delay_seconds = 0.0
 	add_child(manager)
 	return manager
 
