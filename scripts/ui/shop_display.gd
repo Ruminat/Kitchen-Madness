@@ -12,7 +12,16 @@ const VISUALS: Dictionary = {
 	{"emoji": "⚡", "accent": Color(0.86, 0.62, 0.18), "label": "SPEED"},
 	WeaponShopOffer.OfferType.WEAPON_PELLET:
 	{"emoji": "🥄", "accent": Color(0.22, 0.45, 0.68), "label": "EXTRA"},
+	WeaponShopOffer.OfferType.SELL_WEAPON:
+	{"emoji": "💰", "accent": Color(0.55, 0.42, 0.62), "label": "SELL"},
 }
+
+
+static func is_sell_offer(offer: Resource) -> bool:
+	return (
+		offer is WeaponShopOffer
+		and (offer as WeaponShopOffer).offer_type == WeaponShopOffer.OfferType.SELL_WEAPON
+	)
 
 
 static func get_visual(offer: WeaponShopOffer) -> Dictionary:

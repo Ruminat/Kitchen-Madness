@@ -46,7 +46,9 @@ func configure(offer: Resource, slot_index: int, player_gold: int, is_sold: bool
 		return
 
 	var cost := int(offer.get("gold_cost"))
-	var can_afford := player_gold >= cost
+	var is_sell := ShopDisplay.is_sell_offer(offer)
+	# Sells pay the player, so they are never gated by current Grease.
+	var can_afford := is_sell or player_gold >= cost
 	disabled = is_sold or not can_afford
 	if is_sold:
 		modulate = Color(0.72, 0.7, 0.65, 1.0)
@@ -76,7 +78,12 @@ func configure(offer: Resource, slot_index: int, player_gold: int, is_sold: bool
 		ShopDisplay.apply_card_style(self, offer)
 
 	_hotkey_label.text = str(slot_index + 1)
-	_price_label.text = "SOLD" if is_sold else ShopDisplay.format_price(cost, can_afford)
+	if is_sold:
+		_price_label.text = "SOLD"
+	elif is_sell:
+		_price_label.text = "+%d" % cost
+	else:
+		_price_label.text = ShopDisplay.format_price(cost, can_afford)
 	_price_label.add_theme_color_override(
 		"font_color", COLOR_GREASE if can_afford and not is_sold else COLOR_GREASE_DIM
 	)

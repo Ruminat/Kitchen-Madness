@@ -9,6 +9,40 @@ const LEVEL_01_DEF := preload("res://resources/levels/level_01.tres")
 const CHASER_DEF := preload("res://resources/enemies/chaser.tres")
 
 
+func test_all_base_weapons_share_equal_dps() -> void:
+	var roster := WeaponRoster.load_roster()
+	assert_int(roster.size()).is_equal(8)
+	for weapon in roster:
+		var dps := BalanceCalculator.single_target_dps(weapon)
+		var low := BalanceCalculator.BASE_DPS_TARGET * (1.0 - BalanceCalculator.BASE_DPS_TOLERANCE)
+		var high := BalanceCalculator.BASE_DPS_TARGET * (1.0 + BalanceCalculator.BASE_DPS_TOLERANCE)
+		assert_float(dps).is_greater_equal(low)
+		assert_float(dps).is_less_equal(high)
+		assert_bool(BalanceCalculator.is_base_dps_balanced(weapon)).is_true()
+
+
+func test_single_target_dps_dispatches_by_weapon_type() -> void:
+	var melee := WeaponDefinition.new()
+	melee.weapon_type = WeaponDefinition.WeaponType.MELEE
+	melee.damage = 10
+	melee.fire_rate = 0.5
+	assert_float(BalanceCalculator.single_target_dps(melee)).is_equal_approx(20.0, 0.01)
+
+	var boomerang := WeaponDefinition.new()
+	boomerang.weapon_type = WeaponDefinition.WeaponType.BOOMERANG
+	boomerang.damage = 10
+	boomerang.fire_rate = 1.0
+	assert_float(BalanceCalculator.single_target_dps(boomerang)).is_equal_approx(20.0, 0.01)
+
+	var turret := WeaponDefinition.new()
+	turret.weapon_type = WeaponDefinition.WeaponType.TURRET
+	turret.damage = 10
+	turret.fire_rate = 2.5
+	turret.turret_duration = 5.0
+	turret.turret_fire_rate = 0.5
+	assert_float(BalanceCalculator.single_target_dps(turret)).is_equal_approx(40.0, 0.01)
+
+
 func test_calculate_weapon_dps_returns_positive_value() -> void:
 	var dps := BalanceCalculator.calculate_weapon_dps(PEPPER_DEF)
 	assert_float(dps).is_greater(0.0)

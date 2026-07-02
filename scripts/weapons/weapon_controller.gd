@@ -120,6 +120,22 @@ func has_weapon(weapon_id: String) -> bool:
 	return weapon_id in get_owned_weapon_ids()
 
 
+func weapon_count() -> int:
+	return _weapons.size()
+
+
+func remove_weapon(weapon_id: String) -> bool:
+	for index in _weapons.size():
+		var weapon := _weapons[index]
+		if weapon.definition and weapon.definition.id == weapon_id:
+			if is_instance_valid(weapon):
+				remove_child(weapon)
+				weapon.queue_free()
+			_weapons.remove_at(index)
+			return true
+	return false
+
+
 func can_add_weapon() -> bool:
 	return _weapons.size() < MAX_WEAPONS
 

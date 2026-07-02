@@ -1,7 +1,7 @@
 class_name WeaponShopOffer
 extends Resource
 
-enum OfferType { ADD_WEAPON, WEAPON_DAMAGE, WEAPON_ATTACK_SPEED, WEAPON_PELLET }
+enum OfferType { ADD_WEAPON, WEAPON_DAMAGE, WEAPON_ATTACK_SPEED, WEAPON_PELLET, SELL_WEAPON }
 
 @export var id: String = ""
 @export var title: String = ""

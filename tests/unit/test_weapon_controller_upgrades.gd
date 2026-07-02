@@ -40,6 +40,35 @@ func test_add_weapon_respects_max_weapons() -> void:
 	assert_int(controller.get_owned_weapon_ids().size()).is_equal(WeaponController.MAX_WEAPONS)
 
 
+func test_max_weapons_is_six() -> void:
+	assert_int(WeaponController.MAX_WEAPONS).is_equal(6)
+
+
+func test_weapon_count_tracks_loadout_size() -> void:
+	var controller := await _create_controller()
+	assert_int(controller.weapon_count()).is_equal(1)
+	controller.add_weapon(KNIFE_DEF)
+	assert_int(controller.weapon_count()).is_equal(2)
+
+
+func test_remove_weapon_drops_target_and_frees_slot() -> void:
+	var controller := await _create_controller()
+	controller.add_weapon(KNIFE_DEF)
+
+	var removed := controller.remove_weapon("kitchen_knife")
+
+	assert_bool(removed).is_true()
+	assert_bool(controller.has_weapon("kitchen_knife")).is_false()
+	assert_bool(controller.has_weapon("pepper_grinder_gun")).is_true()
+	assert_int(controller.weapon_count()).is_equal(1)
+
+
+func test_remove_weapon_returns_false_for_unowned() -> void:
+	var controller := await _create_controller()
+	assert_bool(controller.remove_weapon("frying_pan")).is_false()
+	assert_int(controller.weapon_count()).is_equal(1)
+
+
 func test_upgrade_weapon_damage_only_affects_target_weapon() -> void:
 	var controller := await _create_controller()
 	controller.add_weapon(KNIFE_DEF)

@@ -8,6 +8,41 @@ const DEFAULT_HIT_RATE := 0.7
 const MULTI_TARGET_FACTOR := 1.5
 const BURST_FACTOR := 2.0
 
+## Target single-target DPS every tier-1 weapon should hit (Phase 8C parity).
+const BASE_DPS_TARGET := 36.0
+const BASE_DPS_TOLERANCE := 0.12
+const BOOMERANG_HITS_PER_THROW := 2.0
+
+
+static func single_target_dps(weapon: WeaponDefinition) -> float:
+	## Canonical, type-aware sustained DPS against one enemy. Used to keep every
+	## tier-1 weapon at parity regardless of delivery mechanic.
+	if weapon == null:
+		return 0.0
+
+	var fire_rate := maxf(weapon.fire_rate, 0.01)
+	var damage := float(weapon.damage)
+	var pellets := float(maxi(weapon.pellet_count, 1))
+
+	match weapon.weapon_type:
+		WeaponDefinition.WeaponType.ORBIT:
+			return damage * pellets * maxf(weapon.orbit_speed, 0.01) / TAU
+		WeaponDefinition.WeaponType.MELEE:
+			return damage / fire_rate
+		WeaponDefinition.WeaponType.BOOMERANG:
+			return BOOMERANG_HITS_PER_THROW * damage / fire_rate
+		WeaponDefinition.WeaponType.TURRET:
+			var shots := weapon.turret_duration / maxf(weapon.turret_fire_rate, 0.01)
+			return damage * shots / fire_rate
+		_:
+			# PROJECTILE and BURST both deliver every pellet per shot.
+			return damage * pellets / fire_rate
+
+
+static func is_base_dps_balanced(weapon: WeaponDefinition) -> bool:
+	var dps := single_target_dps(weapon)
+	return absf(dps - BASE_DPS_TARGET) <= BASE_DPS_TARGET * BASE_DPS_TOLERANCE
+
 
 static func calculate_weapon_dps(
 	weapon: WeaponDefinition, hit_rate: float = DEFAULT_HIT_RATE

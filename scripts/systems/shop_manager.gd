@@ -23,6 +23,7 @@ const MAX_PELLET_COUNT := 8
 const REROLL_BASE_COST := 6
 const REROLL_COST_STEP := 4
 const COST_GROWTH_PER_MINUTE := 0.15
+const SELL_REFUND_RATE := 0.5
 
 @export var offer_count := 5
 
@@ -35,6 +36,7 @@ var _elapsed_level_seconds := 0.0
 var _current_offers: Array[Resource] = []
 var _sold_slots: Array[bool] = []
 var _reroll_count := 0
+var _weapon_purchase_price: Dictionary = {}
 
 
 func _ready() -> void:
@@ -57,7 +59,17 @@ func configure(
 		_ui.shop_continue_requested.connect(_on_shop_continue)
 	if _ui and _ui.has_signal("shop_open_requested"):
 		_ui.shop_open_requested.connect(open_shop)
+	_seed_starting_weapon_prices()
 	_sync_weapon_loadout_ui()
+
+
+func _seed_starting_weapon_prices() -> void:
+	var controller := _get_weapon_controller()
+	if controller == null:
+		return
+	for weapon_id in controller.get_owned_weapon_ids():
+		if not _weapon_purchase_price.has(weapon_id):
+			_weapon_purchase_price[weapon_id] = ADD_WEAPON_BASE_COST
 
 
 func _on_level_time_changed(elapsed_seconds: float, _seconds_remaining: float) -> void:
@@ -97,16 +109,48 @@ func _on_shop_purchase(offer: Resource) -> void:
 		return
 	_ensure_sold_slots()
 
+	if int(offer.get("offer_type")) == WeaponShopOffer.OfferType.SELL_WEAPON:
+		_process_sell(offer, slot_index)
+		return
+
 	var cost := int(offer.get("gold_cost"))
 	if not _gold_system.spend_gold(cost):
 		return
 
 	if offer.has_method("apply") and offer.apply(_player):
 		_sold_slots[slot_index] = true
+		_record_purchase_price(offer, cost)
 		_sync_weapon_loadout_ui()
 	elif offer.has_method("apply"):
 		_gold_system.add_gold(cost)
 
+	_refresh_ui()
+
+
+func _record_purchase_price(offer: Resource, cost: int) -> void:
+	if int(offer.get("offer_type")) != WeaponShopOffer.OfferType.ADD_WEAPON:
+		return
+	var weapon: WeaponDefinition = offer.get("weapon")
+	if weapon:
+		_weapon_purchase_price[weapon.id] = cost
+
+
+func _process_sell(offer: Resource, slot_index: int) -> void:
+	var controller := _get_weapon_controller()
+	if controller == null or controller.weapon_count() <= 1:
+		# Never sell the last remaining weapon.
+		_refresh_ui()
+		return
+
+	var weapon_id := String(offer.get("weapon_id"))
+	if not controller.remove_weapon(weapon_id):
+		_refresh_ui()
+		return
+
+	_gold_system.add_gold(int(offer.get("gold_cost")))
+	_weapon_purchase_price.erase(weapon_id)
+	_sold_slots[slot_index] = true
+	_sync_weapon_loadout_ui()
 	_refresh_ui()
 
 
@@ -215,6 +259,14 @@ func _build_offer_candidates() -> Array[WeaponShopOffer]:
 		):
 			candidates.append(_create_pellet_offer(weapon_id, weapon_name))
 
+	# Offer sells only when there is more than one weapon to fall back on.
+	if owned_ids.size() > 1:
+		for weapon_id in owned_ids:
+			var sell_name := (
+				controller.get_weapon_display_name(weapon_id) if controller else weapon_id
+			)
+			candidates.append(_create_sell_offer(weapon_id, sell_name))
+
 	return candidates
 
 
@@ -273,6 +325,23 @@ func _create_pellet_offer(weapon_id: String, weapon_name: String) -> WeaponShopO
 	offer.description = "+%d projectile for this weapon." % PELLET_UPGRADE_AMOUNT
 	offer.gold_cost = _scaled_cost(PELLET_UPGRADE_COST)
 	return offer
+
+
+func _create_sell_offer(weapon_id: String, weapon_name: String) -> WeaponShopOffer:
+	var offer := WeaponShopOffer.new()
+	offer.id = "sell_%s" % weapon_id
+	offer.offer_type = WeaponShopOffer.OfferType.SELL_WEAPON
+	offer.weapon_id = weapon_id
+	offer.title = "Sell %s" % weapon_name
+	var price := _sell_price(weapon_id)
+	offer.gold_cost = price
+	offer.description = "Sell back for %d Grease." % price
+	return offer
+
+
+func _sell_price(weapon_id: String) -> int:
+	var paid := int(_weapon_purchase_price.get(weapon_id, ADD_WEAPON_BASE_COST))
+	return maxi(roundi(float(paid) * SELL_REFUND_RATE), 1)
 
 
 func _weapon_label(weapon: WeaponDefinition) -> String:

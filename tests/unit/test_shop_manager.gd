@@ -112,6 +112,88 @@ func test_scaled_cost_grows_per_elapsed_minute() -> void:
 	assert_int(ShopManager.scaled_cost_for_time(8, 180.0)).is_equal(12)
 
 
+func test_starting_weapon_seeded_with_base_price() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	manager.configure(player, _create_ui(), _create_gold_system())
+
+	var owned := _weapon_controller(player).get_owned_weapon_ids()
+	assert_int(owned.size()).is_equal(1)
+	assert_int(manager._sell_price(owned[0])).is_equal(6)
+
+
+func test_sell_price_is_half_recorded_purchase_price() -> void:
+	var manager := _create_manager()
+	manager._weapon_purchase_price["kitchen_knife"] = 20
+	assert_int(manager._sell_price("kitchen_knife")).is_equal(10)
+
+
+func test_no_sell_offers_with_single_weapon() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	manager.configure(player, _create_ui(), _create_gold_system())
+	manager.offer_count = 30
+
+	for offer in manager.generate_offers():
+		assert_bool(ShopDisplay.is_sell_offer(offer)).is_false()
+
+
+func test_sell_offers_appear_with_multiple_weapons() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	manager.configure(player, _create_ui(), _create_gold_system())
+	_weapon_controller(player).add_weapon(KNIFE_DEF)
+	manager.offer_count = 30
+
+	var sell_ids: Array[String] = []
+	for offer in manager.generate_offers():
+		if ShopDisplay.is_sell_offer(offer):
+			sell_ids.append((offer as WeaponShopOffer).weapon_id)
+	assert_bool(sell_ids.has("kitchen_knife")).is_true()
+
+
+func test_selling_weapon_refunds_grease_and_removes_it() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	var ui := _create_ui()
+	var gold_system := _create_gold_system()
+	gold_system.add_gold(30)
+	manager.configure(player, ui, gold_system, func() -> void: pass)
+	_weapon_controller(player).add_weapon(KNIFE_DEF)
+	manager._weapon_purchase_price["kitchen_knife"] = 12
+
+	var sell_offer := _create_sell_offer("kitchen_knife", 6)
+	manager._current_offers = [sell_offer]
+	manager._reset_sold_slots()
+	manager._shop_open = true
+
+	ui.shop_purchase_requested.emit(sell_offer)
+
+	assert_int(gold_system.gold).is_equal(36)
+	assert_bool(_weapon_controller(player).has_weapon("kitchen_knife")).is_false()
+	assert_bool(ui.last_sold_slots[0]).is_true()
+
+
+func test_cannot_sell_last_weapon() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	var ui := _create_ui()
+	var gold_system := _create_gold_system()
+	manager.configure(player, ui, gold_system, func() -> void: pass)
+
+	var last_id := _weapon_controller(player).get_owned_weapon_ids()[0]
+	var sell_offer := _create_sell_offer(last_id, 6)
+	manager._current_offers = [sell_offer]
+	manager._reset_sold_slots()
+	manager._shop_open = true
+
+	ui.shop_purchase_requested.emit(sell_offer)
+
+	assert_int(gold_system.gold).is_equal(0)
+	assert_bool(_weapon_controller(player).has_weapon(last_id)).is_true()
+	assert_int(_weapon_controller(player).weapon_count()).is_equal(1)
+
+
 func test_generated_offers_never_include_stat_upgrades() -> void:
 	var manager := _create_manager()
 	var player := await _create_player()
@@ -326,6 +408,15 @@ func _create_add_weapon_offer(weapon: WeaponDefinition, cost: int) -> WeaponShop
 	offer.title = "Add %s" % weapon.display_name
 	offer.description = weapon.description
 	offer.gold_cost = cost
+	return offer
+
+
+func _create_sell_offer(weapon_id: String, refund: int) -> WeaponShopOffer:
+	var offer := WeaponShopOffer.new()
+	offer.offer_type = WeaponShopOffer.OfferType.SELL_WEAPON
+	offer.weapon_id = weapon_id
+	offer.title = "Sell %s" % weapon_id
+	offer.gold_cost = refund
 	return offer
 
 

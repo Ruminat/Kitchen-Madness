@@ -4,13 +4,13 @@
 
 ## Current status
 
-**Latest: Phase 8B** — on-demand shop (`E` / Shop button) and banked level-up upgrades (`Q` / Upgrades button); no auto-opening menus.
+**Latest: Phase 8C** — all tier-1 weapons at equal DPS (~36), 6 weapon slots, shop buy/sell/upgrade economy.
 
-**Loop:** character select → survive the 10-minute level while pressure ramps → level-ups bank upgrade picks (open on demand) → shop weapons anytime. Survive → win, die → lose. SFX + run stats to `ignored/stats/`.
+**Loop:** character select → survive the 10-minute level while pressure ramps → level-ups bank upgrade picks (open on demand) → shop to buy/upgrade/sell weapons anytime. Survive → win, die → lose. SFX + run stats to `ignored/stats/`.
 
-**Content:** 9 characters · 8 weapons (2 melee) · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers · idle squash bob · settings overlay.
+**Content:** 9 characters · 8 weapons (2 melee), DPS-balanced tier-1 · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers · idle squash bob · settings overlay.
 
-**Next: Phase 8C** — equal base-tier weapon DPS, 6 weapon slots, buy/sell weapon upgrades.
+**Next: open** — roadmap 8A–8C done; pick from the optimizations backlog or add a new phase in [plans.md](plans.md).
 
 ---
 
@@ -37,7 +37,8 @@
 | **CollisionLayers** | Player mask = wall+enemy; enemy mask = wall+enemy+player; `MOTION_MODE_FLOATING` |
 | **BaseEnemy** | Contact slow · knockback · collision radius from `EnemyDefinition` · time-scaled HP/damage |
 | **MeleeWeapon** | Arc hits · crit · knockback via `.tres` fields |
-| **GoldSystem / ShopManager** | `open_shop()` is on-demand only (connects to `ui.shop_open_requested`); prices +15%/elapsed minute via `scaled_cost_for_time()` |
+| **GoldSystem / ShopManager** | `open_shop()` on-demand (`ui.shop_open_requested`); prices +15%/elapsed minute via `scaled_cost_for_time()`; `SELL_WEAPON` offers refund 50% of tracked purchase price (`_weapon_purchase_price`), blocked at last gun |
+| **Weapon DPS parity** | `BalanceCalculator.single_target_dps(weapon)` is type-aware (projectile/burst = dmg·pellets/rate, orbit = dmg·pellets·orbit_speed/τ, melee = dmg/rate, boomerang = 2·dmg/rate, turret = dmg·(dur/tfr)/rate); all tier-1 weapons ≈ `BASE_DPS_TARGET` (36) ±12%. Each `.tres` must set correct `weapon_type` |
 | **LevelUpManager** | Level-ups bank pending picks (`EventBus.upgrades_pending_changed`); `open_upgrades()` (via `ui.upgrades_open_requested`) shows 1-of-3 stat upgrades; chains remaining pending before unpausing |
 | **HudActionBar** | `scripts/ui/hud_action_bar.gd` + `hud_action_button.gd` — bottom-corner Upgrades/Shop buttons; built by `game_ui` beneath the modal overlays; Upgrades badge = pending count |
 | **FloatingTextManager** | UI `Control` on `CanvasLayer`; world anchor + per-frame canvas sync |
@@ -73,7 +74,7 @@ scripts/enemies/     base_enemy.gd, moth_enemy.gd
 scripts/data/        level_definition.gd, collision_layers.gd
 resources/levels/    level_01.tres (10 min, full enemy roster, 1×→6× spawn ramp)
 resources/enemies/   chaser, sprinter, tank, ant, moth
-tests/               unit + integration (GdUnit4) — 291 tests
+tests/               unit + integration (GdUnit4) — 303 tests
 tools/codecheck.sh   (codecheck.ps1 on Windows)
 ```
 

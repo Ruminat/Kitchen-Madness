@@ -18,18 +18,7 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 
 ## Active roadmap
 
-### Phase 8C — Weapon balance and 6-slot loadout
-
-**Goal:** Equal base weapon DPS, six weapon slots, and full buy/sell/upgrade shop economy.
-
-| Task | Details |
-|---|---|
-| Base DPS parity | Tune all weapons so **basic (tier-1) versions deal equal DPS** — adjust damage, fire rate, projectile count, and melee cadence in `.tres` |
-| Six weapon slots | Expand loadout from current cap to **6 simultaneous weapons** |
-| Shop upgrades | Player can buy **weapon tier upgrades** for owned guns in the shop (existing or extended offer types) |
-| Sell weapons | Player can sell owned weapons for **50% of purchase price** |
-| Last-gun rule | **Cannot sell** the last weapon remaining in the loadout |
-| Tests | DPS parity checks via `BalanceCalculator`; sell price; sell blocked at 1 weapon; 6-slot equip limits |
+_Roadmap 8A–8C complete. Add the next phase here._
 
 ---
 
@@ -88,3 +77,5 @@ Every iteration should end with:
 **Phase 8A — Remove waves; time-based levels:** `LevelDefinition`/`LevelManager` replace `WaveDefinition`/`WaveManager`; single 10-minute survival level (`level_01.tres`) with continuous spawn-rate/cap ramps and per-minute enemy HP/damage scaling; survive → victory screen, death → game over; shop no longer auto-opens (on-demand hook `ShopManager.open_shop()` ready for 8B); shop prices scale per elapsed minute; 282 tests green.
 
 **Phase 8B — On-demand shop and upgrades:** level-ups bank a pending choice (`EventBus.upgrades_pending_changed`) instead of auto-opening; player opens the shop with **`E`** / bottom-right Shop button and banked upgrades with **`Q`** / bottom-left Upgrades button (shows pending count, disabled at 0); both overlays pause and support mouse + keyboard; HUD action bar (`hud_action_bar.gd` + `hud_action_button.gd`) sits beneath modal overlays; 291 tests green.
+
+**Phase 8C — Weapon balance and 6-slot loadout:** all 8 tier-1 weapons tuned to equal single-target DPS (~36, within ±12%) verified by `BalanceCalculator.single_target_dps()` (type-aware: projectile/burst/orbit/melee/boomerang/turret); correct `weapon_type` set on every `.tres`; 6-slot cap confirmed (`WeaponController.MAX_WEAPONS = 6`); shop gains `SELL_WEAPON` offers refunding 50% of purchase price (`ShopManager` tracks per-weapon paid price, starting weapon seeded at base cost), blocked when only one weapon remains; sell cards always affordable with a `+N` refund badge; 303 tests green.
