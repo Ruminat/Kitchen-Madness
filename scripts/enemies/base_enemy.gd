@@ -13,7 +13,7 @@ var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var move_speed := 90.0
 var target: Node2D
 var definition: EnemyDefinition
-var _wave_number := 1
+var _elapsed_level_seconds := 0.0
 var _scaled_contact_damage := 0
 var _base_move_speed := 90.0
 var _slow_timer := 0.0
@@ -39,12 +39,12 @@ func _attach_idle_squash() -> void:
 
 
 func configure(enemy_definition: EnemyDefinition) -> void:
-	configure_for_wave(enemy_definition, 1)
+	configure_for_time(enemy_definition, 0.0)
 
 
-func configure_for_wave(enemy_definition: EnemyDefinition, wave_number: int) -> void:
+func configure_for_time(enemy_definition: EnemyDefinition, elapsed_level_seconds: float) -> void:
 	definition = enemy_definition
-	_wave_number = maxi(wave_number, 1)
+	_elapsed_level_seconds = maxf(elapsed_level_seconds, 0.0)
 	if definition == null:
 		return
 
@@ -65,9 +65,11 @@ func _apply_definition() -> void:
 		push_error("BaseEnemy: missing HealthComponent on %s" % name)
 		return
 
-	var scaled_health := WaveDefinition.resolve_enemy_health(definition.max_health, _wave_number)
-	_scaled_contact_damage = WaveDefinition.resolve_contact_damage(
-		definition.contact_damage, _wave_number
+	var scaled_health := LevelDefinition.resolve_enemy_health(
+		definition.max_health, _elapsed_level_seconds
+	)
+	_scaled_contact_damage = LevelDefinition.resolve_contact_damage(
+		definition.contact_damage, _elapsed_level_seconds
 	)
 	health.max_health = scaled_health
 	health.current_health = scaled_health

@@ -25,7 +25,7 @@ func build_run_record(summary: Dictionary, upgrades: Array[String]) -> Dictionar
 		"character": summary.get("character_id", "unknown"),
 		"weapons": summary.get("weapons", []).duplicate(),
 		"upgrades": upgrades.duplicate(),
-		"final_wave": summary.get("final_wave", 0),
+		"time_survived": summary.get("time_survived", 0.0),
 		"level_reached": summary.get("level_reached", 1),
 		"total_kills": aggregates.get("total_kills", 0),
 		"total_damage_dealt": aggregates.get("total_damage_dealt", 0),

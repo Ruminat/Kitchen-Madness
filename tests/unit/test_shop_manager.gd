@@ -53,16 +53,15 @@ func after() -> void:
 	get_tree().paused = false
 
 
-func test_wave_complete_opens_shop_with_weapon_offers() -> void:
+func test_open_shop_shows_weapon_offers_and_pauses() -> void:
 	var manager := _create_manager()
 	var player := await _create_player()
 	var ui := _create_ui()
 	var gold_system := _create_gold_system()
 	gold_system.add_gold(30)
 	manager.configure(player, ui, gold_system, func() -> void: pass)
-	manager._current_wave = 1
 
-	EventBus.wave_completed.emit()
+	manager.open_shop()
 
 	assert_bool(get_tree().paused).is_true()
 	assert_bool(ui.shown).is_true()
@@ -71,6 +70,32 @@ func test_wave_complete_opens_shop_with_weapon_offers() -> void:
 	for offer in ui.offers:
 		assert_bool(offer is WeaponShopOffer).is_true()
 		assert_bool(ShopManager.is_stat_upgrade(offer)).is_false()
+
+
+func test_level_completed_does_not_auto_open_shop() -> void:
+	var manager := _create_manager()
+	var player := await _create_player()
+	var ui := _create_ui()
+	manager.configure(player, ui, _create_gold_system(), func() -> void: pass)
+
+	EventBus.level_completed.emit()
+
+	assert_bool(ui.shown).is_false()
+	assert_bool(manager._shop_open).is_false()
+
+
+func test_level_time_signal_updates_price_scaling() -> void:
+	var manager := _create_manager()
+
+	EventBus.level_time_changed.emit(120.0, 480.0)
+
+	assert_float(manager._elapsed_level_seconds).is_equal(120.0)
+
+
+func test_scaled_cost_grows_per_elapsed_minute() -> void:
+	assert_int(ShopManager.scaled_cost_for_time(12, 0.0)).is_equal(12)
+	assert_int(ShopManager.scaled_cost_for_time(12, 60.0)).is_equal(14)
+	assert_int(ShopManager.scaled_cost_for_time(8, 180.0)).is_equal(12)
 
 
 func test_generated_offers_never_include_stat_upgrades() -> void:
@@ -142,11 +167,11 @@ func test_purchase_weapon_damage_upgrade_targets_one_weapon() -> void:
 	assert_int(weapon.get_damage()).is_greater(before)
 
 
-func test_wave_one_shop_costs_use_base_prices() -> void:
+func test_level_start_shop_costs_use_base_prices() -> void:
 	var manager := _create_manager()
 	var player := await _create_player()
 	manager.configure(player, _create_ui(), _create_gold_system())
-	manager._current_wave = 1
+	manager._elapsed_level_seconds = 0.0
 
 	var offers := manager.generate_offers()
 	assert_int(offers.size()).is_greater(0)
@@ -158,11 +183,11 @@ func test_wave_one_shop_costs_use_base_prices() -> void:
 	assert_bool(false).is_true()
 
 
-func test_later_wave_shop_costs_scale_up() -> void:
+func test_late_level_shop_costs_scale_up() -> void:
 	var manager := _create_manager()
 	var player := await _create_player()
 	manager.configure(player, _create_ui(), _create_gold_system())
-	manager._current_wave = 4
+	manager._elapsed_level_seconds = 180.0
 	# Include every candidate so the (shuffled) weapon-damage offer is always present.
 	manager.offer_count = 20
 
@@ -243,7 +268,7 @@ func test_continue_hides_shop_and_calls_callback() -> void:
 	var continued: Array[bool] = [false]
 	manager.configure(player, ui, gold_system, func() -> void: continued[0] = true)
 
-	EventBus.wave_completed.emit()
+	manager.open_shop()
 	ui.shop_continue_requested.emit()
 
 	assert_bool(ui.hidden).is_true()

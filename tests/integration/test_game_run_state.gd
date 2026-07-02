@@ -3,9 +3,7 @@ extends GdUnitTestSuite
 
 const GAME_SCENE := preload("res://scenes/main/game.tscn")
 const GAME_SCRIPT := preload("res://scripts/game.gd")
-const WAVE_01 := preload("res://resources/waves/wave_01.tres")
-const WAVE_02 := preload("res://resources/waves/wave_02.tres")
-const WAVE_03 := preload("res://resources/waves/wave_03.tres")
+const LEVEL_01 := preload("res://resources/levels/level_01.tres")
 const CHEF_DEF := preload("res://resources/characters/chef.tres")
 const GOBLIN_DEF := preload("res://resources/characters/goblin.tres")
 
@@ -59,14 +57,27 @@ func test_game_pauses_on_player_death() -> void:
 	assert_bool(game.is_run_active()).is_false()
 
 
-func test_game_pauses_on_wave_complete() -> void:
+func test_game_wins_on_level_completed() -> void:
 	var game: Node2D = auto_free(GAME_SCENE.instantiate())
 	add_child(game)
 	await _wait_ready(game)
-	EventBus.wave_completed.emit()
-	assert_bool(game.is_wave_complete).is_true()
+	EventBus.level_completed.emit()
+	assert_bool(game.is_victory).is_true()
 	assert_bool(get_tree().paused).is_true()
 	assert_bool(game.is_run_active()).is_false()
+
+	var ui: CanvasLayer = game.get_node("UI") as CanvasLayer
+	assert_bool((ui.get_node("Overlay") as CanvasItem).visible).is_true()
+
+
+func test_level_completed_does_not_open_shop() -> void:
+	var game: Node2D = auto_free(GAME_SCENE.instantiate())
+	add_child(game)
+	await _wait_ready(game)
+	EventBus.level_completed.emit()
+
+	var ui: CanvasLayer = game.get_node("UI") as CanvasLayer
+	assert_bool((ui.get_node("ShopOverlay") as CanvasItem).visible).is_false()
 
 
 func test_game_includes_xp_and_floating_text_ui() -> void:
@@ -78,36 +89,32 @@ func test_game_includes_xp_and_floating_text_ui() -> void:
 	assert_object(game.get_node_or_null("ShopManager")).is_not_null()
 	assert_object(game.get_node_or_null("VfxManager")).is_not_null()
 	assert_object(game.get_node_or_null("VFXContainer")).is_not_null()
+	assert_object(game.get_node_or_null("LevelManager")).is_not_null()
 	var ui: CanvasLayer = game.get_node("UI") as CanvasLayer
 	assert_object(ui.get_node_or_null("FloatingTextManager")).is_not_null()
 	assert_object(ui.get_node_or_null("XpPanel")).is_not_null()
 	assert_object(ui.get_node_or_null("ShopOverlay")).is_not_null()
 
 
-func test_game_scene_has_authored_wave_sequence() -> void:
+func test_game_scene_has_authored_level() -> void:
 	var game: Node2D = auto_free(GAME_SCENE.instantiate())
 	add_child(game)
 	await _wait_ready(game)
 
-	assert_int(game.wave_definitions.size()).is_equal(3)
-	assert_object(game.wave_definitions[0]).is_same(WAVE_01)
-	assert_object(game.wave_definitions[1]).is_same(WAVE_02)
-	assert_object(game.wave_definitions[2]).is_same(WAVE_03)
+	assert_object(game.level_definition).is_same(LEVEL_01)
+	assert_float(game.level_definition.duration).is_equal(600.0)
+
+	var level_manager: LevelManager = game.get_node("LevelManager") as LevelManager
+	assert_float(level_manager.get_duration()).is_equal(600.0)
 
 
-func test_game_wave_selection_uses_last_authored_wave_after_sequence() -> void:
+func test_get_level_definition_falls_back_to_default() -> void:
 	var game: Node2D = auto_free(GAME_SCRIPT.new())
-	var waves: Array[WaveDefinition] = [WAVE_01, WAVE_02, WAVE_03]
-	game.wave_definitions = waves
+	game.level_definition = null
+	assert_object(game.get_level_definition()).is_not_null()
 
-	game.current_wave = 1
-	assert_object(game.get_current_wave_definition()).is_same(WAVE_01)
-	game.current_wave = 2
-	assert_object(game.get_current_wave_definition()).is_same(WAVE_02)
-	game.current_wave = 3
-	assert_object(game.get_current_wave_definition()).is_same(WAVE_03)
-	game.current_wave = 8
-	assert_object(game.get_current_wave_definition()).is_same(WAVE_03)
+	game.level_definition = LEVEL_01
+	assert_object(game.get_level_definition()).is_same(LEVEL_01)
 
 
 func _wait_ready(node: Node) -> void:

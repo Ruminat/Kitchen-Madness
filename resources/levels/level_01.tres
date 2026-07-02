@@ -1,47 +1,50 @@
-[gd_resource type="Resource" script_class="WaveDefinition" format=3 uid="uid://xxgwle2cai05"]
+[gd_resource type="Resource" script_class="LevelDefinition" format=3 uid="uid://leveldef_01"]
 
-[ext_resource type="Script" uid="uid://csbu37rjarvka" path="res://scripts/data/wave_definition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/data/level_definition.gd" id="1"]
 [ext_resource type="Script" uid="uid://8b76112d4tq4" path="res://scripts/data/enemy_spawn_entry.gd" id="2"]
 [ext_resource type="Resource" path="res://resources/enemies/chaser.tres" id="3"]
-[ext_resource type="Resource" path="res://resources/enemies/tank.tres" id="4"]
-[ext_resource type="Resource" path="res://resources/enemies/sprinter.tres" id="5"]
-[ext_resource type="Resource" path="res://resources/enemies/ant.tres" id="6"]
-[ext_resource type="Resource" path="res://resources/enemies/moth.tres" id="7"]
+[ext_resource type="Resource" path="res://resources/enemies/sprinter.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/enemies/ant.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/enemies/moth.tres" id="6"]
+[ext_resource type="Resource" path="res://resources/enemies/tank.tres" id="7"]
 [ext_resource type="PackedScene" uid="uid://enemy001" path="res://scenes/enemy/enemy.tscn" id="8"]
 
 [sub_resource type="Resource" id="EnemySpawnEntry_chaser"]
 script = ExtResource("2")
 definition = ExtResource("3")
-weight = 4
+weight = 5
 
 [sub_resource type="Resource" id="EnemySpawnEntry_sprinter"]
 script = ExtResource("2")
-definition = ExtResource("5")
+definition = ExtResource("4")
 weight = 3
 
 [sub_resource type="Resource" id="EnemySpawnEntry_ant"]
 script = ExtResource("2")
-definition = ExtResource("6")
-weight = 3
+definition = ExtResource("5")
+weight = 4
 
 [sub_resource type="Resource" id="EnemySpawnEntry_moth"]
 script = ExtResource("2")
-definition = ExtResource("7")
+definition = ExtResource("6")
 weight = 3
 
 [sub_resource type="Resource" id="EnemySpawnEntry_tank"]
 script = ExtResource("2")
-definition = ExtResource("4")
+definition = ExtResource("7")
+weight = 1
 
 [resource]
 script = ExtResource("1")
-duration = 22.0
-spawn_interval = 2.4
-max_enemies = 54
-spawn_multiplier_end = 1.5
+duration = 600.0
+spawn_interval = 2.8
+max_enemies_start = 24
+max_enemies_end = 140
+spawn_multiplier_start = 1.0
+spawn_multiplier_end = 6.0
 spawn_multiplier_curve = 1.2
-swarm_size_min = 4
-swarm_size_max = 8
-swarm_cluster_radius = 40.0
+swarm_size_min = 2
+swarm_size_max = 6
+swarm_cluster_radius = 36.0
 enemy_weights = Array[ExtResource("2")]([SubResource("EnemySpawnEntry_chaser"), SubResource("EnemySpawnEntry_sprinter"), SubResource("EnemySpawnEntry_ant"), SubResource("EnemySpawnEntry_moth"), SubResource("EnemySpawnEntry_tank")])
 fallback_enemy_scene = ExtResource("8")

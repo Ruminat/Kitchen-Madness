@@ -9,10 +9,9 @@ signal player_died
 signal xp_changed(current: int, to_next: int, level: int)
 signal level_up(level: int)
 signal pickup_collected(type: StringName, world_pos: Vector2, value: int)
-signal wave_time_changed(seconds_remaining: float)
-signal wave_completed
+signal level_time_changed(elapsed_seconds: float, seconds_remaining: float)
+signal level_completed
 signal gold_changed(gold: int)
-signal wave_index_changed(wave: int)
 
 # Balance metrics signals
 signal metrics_damage_dealt(amount: int, weapon_id: String)

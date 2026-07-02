@@ -17,7 +17,7 @@ func test_build_run_record_maps_summary_fields() -> void:
 	var persistence := RunStatsPersistence.new()
 	var summary := {
 		"character_id": "chef",
-		"final_wave": 3,
+		"time_survived": 320.5,
 		"level_reached": 7,
 		"total_run_time": 52.5,
 		"run_completed": false,
@@ -38,7 +38,7 @@ func test_build_run_record_maps_summary_fields() -> void:
 	assert_str(record.get("character", "")).is_equal("chef")
 	assert_array(record.get("weapons", [])).is_equal([])
 	assert_array(record.get("upgrades", [])).is_equal(upgrades)
-	assert_int(record.get("final_wave", 0)).is_equal(3)
+	assert_float(record.get("time_survived", 0.0)).is_equal(320.5)
 	assert_int(record.get("level_reached", 0)).is_equal(7)
 	assert_int(record.get("total_kills", 0)).is_equal(40)
 	assert_int(record.get("total_damage_dealt", 0)).is_equal(900)
@@ -110,10 +110,10 @@ func _create_test_persistence() -> RunStatsPersistence:
 	return persistence
 
 
-func _sample_summary(character_id: String, final_wave: int) -> Dictionary:
+func _sample_summary(character_id: String, segment: int) -> Dictionary:
 	return {
 		"character_id": character_id,
-		"final_wave": final_wave,
+		"time_survived": 60.0 * segment,
 		"level_reached": 2,
 		"total_run_time": 10.0,
 		"run_completed": false,
@@ -126,7 +126,7 @@ func _sample_summary(character_id: String, final_wave: int) -> Dictionary:
 			"total_damage_taken": 12,
 			"total_gold_earned": 4,
 		},
-		"waves": [{"wave_number": final_wave, "duration_seconds": 10.0}],
+		"waves": [{"wave_number": segment, "duration_seconds": 10.0}],
 	}
 
 

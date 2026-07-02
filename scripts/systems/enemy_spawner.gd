@@ -5,7 +5,7 @@ const EDGE_MARGIN := 20.0
 const MAX_ELITE_ALIVE := 2
 const SPAWN_OFFSCREEN_MARGIN := 100.0
 
-var wave_definition: WaveDefinition
+var level_definition: LevelDefinition
 var enemy_container: Node2D
 var arena_bounds := Rect2()
 var camera_target: Node2D
@@ -16,16 +16,12 @@ var is_active := true
 var _has_camera_focus := false
 var _spawn_timer: Timer
 var _elapsed_time := 0.0
-var _wave_number := 1
 
 
-func configure(
-	definition: WaveDefinition, container: Node2D, bounds: Rect2, wave_number: int = 1
-) -> void:
-	wave_definition = definition
+func configure(definition: LevelDefinition, container: Node2D, bounds: Rect2) -> void:
+	level_definition = definition
 	enemy_container = container
 	arena_bounds = bounds
-	_wave_number = maxi(wave_number, 1)
 	is_active = true
 	_elapsed_time = 0.0
 
@@ -91,7 +87,7 @@ func _spawn_enemy() -> void:
 
 	var swarm_size := _resolve_swarm_size(definition)
 	var anchor := _random_spawn_position()
-	var cluster_radius := wave_definition.swarm_cluster_radius if wave_definition else 0.0
+	var cluster_radius := level_definition.swarm_cluster_radius if level_definition else 0.0
 
 	for _index in swarm_size:
 		if enemy_container.get_child_count() >= max_alive:
@@ -107,8 +103,8 @@ func _spawn_enemy() -> void:
 		if enemy.has_method("set_target") and camera_target:
 			enemy.set_target(camera_target)
 		if enemy.has_method("configure") and definition:
-			if enemy.has_method("configure_for_wave"):
-				enemy.configure_for_wave(definition, _wave_number)
+			if enemy.has_method("configure_for_time"):
+				enemy.configure_for_time(definition, _elapsed_time)
 			else:
 				enemy.configure(definition)
 
@@ -116,18 +112,18 @@ func _spawn_enemy() -> void:
 
 
 func _max_alive_enemies() -> int:
-	if wave_definition:
-		return wave_definition.max_enemies
+	if level_definition:
+		return level_definition.get_max_enemies(_level_progress())
 	return 120
 
 
 func _resolve_swarm_size(definition: EnemyDefinition) -> int:
 	if definition and definition.is_elite:
 		return 1
-	if wave_definition == null:
+	if level_definition == null:
 		return 1
 
-	return wave_definition.roll_swarm_size()
+	return level_definition.roll_swarm_size()
 
 
 func _cluster_spawn_position(anchor: Vector2, radius: float) -> Vector2:
@@ -151,7 +147,7 @@ func _spawn_camera_center() -> Vector2:
 
 
 func _pick_spawn_definition() -> EnemyDefinition:
-	var definition: EnemyDefinition = SpawnTable.pick_weighted(wave_definition.enemy_weights)
+	var definition: EnemyDefinition = SpawnTable.pick_weighted(level_definition.enemy_weights)
 	if definition == null:
 		return null
 
@@ -186,11 +182,11 @@ func _definition_for_enemy(enemy: Node) -> EnemyDefinition:
 
 
 func _pick_non_elite_definition() -> EnemyDefinition:
-	if wave_definition == null:
+	if level_definition == null:
 		return null
 
 	var non_elite_entries: Array = []
-	for entry in wave_definition.enemy_weights:
+	for entry in level_definition.enemy_weights:
 		if entry is EnemySpawnEntry and entry.definition and not entry.definition.is_elite:
 			non_elite_entries.append(entry)
 
@@ -203,8 +199,8 @@ func _pick_non_elite_definition() -> EnemyDefinition:
 func _scene_for_definition(definition: EnemyDefinition) -> PackedScene:
 	if definition and definition.scene:
 		return definition.scene
-	if wave_definition and wave_definition.fallback_enemy_scene:
-		return wave_definition.fallback_enemy_scene
+	if level_definition and level_definition.fallback_enemy_scene:
+		return level_definition.fallback_enemy_scene
 	return null
 
 
@@ -218,16 +214,17 @@ func _schedule_next_spawn() -> void:
 
 
 func _current_spawn_interval() -> float:
-	var base_interval := wave_definition.spawn_interval if wave_definition else 1.4
+	var base_interval := level_definition.spawn_interval if level_definition else 1.4
 	var multiplier := 1.0
-	if wave_definition:
-		var progress := _elapsed_time / maxf(wave_definition.duration, 0.01)
-		multiplier = wave_definition.get_spawn_multiplier(progress)
-	return base_interval / maxf(multiplier * _density_multiplier(), 0.01)
+	if level_definition:
+		multiplier = level_definition.get_spawn_multiplier(_level_progress())
+	return base_interval / maxf(multiplier, 0.01)
 
 
-func _density_multiplier() -> float:
-	return WaveDefinition.resolve_density_multiplier(_wave_number)
+func _level_progress() -> float:
+	if level_definition == null:
+		return 0.0
+	return level_definition.get_progress(_elapsed_time)
 
 
 func _random_spawn_position() -> Vector2:

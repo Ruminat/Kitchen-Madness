@@ -2,22 +2,15 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Clean asset-backed settings menu · codecheck green
+**Last updated:** Phase 8A — time-based survival level replaces waves · 282 tests green
 
 ---
 
 ## Unfinished
 
-### Phase 8A — Remove waves; time-based levels
-
-- [ ] Remove wave transitions and wave-index-driven shop/end flow
-- [ ] Level 1 = 10-minute fixed timer; survive → win, death → lose
-- [ ] Scale enemy spawns/density over elapsed time instead of wave number
-- [ ] HUD shows level time remaining; win/lose screens replace wave continue
-
 ### Phase 8B — On-demand shop and upgrades
 
-- [ ] Shop opens on **`E`** or bottom-right **Shop** button (not after waves)
+- [ ] Shop opens on **`E`** or bottom-right **Shop** button (`ShopManager.open_shop()` already exists)
 - [ ] Level-ups bank an upgrade without opening the menu
 - [ ] Upgrades open on **`Q`** or bottom-left **Upgrades** button
 - [ ] HUD buttons + keyboard/mouse nav while paused
@@ -51,18 +44,18 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 - [x] **Phase 7D** — Music-forward mix, SFX distance falloff, per-sound volume trims.
 - [x] **Phase 7E** — Idle squash/bob on player and enemy visuals.
 - [x] **Phase 7F** — Economy/XP rebalance (drops, curve, wave-scaled shop prices).
-- [x] **Settings overlay** — Pause-safe asset-backed settings menu with clean generated background, generated button plates, deterministic row/control margins, audio/render options, persisted config, and E2E layout coverage.
-- [x] **Test suite repair** — 270 tests, 0 failures; GdUnit/Godot 4.7 fixes.
+- [x] **Settings overlay** — Pause-safe asset-backed settings menu, persisted config, E2E layout coverage.
+- [x] **Test suite repair** — GdUnit/Godot 4.7 fixes.
+- [x] **Phase 8A — Remove waves; time-based levels** — `LevelDefinition` + `LevelManager` replace `WaveDefinition` + `WaveManager`; level 1 is a single 10-minute survival run (`resources/levels/level_01.tres`); spawn rate ramps 1×→6× and the alive cap 24→140 over elapsed time; enemy HP +25%/min and contact damage +15%/min; HUD shows `SURVIVE MM:SS` countdown; timer end → “You Survived!” victory screen, death → game over; shop no longer auto-opens (public `ShopManager.open_shop()` awaits 8B) and prices scale +15% per elapsed minute; run stats record `time_survived`; 282 tests, 0 failures.
 
 ---
 
 ## How to try it
 
 1. Open the project in Godot 4.7 and press **F5**.
-2. Kill enemies to gain XP and Grease.
-3. Survive the wave to open the shop (5 fixed slots, R to reroll), then continue to the next wave.
-4. Level up from XP orbs to choose free stat upgrades.
-5. Run `.\tools\codecheck.ps1` before handoff.
-6. Run tests only with `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode`.
+2. Kill enemies to gain XP and Grease; level up from XP orbs to pick free stat upgrades.
+3. Survive the 10-minute level timer to win — enemy pressure ramps continuously.
+4. Run `./tools/codecheck.sh` (or `.\tools\codecheck.ps1` on Windows) before handoff.
+5. Run tests only with `godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/ --ignoreHeadlessMode`.
 
-_Note: Phase 8 will replace waves with a 10-minute survival level and on-demand shop (`E`) / upgrades (`Q`) buttons._
+_Note: the shop is temporarily unreachable in-game until Phase 8B wires the on-demand `E` key / Shop button to `ShopManager.open_shop()`._

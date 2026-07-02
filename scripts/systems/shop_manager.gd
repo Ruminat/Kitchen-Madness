@@ -22,7 +22,7 @@ const PELLET_UPGRADE_AMOUNT := 1
 const MAX_PELLET_COUNT := 8
 const REROLL_BASE_COST := 6
 const REROLL_COST_STEP := 4
-const WAVE_COST_GROWTH := 0.15
+const COST_GROWTH_PER_MINUTE := 0.15
 
 @export var offer_count := 5
 
@@ -31,15 +31,14 @@ var _ui: Node
 var _gold_system: GoldSystem
 var _on_continue := Callable()
 var _shop_open := false
-var _current_wave := 1
+var _elapsed_level_seconds := 0.0
 var _current_offers: Array[Resource] = []
 var _sold_slots: Array[bool] = []
 var _reroll_count := 0
 
 
 func _ready() -> void:
-	EventBus.wave_completed.connect(_on_wave_completed)
-	EventBus.wave_index_changed.connect(_on_wave_index_changed)
+	EventBus.level_time_changed.connect(_on_level_time_changed)
 
 
 func configure(
@@ -59,11 +58,14 @@ func configure(
 	_sync_weapon_loadout_ui()
 
 
-func _on_wave_index_changed(wave: int) -> void:
-	_current_wave = wave
+func _on_level_time_changed(elapsed_seconds: float, _seconds_remaining: float) -> void:
+	_elapsed_level_seconds = elapsed_seconds
 
 
-func _on_wave_completed() -> void:
+func open_shop() -> void:
+	if _shop_open:
+		return
+
 	_shop_open = true
 	_reroll_count = 0
 	_current_offers = generate_offers()
@@ -278,7 +280,11 @@ func _weapon_label(weapon: WeaponDefinition) -> String:
 
 
 func _scaled_cost(base_cost: int) -> int:
-	var multiplier := 1.0 + WAVE_COST_GROWTH * float(maxi(_current_wave - 1, 0))
+	return scaled_cost_for_time(base_cost, _elapsed_level_seconds)
+
+
+static func scaled_cost_for_time(base_cost: int, elapsed_seconds: float) -> int:
+	var multiplier := 1.0 + COST_GROWTH_PER_MINUTE * maxf(elapsed_seconds, 0.0) / 60.0
 	return maxi(roundi(float(base_cost) * multiplier), 5)
 
 

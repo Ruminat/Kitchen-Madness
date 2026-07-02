@@ -35,26 +35,27 @@ func test_spawner_respects_max_enemy_cap() -> void:
 	var container: Node2D = auto_free(Node2D.new())
 	add_child(container)
 
-	var wave := WaveDefinition.new()
-	wave.max_enemies = 2
-	wave.spawn_interval = 999.0
-	wave.fallback_enemy_scene = ENEMY_SCENE
+	var level := LevelDefinition.new()
+	level.max_enemies_start = 2
+	level.max_enemies_end = 2
+	level.spawn_interval = 999.0
+	level.fallback_enemy_scene = ENEMY_SCENE
 
-	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner.configure(level, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	spawner._spawn_enemy()
 	spawner._spawn_enemy()
 	assert_int(container.get_child_count()).is_equal(2)
 
 
-func test_spawner_scales_interval_with_wave_multiplier() -> void:
+func test_spawner_scales_interval_with_level_multiplier() -> void:
 	var spawner: EnemySpawner = auto_free(EnemySpawner.new()) as EnemySpawner
-	var wave := WaveDefinition.new()
-	wave.duration = 60.0
-	wave.spawn_interval = 1.4
-	wave.spawn_multiplier_start = 2.0
-	wave.spawn_multiplier_end = 8.0
-	wave.spawn_multiplier_curve = 2.0
-	spawner.wave_definition = wave
+	var level := LevelDefinition.new()
+	level.duration = 60.0
+	level.spawn_interval = 1.4
+	level.spawn_multiplier_start = 2.0
+	level.spawn_multiplier_end = 8.0
+	level.spawn_multiplier_curve = 2.0
+	spawner.level_definition = level
 
 	assert_float(spawner._current_spawn_interval()).is_equal(0.7)
 
@@ -68,16 +69,18 @@ func test_spawner_reconfigure_reuses_spawn_timer() -> void:
 	var container: Node2D = auto_free(Node2D.new()) as Node2D
 	add_child(container)
 
-	var wave_one := WaveDefinition.new()
-	wave_one.spawn_interval = 2.0
-	wave_one.fallback_enemy_scene = ENEMY_SCENE
-	var wave_two := WaveDefinition.new()
-	wave_two.spawn_interval = 1.0
-	wave_two.fallback_enemy_scene = ENEMY_SCENE
+	var level_one := LevelDefinition.new()
+	level_one.spawn_interval = 2.0
+	level_one.spawn_multiplier_end = 1.0
+	level_one.fallback_enemy_scene = ENEMY_SCENE
+	var level_two := LevelDefinition.new()
+	level_two.spawn_interval = 1.0
+	level_two.spawn_multiplier_end = 1.0
+	level_two.fallback_enemy_scene = ENEMY_SCENE
 
-	spawner.configure(wave_one, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner.configure(level_one, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	var timer := spawner._spawn_timer
-	spawner.configure(wave_two, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner.configure(level_two, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 
 	assert_object(spawner._spawn_timer).is_same(timer)
 	assert_float(spawner._spawn_timer.wait_time).is_equal(1.0)
@@ -96,7 +99,7 @@ func test_spawner_picks_positions_outside_camera_view() -> void:
 	var view_size := Vector2(880.0, 480.0)
 	spawner.set_camera_spawn_target(target, view_size)
 	spawner.set_camera_focus(target.global_position)
-	spawner.configure(WaveDefinition.new(), container, bounds)
+	spawner.configure(LevelDefinition.new(), container, bounds)
 	var camera_rect := Rect2(spawner.camera_focus - view_size * 0.5, view_size)
 	var inner_bounds := bounds.grow(-EnemySpawner.EDGE_MARGIN)
 	var margin := EnemySpawner.SPAWN_OFFSCREEN_MARGIN
@@ -159,14 +162,14 @@ func test_spawner_swarm_spawns_multiple_enemies() -> void:
 	chaser_entry.definition = CHASER_DEF
 	chaser_entry.weight = 1
 
-	var wave := WaveDefinition.new()
-	wave.enemy_weights = [chaser_entry]
-	wave.fallback_enemy_scene = ENEMY_SCENE
-	wave.swarm_size_min = 4
-	wave.swarm_size_max = 4
+	var level := LevelDefinition.new()
+	level.enemy_weights = [chaser_entry]
+	level.fallback_enemy_scene = ENEMY_SCENE
+	level.swarm_size_min = 4
+	level.swarm_size_max = 4
 
 	# configure() already triggers one initial swarm spawn.
-	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner.configure(level, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	assert_int(container.get_child_count()).is_equal(4)
 
 
@@ -203,14 +206,15 @@ func test_spawner_swarm_respects_alive_cap() -> void:
 	chaser_entry.definition = CHASER_DEF
 	chaser_entry.weight = 1
 
-	var wave := WaveDefinition.new()
-	wave.max_enemies = 1
-	wave.enemy_weights = [chaser_entry]
-	wave.fallback_enemy_scene = ENEMY_SCENE
-	wave.swarm_size_min = 6
-	wave.swarm_size_max = 6
+	var level := LevelDefinition.new()
+	level.max_enemies_start = 1
+	level.max_enemies_end = 1
+	level.enemy_weights = [chaser_entry]
+	level.fallback_enemy_scene = ENEMY_SCENE
+	level.swarm_size_min = 6
+	level.swarm_size_max = 6
 
-	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner.configure(level, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	spawner._spawn_enemy()
 	assert_int(container.get_child_count()).is_equal(1)
 
@@ -225,33 +229,33 @@ func test_spawner_elite_swarm_spawns_one_enemy() -> void:
 	tank_entry.definition = TANK_DEF
 	tank_entry.weight = 1
 
-	var wave := WaveDefinition.new()
-	wave.enemy_weights = [tank_entry]
-	wave.fallback_enemy_scene = ENEMY_SCENE
-	wave.swarm_size_min = 5
-	wave.swarm_size_max = 5
+	var level := LevelDefinition.new()
+	level.enemy_weights = [tank_entry]
+	level.fallback_enemy_scene = ENEMY_SCENE
+	level.swarm_size_min = 5
+	level.swarm_size_max = 5
 
 	# configure() already triggers one initial spawn; an elite swarm yields one enemy.
-	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner.configure(level, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	assert_int(container.get_child_count()).is_equal(1)
 
 
-func test_wave_definition_roll_swarm_size_respects_bounds() -> void:
-	var wave := WaveDefinition.new()
-	wave.swarm_size_min = 3
-	wave.swarm_size_max = 6
+func test_level_definition_roll_swarm_size_respects_bounds() -> void:
+	var level := LevelDefinition.new()
+	level.swarm_size_min = 3
+	level.swarm_size_max = 6
 
 	for _attempt in 30:
-		var size := wave.roll_swarm_size()
+		var size := level.roll_swarm_size()
 		assert_int(size).is_greater_equal(3)
 		assert_int(size).is_less_equal(6)
 
 
-func test_wave_definition_average_swarm_size() -> void:
-	var wave := WaveDefinition.new()
-	wave.swarm_size_min = 2
-	wave.swarm_size_max = 4
-	assert_float(wave.average_swarm_size()).is_equal(3.0)
+func test_level_definition_average_swarm_size() -> void:
+	var level := LevelDefinition.new()
+	level.swarm_size_min = 2
+	level.swarm_size_max = 4
+	assert_float(level.average_swarm_size()).is_equal(3.0)
 
 
 func test_spawner_caps_elite_enemies_at_two() -> void:
@@ -273,11 +277,11 @@ func test_spawner_caps_elite_enemies_at_two() -> void:
 	tank_entry.definition = tank
 	tank_entry.weight = 99
 
-	var wave := WaveDefinition.new()
-	wave.enemy_weights = [chaser_entry, tank_entry]
-	wave.fallback_enemy_scene = ENEMY_SCENE
+	var level := LevelDefinition.new()
+	level.enemy_weights = [chaser_entry, tank_entry]
+	level.fallback_enemy_scene = ENEMY_SCENE
 
-	spawner.configure(wave, container, Rect2(-440.0, -240.0, 880.0, 480.0))
+	spawner.configure(level, container, Rect2(-440.0, -240.0, 880.0, 480.0))
 	_add_elite_stub(container, tank)
 	_add_elite_stub(container, tank)
 

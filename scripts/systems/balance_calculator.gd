@@ -51,47 +51,44 @@ static func calculate_effective_dps(
 	return calculate_weapon_dps(weapon)
 
 
-static func estimate_wave_gold(
-	wave: WaveDefinition, enemy_roster: Array[EnemyDefinition], wave_number: int = 1
+static func estimate_level_gold(
+	level: LevelDefinition, enemy_roster: Array[EnemyDefinition]
 ) -> int:
-	if wave == null or enemy_roster.is_empty():
+	if level == null or enemy_roster.is_empty():
 		return 0
 
-	var estimated_kills := estimate_wave_kills(wave, wave_number)
+	var estimated_kills := estimate_level_kills(level)
 	var avg_gold_per_kill := _calculate_avg_gold(enemy_roster) * DropRates.GREASE_DROP_CHANCE
 	return int(estimated_kills * avg_gold_per_kill)
 
 
-static func estimate_wave_xp(
-	wave: WaveDefinition, enemy_roster: Array[EnemyDefinition], wave_number: int = 1
-) -> int:
-	if wave == null or enemy_roster.is_empty():
+static func estimate_level_xp(level: LevelDefinition, enemy_roster: Array[EnemyDefinition]) -> int:
+	if level == null or enemy_roster.is_empty():
 		return 0
 
-	var estimated_kills := estimate_wave_kills(wave, wave_number)
+	var estimated_kills := estimate_level_kills(level)
 	var avg_xp_per_kill := _calculate_avg_xp(enemy_roster) * DropRates.XP_DROP_CHANCE
 	return int(estimated_kills * avg_xp_per_kill)
 
 
-static func estimate_wave_kills(wave: WaveDefinition, wave_number: int = 1) -> int:
-	if wave == null:
+static func estimate_level_kills(level: LevelDefinition) -> int:
+	if level == null:
 		return 0
 
-	var density := WaveDefinition.resolve_density_multiplier(wave_number)
-	var spawn_count := wave.duration / maxf(wave.spawn_interval, 0.1) * density
-	var avg_multiplier := (wave.spawn_multiplier_start + wave.spawn_multiplier_end) * 0.5
-	var avg_swarm_size := wave.average_swarm_size()
+	var spawn_count := level.duration / maxf(level.spawn_interval, 0.1)
+	var avg_multiplier := (level.spawn_multiplier_start + level.spawn_multiplier_end) * 0.5
+	var avg_swarm_size := level.average_swarm_size()
 	return int(spawn_count * avg_multiplier * avg_swarm_size)
 
 
-static func calculate_wave_hp_budget(
-	wave: WaveDefinition, enemy_roster: Array[EnemyDefinition], wave_number: int = 1
+static func calculate_level_hp_budget(
+	level: LevelDefinition, enemy_roster: Array[EnemyDefinition]
 ) -> int:
-	if wave == null or enemy_roster.is_empty():
+	if level == null or enemy_roster.is_empty():
 		return 0
 
-	var avg_hp := _calculate_avg_hp(enemy_roster, wave_number)
-	var estimated_kills := estimate_wave_kills(wave, wave_number)
+	var avg_hp := _calculate_avg_hp(enemy_roster, level.duration * 0.5)
+	var estimated_kills := estimate_level_kills(level)
 	return int(estimated_kills * avg_hp)
 
 
@@ -104,26 +101,26 @@ static func calculate_time_to_level(_level: int, xp_system: XpSystem) -> float:
 	return float(xp_needed - current_xp)
 
 
-static func estimate_levels_per_wave(
-	wave: WaveDefinition, enemy_roster: Array[EnemyDefinition], wave_number: int = 1
+static func estimate_levels_per_run(
+	level: LevelDefinition, enemy_roster: Array[EnemyDefinition]
 ) -> float:
-	var wave_xp := estimate_wave_xp(wave, enemy_roster, wave_number)
+	var run_xp := estimate_level_xp(level, enemy_roster)
 	var xp_to_level := _xp_required_for_level(2)
 	if xp_to_level <= 0:
 		return 0.0
-	return float(wave_xp) / float(xp_to_level)
+	return float(run_xp) / float(xp_to_level)
 
 
-static func estimate_wave_affordability(
-	wave: WaveDefinition,
+static func estimate_level_affordability(
+	level: LevelDefinition,
 	enemy_roster: Array[EnemyDefinition],
-	wave_number: int = 1,
+	elapsed_seconds: float = 0.0,
 	cheap_cost: int = 8,
 	weapon_cost: int = 12
 ) -> Dictionary:
-	var grease := estimate_wave_gold(wave, enemy_roster, wave_number)
-	var scaled_cheap := _scaled_shop_cost(cheap_cost, wave_number)
-	var scaled_weapon := _scaled_shop_cost(weapon_cost, wave_number)
+	var grease := estimate_level_gold(level, enemy_roster)
+	var scaled_cheap := ShopManager.scaled_cost_for_time(cheap_cost, elapsed_seconds)
+	var scaled_weapon := ShopManager.scaled_cost_for_time(weapon_cost, elapsed_seconds)
 	return {
 		"estimated_grease": grease,
 		"cheap_item_cost": scaled_cheap,
@@ -151,23 +148,20 @@ static func compare_weapon_dps(weapons: Array[WeaponDefinition]) -> Dictionary:
 	return results
 
 
-static func compare_wave_budgets(
-	waves: Array[WaveDefinition], enemy_roster: Array[EnemyDefinition]
+static func compare_level_budgets(
+	levels: Array[LevelDefinition], enemy_roster: Array[EnemyDefinition]
 ) -> Dictionary:
 	var results := {}
-	for index in waves.size():
-		var wave := waves[index] as WaveDefinition
-		if wave == null:
+	for level in levels:
+		if level == null:
 			continue
-		var wave_number := index + 1
-		results[wave.resource_path.get_file()] = {
-			"wave_number": wave_number,
-			"duration": wave.duration,
-			"estimated_kills": estimate_wave_kills(wave, wave_number),
-			"estimated_gold": estimate_wave_gold(wave, enemy_roster, wave_number),
-			"estimated_xp": estimate_wave_xp(wave, enemy_roster, wave_number),
-			"hp_budget": calculate_wave_hp_budget(wave, enemy_roster, wave_number),
-			"levels_gained": estimate_levels_per_wave(wave, enemy_roster, wave_number),
+		results[level.resource_path.get_file()] = {
+			"duration": level.duration,
+			"estimated_kills": estimate_level_kills(level),
+			"estimated_gold": estimate_level_gold(level, enemy_roster),
+			"estimated_xp": estimate_level_xp(level, enemy_roster),
+			"hp_budget": calculate_level_hp_budget(level, enemy_roster),
+			"levels_gained": estimate_levels_per_run(level, enemy_roster),
 		}
 	return results
 
@@ -193,24 +187,21 @@ static func _calculate_avg_xp(enemies: Array[EnemyDefinition]) -> float:
 	return float(total) / enemies.size()
 
 
-static func _calculate_avg_hp(enemies: Array[EnemyDefinition], wave_number: int = 1) -> float:
+static func _calculate_avg_hp(
+	enemies: Array[EnemyDefinition], elapsed_seconds: float = 0.0
+) -> float:
 	if enemies.is_empty():
 		return 30.0
 
 	var total := 0.0
 	for enemy in enemies:
 		if enemy:
-			total += float(WaveDefinition.resolve_enemy_health(enemy.max_health, wave_number))
+			total += float(LevelDefinition.resolve_enemy_health(enemy.max_health, elapsed_seconds))
 	return total / enemies.size()
 
 
 static func _xp_required_for_level(next_level: int) -> int:
 	return XpSystem.BASE_XP_TO_LEVEL + (next_level - 1) * XpSystem.XP_PER_LEVEL_GROWTH
-
-
-static func _scaled_shop_cost(base_cost: int, wave_number: int) -> int:
-	var multiplier := 1.0 + ShopManager.WAVE_COST_GROWTH * float(maxi(wave_number - 1, 0))
-	return maxi(roundi(float(base_cost) * multiplier), 5)
 
 
 static func format_balance_report(report: Dictionary) -> String:

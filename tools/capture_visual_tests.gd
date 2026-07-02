@@ -208,7 +208,7 @@ func _capture_dead_screen(output_path: String) -> void:
 	_equip_showcase_weapons(game)
 	_enable_weapon_visuals(game)
 	_spawn_fan_projectiles(game, load(PEPPER_GUN_PATH) as WeaponDefinition, 10)
-	_set_combat_hud(game, 12, 0, 58, 18)
+	_set_combat_hud(game, 0.0, 58, 18)
 
 	game.set("is_game_over", true)
 	var ui := game.get_node("UI")
@@ -259,9 +259,9 @@ func _freeze_live_systems(game: Node) -> void:
 	if spawner and spawner.has_method("stop"):
 		spawner.stop()
 
-	var wave_manager := game.get_node_or_null("WaveManager")
-	if wave_manager and wave_manager.has_method("pause"):
-		wave_manager.pause()
+	var level_manager := game.get_node_or_null("LevelManager")
+	if level_manager and level_manager.has_method("pause"):
+		level_manager.pause()
 
 	var player := game.get_node("Player") as Node2D
 	player.global_position = Vector2.ZERO
@@ -314,7 +314,6 @@ func _event_bus() -> Node:
 
 func _set_combat_hud(
 	_game: Node,
-	wave: int = 4,
 	seconds_remaining: float = 7.0,
 	kills: int = 38,
 	grease: int = 127,
@@ -328,8 +327,7 @@ func _set_combat_hud(
 	if bus == null:
 		return
 
-	bus.wave_index_changed.emit(wave)
-	bus.wave_time_changed.emit(seconds_remaining)
+	bus.level_time_changed.emit(600.0 - seconds_remaining, seconds_remaining)
 	bus.gold_changed.emit(grease)
 	bus.player_health_changed.emit(current_hp, max_hp)
 	bus.xp_changed.emit(xp_current, xp_to_next, level)

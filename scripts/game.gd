@@ -4,15 +4,13 @@ const ENEMY_DETAIL_UPDATE_INTERVAL := 0.12
 const ENEMY_RENDER_MARGIN := 64.0
 const ENEMY_FULL_DETAIL_MARGIN := 180.0
 
-@export var wave_definition: WaveDefinition
-@export var wave_definitions: Array[WaveDefinition] = []
+@export var level_definition: LevelDefinition
 @export var health_drop: DropDefinition
 @export var starting_character: CharacterDefinition
 @export var skip_character_select := false
 
-var is_wave_complete := false
+var is_victory := false
 var is_game_over := false
-var current_wave := 1
 var _arena_bounds := Rect2()
 var _enemy_detail_timer := 0.0
 
@@ -23,7 +21,7 @@ var _enemy_detail_timer := 0.0
 @onready var projectile_container: Node2D = $ProjectileContainer
 @onready var pickup_container: Node2D = $PickupContainer
 @onready var vfx_container: Node2D = $VFXContainer
-@onready var wave_manager: WaveManager = $WaveManager
+@onready var level_manager: LevelManager = $LevelManager
 @onready var enemy_spawner: EnemySpawner = $EnemySpawner
 @onready var loot_spawner: LootSpawner = $LootSpawner
 @onready var level_up_manager: Node = $LevelUpManager
@@ -44,16 +42,15 @@ func _ready() -> void:
 	_refresh_ui_weapon_loadout()
 	_fit_camera_to_play_area()
 	_follow_player_camera()
-	_configure_current_wave()
+	_configure_level()
 	loot_spawner.configure(pickup_container, health_drop)
 	vfx_manager.configure(vfx_container, camera, Callable(self, "_get_camera_world_view_size"))
 	if level_up_manager.has_method("configure"):
 		level_up_manager.configure(player, ui, Callable(self, "is_run_active"))
 	if shop_manager.has_method("configure"):
-		shop_manager.configure(player, ui, gold_system, Callable(self, "start_next_wave"))
+		shop_manager.configure(player, ui, gold_system, Callable(self, "resume_run"))
 
-	EventBus.wave_completed.connect(_on_wave_completed)
-	EventBus.wave_index_changed.emit(current_wave)
+	EventBus.level_completed.connect(_on_level_completed)
 	EventBus.player_died.connect(_on_player_died)
 
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
@@ -157,7 +154,7 @@ func _update_enemy_detail() -> void:
 
 
 func is_run_active() -> bool:
-	return not is_game_over and not is_wave_complete
+	return not is_game_over and not is_victory
 
 
 func _apply_starting_character() -> void:
@@ -169,7 +166,7 @@ func _apply_starting_character() -> void:
 		character = CharacterRoster.get_default()
 	player.configure(character)
 	_start_metrics_tracking()
-	if get_tree().paused and not is_game_over and not is_wave_complete:
+	if get_tree().paused and is_run_active():
 		get_tree().paused = false
 
 
@@ -179,57 +176,41 @@ func _should_auto_start_character() -> bool:
 
 func _end_run() -> void:
 	enemy_spawner.stop()
-	wave_manager.pause()
+	level_manager.pause()
 	get_tree().paused = true
 
 
-func _on_wave_completed() -> void:
-	is_wave_complete = true
-	_end_wave_metrics()
+func resume_run() -> void:
+	if is_run_active():
+		get_tree().paused = false
+
+
+func _on_level_completed() -> void:
+	is_victory = true
+	_end_level_metrics()
+	balance_metrics.end_run(true)
+	_emit_run_ended_metrics("victory")
+	ui.show_victory()
 	_end_run()
 
 
-func start_next_wave() -> void:
-	is_wave_complete = false
-	current_wave += 1
-	_clear_wave_entities()
-	_refresh_ui_weapon_loadout()
-	EventBus.wave_index_changed.emit(current_wave)
-	_configure_current_wave()
-	get_tree().paused = false
+func get_level_definition() -> LevelDefinition:
+	if level_definition:
+		return level_definition
+	return LevelDefinition.new()
 
 
-func get_current_wave_definition() -> WaveDefinition:
-	if not wave_definitions.is_empty():
-		var index := mini(current_wave - 1, wave_definitions.size() - 1)
-		return wave_definitions[index]
-	if wave_definition:
-		return wave_definition
-	return WaveDefinition.new()
-
-
-func _configure_current_wave() -> void:
-	var wave := get_current_wave_definition()
-	var duration := WaveDefinition.resolve_duration(
-		wave, current_wave, maxi(wave_definitions.size(), 1)
-	)
-	wave_manager.configure(wave, duration)
+func _configure_level() -> void:
+	var level := get_level_definition()
+	level_manager.configure(level)
 	enemy_spawner.set_camera_spawn_target(player, _get_camera_world_view_size())
-	enemy_spawner.configure(wave, enemy_container, _arena_bounds, current_wave)
-	_start_wave_metrics()
-
-
-func _clear_wave_entities() -> void:
-	for child in enemy_container.get_children():
-		child.queue_free()
-	for child in pickup_container.get_children():
-		child.queue_free()
-	for child in projectile_container.get_children():
-		child.queue_free()
+	enemy_spawner.configure(level, enemy_container, _arena_bounds)
+	_start_level_metrics()
 
 
 func _on_player_died() -> void:
 	is_game_over = true
+	_end_level_metrics()
 	balance_metrics.end_run(false)
 	_emit_run_ended_metrics("death")
 	ui.show_game_over()
@@ -275,9 +256,8 @@ func _on_pickup_collected_metrics(type: StringName, _world_pos: Vector2, value: 
 func _on_wave_metrics_ready(report: Dictionary) -> void:
 	print(
 		(
-			"Wave %d Metrics: DPS=%.1f, Kills=%d, Damage Dealt=%d, Damage Taken=%d, XP=%d, Grease=%d"
+			"Level Metrics: DPS=%.1f, Kills=%d, Damage Dealt=%d, Damage Taken=%d, XP=%d, Grease=%d"
 			% [
-				report.get("wave_number", 0),
 				report.get("effective_dps", 0.0),
 				report.get("total_kills", 0),
 				report.get("damage_dealt", 0),
@@ -292,7 +272,7 @@ func _on_wave_metrics_ready(report: Dictionary) -> void:
 
 func _emit_run_ended_metrics(end_reason: String = "unknown") -> void:
 	var summary := balance_metrics.get_run_summary()
-	summary["final_wave"] = current_wave
+	summary["time_survived"] = level_manager.elapsed_time
 	summary["level_reached"] = _get_player_level()
 	summary["weapons"] = _get_player_weapon_ids()
 	summary["end_reason"] = end_reason
@@ -304,7 +284,7 @@ func _save_run_on_quit() -> void:
 		return
 
 	if balance_metrics.get_current_wave_summary().has("wave_number"):
-		_end_wave_metrics()
+		_end_level_metrics()
 
 	balance_metrics.end_run(false)
 	_emit_run_ended_metrics("quit")
@@ -347,14 +327,14 @@ func _start_metrics_tracking() -> void:
 	EventBus.metrics_run_started.emit(character_id)
 
 
-func _start_wave_metrics() -> void:
+func _start_level_metrics() -> void:
 	var xp_system := $XpSystem as XpSystem
 	var player_level := 1 if xp_system == null else xp_system.level
-	balance_metrics.start_wave(current_wave, player_level)
-	EventBus.metrics_wave_started.emit(current_wave, player_level)
+	balance_metrics.start_wave(1, player_level)
+	EventBus.metrics_wave_started.emit(1, player_level)
 
 
-func _end_wave_metrics() -> void:
+func _end_level_metrics() -> void:
 	var xp_system := $XpSystem as XpSystem
 	var player_level := 1 if xp_system == null else xp_system.level
 	balance_metrics.end_wave(player_level)

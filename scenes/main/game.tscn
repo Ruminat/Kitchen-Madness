@@ -2,26 +2,22 @@
 
 [ext_resource type="Script" uid="uid://n27kgt0njlng" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="PackedScene" uid="uid://rena001" path="res://scenes/arena/arena.tscn" id="2_arena"]
-[ext_resource type="Script" uid="uid://csbu37rjarvka" path="res://scripts/data/wave_definition.gd" id="3_oxcik"]
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/player.tscn" id="3_player"]
 [ext_resource type="PackedScene" uid="uid://gameui001" path="res://scenes/ui/game_ui.tscn" id="4_ui"]
-[ext_resource type="Script" uid="uid://boq57pak1tgrn" path="res://scripts/systems/wave_manager.gd" id="5_wave"]
+[ext_resource type="Script" path="res://scripts/systems/level_manager.gd" id="5_level"]
 [ext_resource type="Script" uid="uid://bbglyg3a77woe" path="res://scripts/systems/enemy_spawner.gd" id="6_spawner"]
-[ext_resource type="Resource" path="res://resources/waves/wave_01.tres" id="7_wave"]
+[ext_resource type="Resource" uid="uid://leveldef_01" path="res://resources/levels/level_01.tres" id="7_level"]
 [ext_resource type="Script" uid="uid://bdplp4jt00cgf" path="res://scripts/systems/loot_spawner.gd" id="8_loot"]
 [ext_resource type="Resource" path="res://resources/drops/health_pickup.tres" id="9_health"]
 [ext_resource type="Script" uid="uid://bfx7x0fv7gpyi" path="res://scripts/systems/xp_system.gd" id="10_xp"]
 [ext_resource type="Script" uid="uid://bexwkpstg8gnx" path="res://scripts/systems/level_up_manager.gd" id="11_level"]
 [ext_resource type="Script" uid="uid://7g7ooqmlparf" path="res://scripts/systems/gold_system.gd" id="12_gold"]
 [ext_resource type="Script" uid="uid://brlckfkt1aa8l" path="res://scripts/systems/shop_manager.gd" id="13_shop"]
-[ext_resource type="Resource" path="res://resources/waves/wave_02.tres" id="14_wave_02"]
-[ext_resource type="Resource" path="res://resources/waves/wave_03.tres" id="15_wave_03"]
 [ext_resource type="Script" uid="uid://d1lsd65xmmw6k" path="res://scripts/systems/vfx_manager.gd" id="16_vfx"]
 
 [node name="Game" type="Node2D" unique_id=1722599546]
 script = ExtResource("1_game")
-wave_definition = ExtResource("7_wave")
-wave_definitions = Array[ExtResource("3_oxcik")]([ExtResource("7_wave"), ExtResource("14_wave_02"), ExtResource("15_wave_03")])
+level_definition = ExtResource("7_level")
 health_drop = ExtResource("9_health")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=82928360]
@@ -38,8 +34,8 @@ health_drop = ExtResource("9_health")
 
 [node name="VFXContainer" type="Node2D" parent="." unique_id=1297948798]
 
-[node name="WaveManager" type="Node" parent="." unique_id=92294225]
-script = ExtResource("5_wave")
+[node name="LevelManager" type="Node" parent="." unique_id=92294225]
+script = ExtResource("5_level")
 
 [node name="EnemySpawner" type="Node" parent="." unique_id=1831501558]
 script = ExtResource("6_spawner")

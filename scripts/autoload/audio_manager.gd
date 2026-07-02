@@ -11,7 +11,7 @@ const SFX_PATHS := {
 	"shoot_default": "res://assets/audio/sfx/shoot_default.wav",
 	"shoot_shotgun": "res://assets/audio/sfx/shoot_shotgun.wav",
 	"level_up": "res://assets/audio/sfx/level_up.wav",
-	"wave_complete": "res://assets/audio/sfx/wave_complete.wav",
+	"victory": "res://assets/audio/sfx/victory.wav",
 	"shop_buy": "res://assets/audio/sfx/shop_buy.wav",
 	"pickup_xp": "res://assets/audio/sfx/pickup_xp.wav",
 	"pickup_health": "res://assets/audio/sfx/pickup_health.wav",
@@ -104,7 +104,7 @@ func _connect_signals() -> void:
 	EventBus.enemy_killed.connect(_on_enemy_killed)
 	EventBus.player_health_changed.connect(_on_player_health_changed)
 	EventBus.level_up.connect(_on_level_up)
-	EventBus.wave_completed.connect(_on_wave_completed)
+	EventBus.level_completed.connect(_on_level_completed)
 	EventBus.pickup_collected.connect(_on_pickup_collected)
 	EventBus.gold_changed.connect(_on_gold_changed)
 
@@ -123,7 +123,7 @@ func _generate_placeholder_sounds() -> void:
 	_sfx_cache["shoot_shotgun"] = _generate_noise_burst(0.12)
 	_sfx_cache["weapon_upgrade"] = _generate_beep(990.0, 0.2)
 	_sfx_cache["level_up"] = _generate_arpeggio([523.0, 659.0, 784.0, 1047.0], 0.4)
-	_sfx_cache["wave_complete"] = _generate_arpeggio([440.0, 554.0, 659.0, 880.0], 0.5)
+	_sfx_cache["victory"] = _generate_arpeggio([440.0, 554.0, 659.0, 880.0], 0.5)
 
 
 func _generate_beep(frequency: float, duration: float) -> AudioStreamWAV:
@@ -426,8 +426,8 @@ func _on_level_up(_level: int) -> void:
 	play_sfx("level_up")
 
 
-func _on_wave_completed() -> void:
-	play_sfx("wave_complete")
+func _on_level_completed() -> void:
+	play_sfx("victory")
 
 
 func _on_pickup_collected(type: StringName, _world_pos: Vector2, _value: int) -> void:

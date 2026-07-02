@@ -34,7 +34,6 @@ const SHOP_HINT_TEXT_FIXED := "W/S rows  |  A/D cards  |  1-5 buy  |  R reroll  
 const SHOP_TRANSITION_DURATION := 0.5
 
 var _kills := 0
-var _current_wave := 1
 var _current_gold := 0
 var _timer_pulse_tween: Tween
 var _xp_flash_tween: Tween
@@ -317,13 +316,13 @@ func _ready() -> void:
 		_shop_cards[index].pressed.connect(_on_shop_button_pressed.bind(index))
 
 	EventBus.player_health_changed.connect(_on_player_health_changed)
-	EventBus.wave_time_changed.connect(_on_wave_time_changed)
+	EventBus.level_time_changed.connect(_on_level_time_changed)
 	EventBus.enemy_killed.connect(_on_enemy_killed)
 	EventBus.xp_changed.connect(_on_xp_changed)
 	EventBus.level_up.connect(_on_level_up)
 	EventBus.gold_changed.connect(_on_gold_changed)
-	EventBus.wave_index_changed.connect(_on_wave_index_changed)
 	get_viewport().size_changed.connect(_apply_reference_layout)
+	shop_title_label.text = "KITCHEN SHOP"
 
 
 func _apply_reference_layout() -> void:
@@ -682,11 +681,11 @@ func _on_level_up(_level: int) -> void:
 	_xp_flash_tween.tween_callback(func() -> void: xp_bar.set_fill_color(COLOR_XP_FILL))
 
 
-func _on_wave_time_changed(seconds_remaining: float) -> void:
+func _on_level_time_changed(_elapsed_seconds: float, seconds_remaining: float) -> void:
 	var seconds := ceili(maxf(seconds_remaining, 0.0))
 	var minutes := seconds / 60
 	var seconds_part := seconds % 60
-	timer_label.text = "WAVE %02d      %02d:%02d" % [_current_wave, minutes, seconds_part]
+	timer_label.text = "SURVIVE      %02d:%02d" % [minutes, seconds_part]
 
 	var urgent := seconds <= 10
 	timer_label.add_theme_color_override(
@@ -721,17 +720,13 @@ func _on_gold_changed(gold: int) -> void:
 	gold_label.text = CompactNumberFormat.format(gold)
 
 
-func _on_wave_index_changed(wave: int) -> void:
-	_current_wave = wave
-	shop_title_label.text = "WAVE %d CLEAR - KITCHEN SHOP" % wave
-
-
-func show_wave_complete() -> void:
+func show_victory() -> void:
 	overlay.visible = true
-	overlay_label.text = "Wave Complete!"
-	restart_hint.text = "Press R to play again"
+	overlay_label.text = "You Survived!"
+	restart_hint.text = "Press R or Enter to play again"
 	restart_hint.visible = true
 	restart_button.visible = true
+	restart_button.grab_focus()
 
 
 func show_game_over() -> void:

@@ -18,22 +18,6 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 
 ## Active roadmap
 
-### Phase 8A — Remove waves; time-based levels
-
-**Goal:** Replace the wave loop with a single timed survival level. No between-wave breaks.
-
-| Task | Details |
-|---|---|
-| Remove wave concept | Retire wave transitions, wave-end shop pause, and wave-index-driven flow in `WaveManager` / `EventBus` |
-| Level timer | A level is a fixed-duration map run. Level 1 = **10 minutes**. Survive the full timer → **win**; player death → **lose** |
-| Time-scaled spawning | Enemy count and/or spawn rate increases continuously over elapsed level time (not wave number) |
-| Win/lose flow | Replace “continue to next wave” with run-end screens driven by timer completion or death |
-| HUD | Show level elapsed / remaining time instead of wave number |
-| Data | Replace or repurpose `WaveDefinition` resources as `LevelDefinition` (duration, spawn curves) |
-| Tests | Timer win/lose, spawner scaling over time, no wave-end shop auto-open |
-
----
-
 ### Phase 8B — On-demand shop and upgrades
 
 **Goal:** Shop and level-up choices open only when the player asks — no automatic menus.
@@ -114,3 +98,5 @@ Every iteration should end with:
 **Settings overlay:** Pause-safe settings menu (resolution, audio, mute), persisted config, E2E layout coverage.
 
 **Test suite repair:** 270 tests green; fixed stale references, GdUnit/Godot 4.7 coroutine issues, orphan cleanup.
+
+**Phase 8A — Remove waves; time-based levels:** `LevelDefinition`/`LevelManager` replace `WaveDefinition`/`WaveManager`; single 10-minute survival level (`level_01.tres`) with continuous spawn-rate/cap ramps and per-minute enemy HP/damage scaling; survive → victory screen, death → game over; shop no longer auto-opens (on-demand hook `ShopManager.open_shop()` ready for 8B); shop prices scale per elapsed minute; 282 tests green.
