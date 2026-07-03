@@ -1,7 +1,8 @@
 class_name WeaponBelt
 extends PanelContainer
 
-const BODY_FONT := preload("res://assets/fonts/jersey15.ttf")
+const DS := preload("res://scripts/ui/design_system.gd")
+const BODY_FONT := DS.FONT_BODY
 const HudThemeScript = preload("res://scripts/ui/hud_theme.gd")
 
 var _slot_icons: Array[TextureRect] = []
@@ -12,24 +13,22 @@ func _init() -> void:
 	name = "WeaponBelt"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = Vector2(516, 78)
-	add_theme_stylebox_override(
-		"panel", HudThemeScript.make_metal_panel_style(Color(0.98, 0.72, 0.13, 1.0))
-	)
+	add_theme_stylebox_override("panel", HudThemeScript.make_metal_panel_style(DS.GREASE))
 	_build_slots()
 
 
 func _build_slots() -> void:
 	var margin := MarginContainer.new()
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_theme_constant_override("margin_left", 10)
-	margin.add_theme_constant_override("margin_top", 8)
-	margin.add_theme_constant_override("margin_right", 10)
-	margin.add_theme_constant_override("margin_bottom", 8)
+	margin.add_theme_constant_override("margin_left", DS.SPACE_MD)
+	margin.add_theme_constant_override("margin_top", DS.SPACE_SM)
+	margin.add_theme_constant_override("margin_right", DS.SPACE_MD)
+	margin.add_theme_constant_override("margin_bottom", DS.SPACE_SM)
 	add_child(margin)
 
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_theme_constant_override("separation", 8)
+	row.add_theme_constant_override("separation", DS.SPACE_SM)
 	margin.add_child(row)
 
 	for index in 6:
@@ -41,10 +40,10 @@ func _build_slots() -> void:
 
 		var slot_margin := MarginContainer.new()
 		slot_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		slot_margin.add_theme_constant_override("margin_left", 6)
-		slot_margin.add_theme_constant_override("margin_top", 5)
-		slot_margin.add_theme_constant_override("margin_right", 6)
-		slot_margin.add_theme_constant_override("margin_bottom", 4)
+		slot_margin.add_theme_constant_override("margin_left", DS.SPACE_XS)
+		slot_margin.add_theme_constant_override("margin_top", DS.SPACE_XS)
+		slot_margin.add_theme_constant_override("margin_right", DS.SPACE_XS)
+		slot_margin.add_theme_constant_override("margin_bottom", DS.SPACE_XS)
 		slot.add_child(slot_margin)
 
 		var stack := VBoxContainer.new()
@@ -64,9 +63,7 @@ func _build_slots() -> void:
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		label.text = str(index + 1)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.add_theme_font_override("font", BODY_FONT)
-		label.add_theme_font_size_override("font_size", 14)
-		label.add_theme_color_override("font_color", Color(0.93, 0.88, 0.76, 1.0))
+		DS.style_label(label, BODY_FONT, DS.FONT_SIZE_CAPTION, DS.INK_ON_DARK)
 		stack.add_child(label)
 		_slot_labels.append(label)
 

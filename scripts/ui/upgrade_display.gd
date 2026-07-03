@@ -1,6 +1,8 @@
 class_name UpgradeDisplay
 extends RefCounted
 
+const DS := preload("res://scripts/ui/design_system.gd")
+
 const DEFAULT_VISUAL := {"emoji": "✨", "accent": Color(0.55, 0.72, 0.95)}
 
 const VISUALS: Dictionary = {
@@ -31,31 +33,26 @@ static func apply_card_style(button: Button, upgrade: Resource) -> void:
 	var effect: StringName = upgrade.get("effect")
 	var accent: Color = get_visual(effect).accent
 
-	var normal := _make_style(accent, Color(0.11, 0.12, 0.16, 1.0), 5)
-	var hover := _make_style(accent.lightened(0.15), Color(0.14, 0.15, 0.2, 1.0), 5)
-	var focus := _make_style(accent.lightened(0.35), Color(0.16, 0.18, 0.24, 1.0), 6)
-	var pressed := _make_style(accent.darkened(0.1), Color(0.09, 0.1, 0.13, 1.0), 5)
-
-	button.add_theme_stylebox_override("normal", normal)
-	button.add_theme_stylebox_override("hover", hover)
-	button.add_theme_stylebox_override("focus", focus)
-	button.add_theme_stylebox_override("pressed", pressed)
-	button.add_theme_color_override("font_color", Color(0.92, 0.94, 0.97))
-	button.add_theme_color_override("font_hover_color", Color.WHITE)
-	button.add_theme_color_override("font_focus_color", Color.WHITE)
-	button.add_theme_color_override("font_pressed_color", Color(0.82, 0.84, 0.9))
-	button.add_theme_font_size_override("font_size", 17)
+	button.add_theme_stylebox_override("normal", _make_style(accent, DS.PARCHMENT))
+	button.add_theme_stylebox_override(
+		"hover", _make_style(accent.lightened(0.12), DS.PARCHMENT_LIGHT)
+	)
+	button.add_theme_stylebox_override(
+		"focus", _make_style(accent.lightened(0.25), DS.PARCHMENT_FOCUS)
+	)
+	button.add_theme_stylebox_override(
+		"pressed", _make_style(accent.darkened(0.12), DS.PARCHMENT_SUNK)
+	)
+	button.add_theme_color_override("font_color", DS.INK)
+	button.add_theme_color_override("font_hover_color", DS.INK_STRONG)
+	button.add_theme_color_override("font_focus_color", DS.INK_STRONG)
+	button.add_theme_color_override("font_pressed_color", DS.INK_PRESSED)
+	button.add_theme_font_size_override("font_size", DS.FONT_SIZE_LABEL)
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 
 
-static func _make_style(accent: Color, bg: Color, border_width: int) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = bg
-	style.border_width_left = border_width
-	style.border_color = accent
-	style.set_corner_radius_all(10)
-	style.content_margin_left = 20
-	style.content_margin_right = 20
-	style.content_margin_top = 16
-	style.content_margin_bottom = 16
-	return style
+## A parchment card with a bold accent stripe down its left edge (the rarity/stat cue).
+static func _make_style(accent: Color, bg: Color) -> StyleBoxFlat:
+	var style := DS.stylebox(bg, accent, DS.BORDER_THIN, DS.RADIUS_LG, 1)
+	style.border_width_left = DS.BORDER_THICK + 1
+	return DS.padded(style, DS.SPACE_XL, DS.SPACE_LG)

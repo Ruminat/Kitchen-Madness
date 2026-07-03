@@ -2,6 +2,7 @@ class_name HudActionButton
 extends Button
 
 const HudThemeScript = preload("res://scripts/ui/hud_theme.gd")
+const DS := preload("res://scripts/ui/design_system.gd")
 
 var _title := ""
 var _count := -1
@@ -12,7 +13,7 @@ func configure(title: String, accent: Color) -> void:
 	focus_mode = Control.FOCUS_NONE
 	custom_minimum_size = Vector2(184, 52)
 	HudThemeScript.apply_action_button_style(self, accent)
-	add_theme_font_size_override("font_size", 18)
+	add_theme_font_size_override("font_size", DS.FONT_SIZE_BODY)
 	_refresh_text()
 
 

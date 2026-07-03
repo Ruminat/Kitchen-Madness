@@ -4,13 +4,15 @@
 
 ## Current status
 
-**Latest: Phase 8C** — all tier-1 weapons at equal DPS (~36), 6 weapon slots, shop buy/sell/upgrade economy.
+**Latest: Phase 9 — UI Design System** — token-driven UI. `DesignSystem` (`scripts/ui/design_system.gd`) is the single source of truth for palette, spacing (4px base), radii, borders, a modular type scale, and elevation; all UI style files consume it (no hardcoded colors/sizes). Docs: [docs/ui-design-system.md](docs/ui-design-system.md).
+
+**Prior: Phase 8C** — all tier-1 weapons at equal DPS (~36), 6 weapon slots, shop buy/sell/upgrade economy.
 
 **Loop:** character select → survive the 10-minute level while pressure ramps → level-ups bank upgrade picks (open on demand) → shop to buy/upgrade/sell weapons anytime. Survive → win, die → lose. SFX + run stats to `ignored/stats/`.
 
 **Content:** 9 characters · 8 weapons (2 melee), DPS-balanced tier-1 · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers · idle squash bob · settings overlay.
 
-**Next: open** — roadmap 8A–8C done; pick from the optimizations backlog or add a new phase in [plans.md](plans.md).
+**Next: open** — roadmap 8A–8C + UI design system done; pick from the optimizations backlog or add a new phase in [plans.md](plans.md).
 
 ---
 
@@ -29,6 +31,7 @@
 
 | Pattern | Where |
 |---|---|
+| **DesignSystem (UI tokens)** | `scripts/ui/design_system.gd` (`DS`) — palette, `SPACE_*` (4px base), `RADIUS_*`, `BORDER_*`, `FONT_SIZE_*` (modular 1.2), `ELEVATION`, `Rarity`; builders `stylebox/shadowed/padded/style_label`. `HudTheme` composes tokens; every UI file consumes them, no raw literals. Docs: `docs/ui-design-system.md` |
 | **EventBus** | `scripts/autoload/event_bus.gd` — `level_time_changed(elapsed, remaining)`, `level_completed`, metrics signals |
 | **LevelDefinition** | `scripts/data/level_definition.gd` — duration, spawn curve (`spawn_multiplier_start/end/curve`), cap ramp (`max_enemies_start/end`), swarm fields; statics `resolve_enemy_health/contact_damage(base, elapsed_seconds)` = +25%/+15% per minute |
 | **LevelManager** | Counts elapsed up to `duration`; emits `level_time_changed`; on timeout emits `level_completed` (= victory) |

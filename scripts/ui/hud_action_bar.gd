@@ -6,8 +6,9 @@ signal shop_pressed
 signal upgrades_pressed
 
 const HudActionButtonScript = preload("res://scripts/ui/hud_action_button.gd")
-const COLOR_UPGRADE_ACCENT := Color(0.37, 0.66, 0.21, 1.0)
-const COLOR_SHOP_ACCENT := Color(0.98, 0.72, 0.13, 1.0)
+const DS := preload("res://scripts/ui/design_system.gd")
+const COLOR_UPGRADE_ACCENT := DS.HERB
+const COLOR_SHOP_ACCENT := DS.GREASE
 
 var upgrades_button: HudActionButton
 var shop_button: HudActionButton

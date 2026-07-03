@@ -2,7 +2,7 @@
 
 Tracks implementation status against [plans.md](plans.md). Update this file at the end of each phase or focused slice.
 
-**Last updated:** Phase 8C — weapon DPS parity, 6 slots, sell mechanics · 303 tests green
+**Last updated:** Phase 9 — UI design system (token-driven UI) · 322 tests green
 
 ---
 
@@ -18,6 +18,7 @@ Tracks implementation status against [plans.md](plans.md). Update this file at t
 
 ## Done
 
+- [x] **Phase 9 — UI design system** — new `DesignSystem` (`scripts/ui/design_system.gd`, alias `DS`) is the single source of truth for the interface: palette (ink/parchment/metal/brass + semantic accents + 5 rarity hues), 4px spacing scale, radius/border scales, a modular type scale (base 16, ratio 1.2) mapped to roles, elevation presets, and tiny builders (`stylebox/shadowed/padded/style_label`). Every UI style file (`hud_theme`, `shop_display`, `shop_card`, `upgrade_display`, `hud_action_bar/button`, `weapon_belt`) now composes tokens instead of hardcoding colors/sizes; level-up + shop upgrade cards unified onto the warm parchment language. Documented in `docs/ui-design-system.md`; 19 new tests (`test_design_system`, `test_hud_theme`) cover scale monotonicity, contrast, rarity, and that composed styles source their values from tokens. 322 tests, 0 failures.
 - [x] **Phases 1–4** — Core loop, enemies, XP, wave/shop flow, 9 characters, 8 weapons, VFX, balance metrics.
 - [x] **Phase 5 (5A–5F)** — Crit system, damage numbers, projectile visuals, SFX, run stats JSON, melee weapons.
 - [x] **Phase 6A** — Ant/moth enemies, burst swarms, cluster spawning.

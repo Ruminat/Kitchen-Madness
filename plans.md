@@ -18,7 +18,7 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 
 ## Active roadmap
 
-_Roadmap 8A–8C complete. Add the next phase here._
+_Roadmap 8A–8C and the UI design system (Phase 9) complete. Add the next phase here._
 
 ---
 
@@ -79,3 +79,5 @@ Every iteration should end with:
 **Phase 8B — On-demand shop and upgrades:** level-ups bank a pending choice (`EventBus.upgrades_pending_changed`) instead of auto-opening; player opens the shop with **`E`** / bottom-right Shop button and banked upgrades with **`Q`** / bottom-left Upgrades button (shows pending count, disabled at 0); both overlays pause and support mouse + keyboard; HUD action bar (`hud_action_bar.gd` + `hud_action_button.gd`) sits beneath modal overlays; 291 tests green.
 
 **Phase 8C — Weapon balance and 6-slot loadout:** all 8 tier-1 weapons tuned to equal single-target DPS (~36, within ±12%) verified by `BalanceCalculator.single_target_dps()` (type-aware: projectile/burst/orbit/melee/boomerang/turret); correct `weapon_type` set on every `.tres`; 6-slot cap confirmed (`WeaponController.MAX_WEAPONS = 6`); shop gains `SELL_WEAPON` offers refunding 50% of purchase price (`ShopManager` tracks per-weapon paid price, starting weapon seeded at base cost), blocked when only one weapon remains; sell cards always affordable with a `+N` refund badge; 303 tests green.
+
+**Phase 9 — UI design system:** introduced `DesignSystem` (`scripts/ui/design_system.gd`) as the single source of truth for the interface — palette, 4px spacing scale, radius/border scales, a modular type scale (base 16, ratio 1.2), elevation presets, rarity tiers, and builders (`stylebox/shadowed/padded/style_label`). Refactored every UI style file to compose tokens instead of hardcoded values, unified level-up/shop upgrade cards onto the parchment language, documented the system in `docs/ui-design-system.md`, and added `test_design_system` + `test_hud_theme`; 322 tests green.

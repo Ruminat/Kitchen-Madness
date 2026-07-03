@@ -1,14 +1,22 @@
 class_name ShopCard
 extends Button
 
-const COLOR_INK := Color(0.11, 0.075, 0.045, 1.0)
-const COLOR_MUTED := Color(0.29, 0.2, 0.13, 1.0)
-const COLOR_GREASE := Color(0.98, 0.72, 0.13, 1.0)
-const COLOR_GREASE_DIM := Color(0.46, 0.34, 0.16, 1.0)
-const COLOR_PAPER := Color(0.78, 0.67, 0.46, 1.0)
-const COLOR_PAPER_DARK := Color(0.5, 0.39, 0.26, 1.0)
-const DISPLAY_FONT := preload("res://assets/fonts/bangers.ttf")
-const BODY_FONT := preload("res://assets/fonts/jersey15.ttf")
+const DS := preload("res://scripts/ui/design_system.gd")
+const COLOR_INK := DS.INK
+const COLOR_MUTED := DS.TEXT_MUTED
+const COLOR_GREASE := DS.GREASE
+const COLOR_GREASE_DIM := DS.GREASE_DIM
+const COLOR_PAPER := DS.PARCHMENT
+const COLOR_PAPER_DARK := DS.PARCHMENT_DARK
+const DISPLAY_FONT := DS.FONT_DISPLAY
+const BODY_FONT := DS.FONT_BODY
+
+# Deliberate card geometry — sized once, reused everywhere.
+const CARD_MIN_SIZE := Vector2(218, 270)
+const RIBBON_HEIGHT := 24
+const ICON_AREA_HEIGHT := 86
+const ICON_SIZE := 72
+const HOTKEY_SIZE := 30
 
 var _icon_rect: TextureRect
 var _type_badge: Label
@@ -25,7 +33,7 @@ func _ready() -> void:
 	clip_text = true
 	alignment = HORIZONTAL_ALIGNMENT_LEFT
 	focus_mode = Control.FOCUS_ALL
-	custom_minimum_size = Vector2(218, 270)
+	custom_minimum_size = CARD_MIN_SIZE
 	_build_layout()
 
 
@@ -93,55 +101,51 @@ func _build_layout() -> void:
 	var margin := MarginContainer.new()
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 10)
-	margin.add_theme_constant_override("margin_top", 10)
-	margin.add_theme_constant_override("margin_right", 10)
-	margin.add_theme_constant_override("margin_bottom", 10)
+	margin.add_theme_constant_override("margin_left", DS.SPACE_SM)
+	margin.add_theme_constant_override("margin_top", DS.SPACE_SM)
+	margin.add_theme_constant_override("margin_right", DS.SPACE_SM)
+	margin.add_theme_constant_override("margin_bottom", DS.SPACE_SM)
 	add_child(margin)
 
 	var content := VBoxContainer.new()
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_theme_constant_override("separation", 7)
+	content.add_theme_constant_override("separation", DS.SPACE_SM)
 	margin.add_child(content)
 
 	var header := VBoxContainer.new()
 	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	header.add_theme_constant_override("separation", 3)
+	header.add_theme_constant_override("separation", DS.SPACE_XS)
 	content.add_child(header)
 
 	_accent_strip = ColorRect.new()
 	_accent_strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_accent_strip.custom_minimum_size = Vector2(0, 22)
+	_accent_strip.custom_minimum_size = Vector2(0, RIBBON_HEIGHT)
 	header.add_child(_accent_strip)
 
 	_type_badge = Label.new()
 	_type_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_type_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_type_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_type_badge.add_theme_font_override("font", DISPLAY_FONT)
-	_type_badge.add_theme_font_size_override("font_size", 18)
-	_type_badge.add_theme_color_override("font_color", COLOR_INK)
+	DS.style_label(_type_badge, DISPLAY_FONT, DS.FONT_SIZE_LABEL, COLOR_INK)
 	_type_badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_accent_strip.add_child(_type_badge)
 
 	_title_label = Label.new()
 	_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.add_theme_font_override("font", DISPLAY_FONT)
-	_title_label.add_theme_color_override("font_color", COLOR_INK)
-	_title_label.add_theme_font_size_override("font_size", 23)
+	DS.style_label(_title_label, DISPLAY_FONT, DS.FONT_SIZE_SUBHEADING, COLOR_INK)
 	_title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	header.add_child(_title_label)
 
 	var icon_panel := PanelContainer.new()
 	icon_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon_panel.custom_minimum_size = Vector2(0, 86)
+	icon_panel.custom_minimum_size = Vector2(0, ICON_AREA_HEIGHT)
 	icon_panel.add_theme_stylebox_override("panel", _make_inset_style())
 	content.add_child(icon_panel)
 
 	_icon_rect = TextureRect.new()
 	_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_icon_rect.custom_minimum_size = Vector2(72, 72)
+	_icon_rect.custom_minimum_size = Vector2(ICON_SIZE, ICON_SIZE)
 	_icon_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_panel.add_child(_icon_rect)
@@ -151,20 +155,18 @@ func _build_layout() -> void:
 	_desc_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_desc_label.max_lines_visible = 3
-	_desc_label.add_theme_font_override("font", BODY_FONT)
-	_desc_label.add_theme_color_override("font_color", COLOR_MUTED)
-	_desc_label.add_theme_font_size_override("font_size", 18)
+	DS.style_label(_desc_label, BODY_FONT, DS.FONT_SIZE_BODY, COLOR_MUTED)
 	_desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(_desc_label)
 
 	var footer := HBoxContainer.new()
 	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	footer.add_theme_constant_override("separation", 8)
+	footer.add_theme_constant_override("separation", DS.SPACE_SM)
 	content.add_child(footer)
 
 	var hotkey_panel := PanelContainer.new()
 	hotkey_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hotkey_panel.custom_minimum_size = Vector2(30, 30)
+	hotkey_panel.custom_minimum_size = Vector2(HOTKEY_SIZE, HOTKEY_SIZE)
 	hotkey_panel.add_theme_stylebox_override("panel", _make_hotkey_style())
 	footer.add_child(hotkey_panel)
 
@@ -172,9 +174,7 @@ func _build_layout() -> void:
 	_hotkey_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hotkey_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hotkey_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_hotkey_label.add_theme_font_override("font", BODY_FONT)
-	_hotkey_label.add_theme_color_override("font_color", Color(0.93, 0.88, 0.76, 1.0))
-	_hotkey_label.add_theme_font_size_override("font_size", 18)
+	DS.style_label(_hotkey_label, BODY_FONT, DS.FONT_SIZE_BODY, DS.INK_ON_DARK)
 	hotkey_panel.add_child(_hotkey_label)
 
 	_price_label = Label.new()
@@ -183,33 +183,17 @@ func _build_layout() -> void:
 	_price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_price_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_price_label.add_theme_font_override("font", DISPLAY_FONT)
-	_price_label.add_theme_font_size_override("font_size", 25)
+	_price_label.add_theme_font_size_override("font_size", DS.FONT_SIZE_SUBHEADING)
 	footer.add_child(_price_label)
 
 
 func _make_inset_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.62, 0.51, 0.34, 0.35)
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.border_color = Color(0.22, 0.15, 0.08, 0.45)
-	style.set_corner_radius_all(4)
-	style.content_margin_left = 8
-	style.content_margin_right = 8
-	style.content_margin_top = 6
-	style.content_margin_bottom = 6
-	return style
+	var bg := Color(DS.PARCHMENT_SUNK.r, DS.PARCHMENT_SUNK.g, DS.PARCHMENT_SUNK.b, 0.35)
+	var style := DS.stylebox(bg, Color(0.22, 0.15, 0.08, 0.45), DS.BORDER_HAIRLINE, DS.RADIUS_SM)
+	return DS.padded(style, DS.SPACE_SM, DS.SPACE_XS)
 
 
 func _make_hotkey_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.13, 0.1, 0.07, 1.0)
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.border_color = Color(0.7, 0.61, 0.43, 1.0)
-	style.set_corner_radius_all(4)
-	return style
+	return DS.stylebox(
+		Color(0.13, 0.1, 0.07, 1.0), DS.PARCHMENT.darkened(0.1), DS.BORDER_HAIRLINE, DS.RADIUS_SM
+	)
