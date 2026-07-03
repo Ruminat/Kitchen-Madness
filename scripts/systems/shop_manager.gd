@@ -122,8 +122,11 @@ func _on_shop_purchase(offer: Resource) -> void:
 		_record_purchase_price(offer, cost)
 		_sync_weapon_loadout_ui()
 	elif offer.has_method("apply"):
+		# The offer could not be applied (e.g. weapon already owned, at the slot
+		# cap, or targeting a weapon that is no longer owned) — refund in full.
 		_gold_system.add_gold(cost)
 
+	_invalidate_stale_offers()
 	_refresh_ui()
 
 
@@ -151,7 +154,45 @@ func _process_sell(offer: Resource, slot_index: int) -> void:
 	_weapon_purchase_price.erase(weapon_id)
 	_sold_slots[slot_index] = true
 	_sync_weapon_loadout_ui()
+	_invalidate_stale_offers()
 	_refresh_ui()
+
+
+## Grey out (mark sold) any still-open offer that no longer applies after a
+## purchase/sell — e.g. an add-weapon we now own or are capped on, or an
+## upgrade/sell for a weapon that is no longer in the loadout. Keeps the shop
+## honest so Grease can't be spent on a stale offer that would do nothing.
+func _invalidate_stale_offers() -> void:
+	_ensure_sold_slots()
+	for index in _current_offers.size():
+		if index >= _sold_slots.size() or _sold_slots[index]:
+			continue
+		if not _offer_still_valid(_current_offers[index]):
+			_sold_slots[index] = true
+
+
+func _offer_still_valid(offer: Resource) -> bool:
+	if offer == null:
+		return false
+	var controller := _get_weapon_controller()
+	if controller == null:
+		return false
+
+	match int(offer.get("offer_type")):
+		WeaponShopOffer.OfferType.ADD_WEAPON:
+			var weapon: WeaponDefinition = offer.get("weapon")
+			return (
+				weapon != null
+				and controller.can_add_weapon()
+				and not controller.has_weapon(weapon.id)
+			)
+		WeaponShopOffer.OfferType.SELL_WEAPON:
+			return (
+				controller.weapon_count() > 1
+				and controller.has_weapon(String(offer.get("weapon_id")))
+			)
+		_:
+			return controller.has_weapon(String(offer.get("weapon_id")))
 
 
 func _on_shop_reroll() -> void:

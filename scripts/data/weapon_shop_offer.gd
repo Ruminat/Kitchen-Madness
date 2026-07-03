@@ -18,15 +18,17 @@ func apply(player: Node) -> bool:
 	if controller == null:
 		return false
 
+	if offer_type == OfferType.ADD_WEAPON:
+		if weapon == null or controller.has_weapon(weapon.id) or not controller.can_add_weapon():
+			return false
+		controller.add_weapon(weapon)
+		return true
+
+	# Every other applicable offer upgrades a weapon the player must still own.
+	if weapon_id.is_empty() or not controller.has_weapon(weapon_id):
+		return false
+
 	match offer_type:
-		OfferType.ADD_WEAPON:
-			if (
-				weapon == null
-				or controller.has_weapon(weapon.id)
-				or not controller.can_add_weapon()
-			):
-				return false
-			controller.add_weapon(weapon)
 		OfferType.WEAPON_DAMAGE:
 			controller.upgrade_weapon_damage(weapon_id, amount)
 		OfferType.WEAPON_ATTACK_SPEED:

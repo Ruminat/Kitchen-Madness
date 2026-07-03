@@ -45,6 +45,48 @@ func test_apply_damage_upgrade_increases_weapon_damage() -> void:
 	assert_int(weapon.get_damage()).is_greater(before)
 
 
+func test_apply_damage_upgrade_fails_for_unowned_weapon() -> void:
+	var player := await _create_player()
+	# Player does not own a frying pan.
+	var offer := WeaponShopOffer.new()
+	offer.offer_type = WeaponShopOffer.OfferType.WEAPON_DAMAGE
+	offer.weapon_id = "frying_pan"
+	offer.amount = 0.25
+
+	assert_bool(offer.apply(player)).is_false()
+
+
+func test_apply_attack_speed_upgrade_fails_for_unowned_weapon() -> void:
+	var player := await _create_player()
+	var offer := WeaponShopOffer.new()
+	offer.offer_type = WeaponShopOffer.OfferType.WEAPON_ATTACK_SPEED
+	offer.weapon_id = "frying_pan"
+	offer.amount = 0.25
+
+	assert_bool(offer.apply(player)).is_false()
+
+
+func test_apply_pellet_upgrade_fails_for_unowned_weapon() -> void:
+	var player := await _create_player()
+	var offer := WeaponShopOffer.new()
+	offer.offer_type = WeaponShopOffer.OfferType.WEAPON_PELLET
+	offer.weapon_id = "frying_pan"
+	offer.amount = 1.0
+
+	assert_bool(offer.apply(player)).is_false()
+
+
+func test_apply_sell_offer_is_not_applied_directly() -> void:
+	# Sells are processed by ShopManager, never through apply().
+	var player := await _create_player()
+	var offer := WeaponShopOffer.new()
+	offer.offer_type = WeaponShopOffer.OfferType.SELL_WEAPON
+	offer.weapon_id = CHEF_DEF.starting_weapon.id
+
+	assert_bool(offer.apply(player)).is_false()
+	assert_int(_controller(player).weapon_count()).is_equal(1)
+
+
 func test_get_offer_key_distinguishes_add_and_upgrade_offers() -> void:
 	var add_offer := _create_add_offer(KNIFE_DEF)
 	var damage_offer := WeaponShopOffer.new()

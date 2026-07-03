@@ -40,7 +40,7 @@
 | **CollisionLayers** | Player mask = wall+enemy; enemy mask = wall+enemy+player; `MOTION_MODE_FLOATING` |
 | **BaseEnemy** | Contact slow · knockback · collision radius from `EnemyDefinition` · time-scaled HP/damage |
 | **MeleeWeapon** | Arc hits · crit · knockback via `.tres` fields |
-| **GoldSystem / ShopManager** | `open_shop()` on-demand (`ui.shop_open_requested`); prices +15%/elapsed minute via `scaled_cost_for_time()`; `SELL_WEAPON` offers refund 50% of tracked purchase price (`_weapon_purchase_price`), blocked at last gun |
+| **GoldSystem / ShopManager** | `open_shop()` on-demand (`ui.shop_open_requested`); prices +15%/elapsed minute via `scaled_cost_for_time()`; `SELL_WEAPON` offers refund 50% of tracked purchase price (`_weapon_purchase_price`), blocked at last gun. `_invalidate_stale_offers()` greys out offers that stop applying after a buy/sell; `WeaponShopOffer.apply()` refunds (returns false) when the target weapon isn't owned or the loadout is capped — no wasted Grease |
 | **Weapon DPS parity** | `BalanceCalculator.single_target_dps(weapon)` is type-aware (projectile/burst = dmg·pellets/rate, orbit = dmg·pellets·orbit_speed/τ, melee = dmg/rate, boomerang = 2·dmg/rate, turret = dmg·(dur/tfr)/rate); all tier-1 weapons ≈ `BASE_DPS_TARGET` (36) ±12%. Each `.tres` must set correct `weapon_type` |
 | **LevelUpManager** | Level-ups bank pending picks (`EventBus.upgrades_pending_changed`); `open_upgrades()` (via `ui.upgrades_open_requested`) shows 1-of-3 stat upgrades; chains remaining pending before unpausing |
 | **HudActionBar** | `scripts/ui/hud_action_bar.gd` + `hud_action_button.gd` — bottom-corner Upgrades/Shop buttons; built by `game_ui` beneath the modal overlays; Upgrades badge = pending count |
