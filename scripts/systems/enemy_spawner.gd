@@ -79,19 +79,34 @@ func _spawn_enemy() -> void:
 		_schedule_next_spawn()
 		return
 
-	var definition := _pick_spawn_definition()
-	var scene := _scene_for_definition(definition)
-	if scene == null:
-		_schedule_next_spawn()
-		return
+	var cluster_radius := level_definition.swarm_cluster_radius if level_definition else 0.0
 
+	# Split the tick's spawns into several small groups, each dropped at its own
+	# scattered anchor so enemies trickle in from different edges rather than
+	# piling up in a single spot.
+	for _group_index in _resolve_group_count():
+		if enemy_container.get_child_count() >= max_alive:
+			break
+
+		var definition := _pick_spawn_definition()
+		var scene := _scene_for_definition(definition)
+		if scene == null:
+			continue
+
+		_spawn_group(definition, scene, cluster_radius, max_alive)
+
+	_schedule_next_spawn()
+
+
+func _spawn_group(
+	definition: EnemyDefinition, scene: PackedScene, cluster_radius: float, max_alive: int
+) -> void:
 	var swarm_size := _resolve_swarm_size(definition)
 	var anchor := _random_spawn_position()
-	var cluster_radius := level_definition.swarm_cluster_radius if level_definition else 0.0
 
 	for _index in swarm_size:
 		if enemy_container.get_child_count() >= max_alive:
-			break
+			return
 
 		var enemy := scene.instantiate() as CharacterBody2D
 		enemy_container.add_child(enemy)
@@ -108,7 +123,11 @@ func _spawn_enemy() -> void:
 			else:
 				enemy.configure(definition)
 
-	_schedule_next_spawn()
+
+func _resolve_group_count() -> int:
+	if level_definition == null:
+		return 1
+	return level_definition.roll_group_count()
 
 
 func _max_alive_enemies() -> int:

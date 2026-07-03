@@ -1,10 +1,10 @@
 # Kitchen Madness
 
-A top-down arena survivor roguelite built in **Godot 4** with **GDScript**. Fight through kitchen-themed waves, collect upgrades, spend gold between rounds, and survive the madness.
+A top-down arena survivor roguelite built in **Godot 4** with **GDScript**. Survive a 10-minute kitchen onslaught, level up for upgrades, spend Grease in the on-demand shop, and outlast the madness.
 
 Genre kin to games like [Brotato](https://store.steampowered.com/app/1942280/Brotato/) - original project, own art and mechanics, targeting eventual cross-platform / Steam release.
 
-**Current status:** Phase 3A complete (gold, shop, multi-wave loop, 8-stat upgrades). See [progress.md](progress.md) and [context.md](context.md).
+**Current status:** Phase 8C complete (10-minute survival level, scattered-swarm spawning, 6-slot loadout, on-demand shop, banked level-up upgrades). See [progress.md](progress.md) and [context.md](context.md).
 
 ![Player surrounded by enemies](visual-tests/screenshots/player_surrounded.png)
 

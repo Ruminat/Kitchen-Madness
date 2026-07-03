@@ -113,7 +113,7 @@ static func estimate_level_kills(level: LevelDefinition) -> int:
 	var spawn_count := level.duration / maxf(level.spawn_interval, 0.1)
 	var avg_multiplier := (level.spawn_multiplier_start + level.spawn_multiplier_end) * 0.5
 	var avg_swarm_size := level.average_swarm_size()
-	return int(spawn_count * avg_multiplier * avg_swarm_size)
+	return int(spawn_count * avg_multiplier * avg_swarm_size * level.average_group_count())
 
 
 static func calculate_level_hp_budget(

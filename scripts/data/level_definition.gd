@@ -16,6 +16,10 @@ const DAMAGE_GROWTH_PER_MINUTE := 0.15
 @export var swarm_size_min: int = 1
 @export var swarm_size_max: int = 1
 @export var swarm_cluster_radius: float = 40.0
+## Number of separate small groups spawned per spawn tick, each at its own
+## scattered location around the arena edges (avoids one giant pile).
+@export var groups_per_wave_min: int = 1
+@export var groups_per_wave_max: int = 1
 
 
 func roll_swarm_size() -> int:
@@ -28,6 +32,18 @@ func average_swarm_size() -> float:
 	var min_size := maxi(swarm_size_min, 1)
 	var max_size := maxi(swarm_size_max, min_size)
 	return float(min_size + max_size) * 0.5
+
+
+func roll_group_count() -> int:
+	var min_groups := maxi(groups_per_wave_min, 1)
+	var max_groups := maxi(groups_per_wave_max, min_groups)
+	return randi_range(min_groups, max_groups)
+
+
+func average_group_count() -> float:
+	var min_groups := maxi(groups_per_wave_min, 1)
+	var max_groups := maxi(groups_per_wave_max, min_groups)
+	return float(min_groups + max_groups) * 0.5
 
 
 func get_spawn_multiplier(progress: float) -> float:
