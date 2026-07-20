@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=2 format=3 uid="uid://upgrade_luck"]
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=3 format=3 uid="uid://upgrade_luck"]
 
 [ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/upgrades/luck.png" id="2"]
 
 [resource]
 script = ExtResource("1")
 id = "luck"
-title = "Lucky Charm"
-description = "+2 luck - better drops, Grease, XP, level-up rolls"
-effect = &"luck_flat"
-amount = 2.0
-gold_cost = 22
+title = "Lucky Break"
+description = "+5% luck"
+icon = ExtResource("2")
+effect = &"luck_percent"
+amount = 0.05
+gold_cost = 20

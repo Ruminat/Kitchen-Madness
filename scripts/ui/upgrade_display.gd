@@ -3,17 +3,18 @@ extends RefCounted
 
 const DS := preload("res://scripts/ui/design_system.gd")
 
-const DEFAULT_VISUAL := {"emoji": "✨", "accent": Color(0.55, 0.72, 0.95)}
+const DEFAULT_VISUAL := {"accent": Color(0.55, 0.72, 0.95)}
 
+## Accent colors per stat effect — drives each card's rarity-style stripe/border.
 const VISUALS: Dictionary = {
-	&"max_health_flat": {"emoji": "❤️", "accent": Color(0.88, 0.28, 0.38)},
-	&"armor_flat": {"emoji": "🛡️", "accent": Color(0.52, 0.62, 0.88)},
-	&"damage_percent": {"emoji": "⚔️", "accent": Color(0.95, 0.48, 0.28)},
-	&"attack_speed_percent": {"emoji": "⚡", "accent": Color(0.95, 0.82, 0.32)},
-	&"move_speed_percent": {"emoji": "👟", "accent": Color(0.42, 0.82, 0.52)},
-	&"luck_flat": {"emoji": "🍀", "accent": Color(0.38, 0.82, 0.48)},
-	&"pickup_range_flat": {"emoji": "🧲", "accent": Color(0.42, 0.68, 0.95)},
-	&"xp_gain_percent": {"emoji": "📘", "accent": Color(0.35, 0.58, 0.95)},
+	&"armor_flat": {"accent": Color(0.52, 0.62, 0.88)},
+	&"max_health_percent": {"accent": Color(0.88, 0.28, 0.38)},
+	&"attack_speed_percent": {"accent": Color(0.95, 0.82, 0.32)},
+	&"damage_percent": {"accent": Color(0.95, 0.48, 0.28)},
+	&"area_percent": {"accent": Color(0.72, 0.52, 0.92)},
+	&"move_speed_percent": {"accent": Color(0.42, 0.82, 0.52)},
+	&"luck_percent": {"accent": Color(0.38, 0.82, 0.48)},
+	&"evasion_percent": {"accent": Color(0.42, 0.78, 0.9)},
 }
 
 
@@ -22,15 +23,26 @@ static func get_visual(effect: StringName) -> Dictionary:
 
 
 static func format_card_text(upgrade: Resource, hotkey: String) -> String:
-	var effect: StringName = upgrade.get("effect")
-	var visual := get_visual(effect)
 	var title: String = upgrade.get("title")
 	var description: String = upgrade.get("description")
-	return "%s  %s   %s\n%s" % [visual.emoji, title, hotkey, description]
+	return "%s   %s\n%s" % [title, hotkey, description]
+
+
+## Show the upgrade's generated icon on top of a card-style button.
+static func apply_icon(button: Button, upgrade: Resource) -> void:
+	var icon: Texture2D = upgrade.get("icon")
+	button.icon = icon
+	if icon == null:
+		return
+	button.expand_icon = true
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 
 
 static func apply_card_style(button: Button, upgrade: Resource) -> void:
-	var effect: StringName = upgrade.get("effect")
+	# Perks and other non-upgrade offers have no "effect"; fall back to the default.
+	var raw_effect: Variant = upgrade.get("effect")
+	var effect: StringName = raw_effect if raw_effect != null else &""
 	var accent: Color = get_visual(effect).accent
 
 	button.add_theme_stylebox_override("normal", _make_style(accent, DS.PARCHMENT))

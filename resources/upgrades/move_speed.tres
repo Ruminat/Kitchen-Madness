@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=3 format=3 uid="uid://upgrade_move_speed"]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/upgrades/move-speed.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "move_speed"
+title = "Fleet Feet"
+description = "+5% move speed"
+icon = ExtResource("2")
+effect = &"move_speed_percent"
+amount = 0.05
+gold_cost = 20

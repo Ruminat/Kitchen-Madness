@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3 uid="uid://skill_wraith_of_cooking_god"]
+
+[ext_resource type="Script" path="res://scripts/data/skill_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/skills/wraith-of-cooking-god.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "wraith_of_cooking_god"
+display_name = "Wraith of Cooking God"
+description = "The cooking god smites several enemies with ruthless lightning."
+icon = ExtResource("2")
+kind = 1
+cadence = 6.0
+damage = 300
+area = 10.0
+base_hits = 3
+max_level = 5
+damage_per_level = 0.1
+area_per_level = 0.0
+cadence_per_level = 0.0
+hits_per_level = 1

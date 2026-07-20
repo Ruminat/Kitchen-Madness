@@ -16,13 +16,32 @@ func _process(delta: float) -> void:
 	if _cooldown > 0.0:
 		return
 
-	var target := find_nearest_enemy()
+	var target := _find_target_in_range()
 	if target == null:
 		return
 
 	_fire_at(target)
 	var fire_rate := definition.fire_rate if definition else 0.45
 	_cooldown = fire_rate / get_fire_rate_multiplier()
+
+
+## Nearest live enemy within the weapon's design attack range (0 = unlimited).
+func _find_target_in_range() -> Node2D:
+	var nearest := find_nearest_enemy()
+	if nearest == null or definition == null or definition.attack_range <= 0.0:
+		return nearest
+
+	var range_px := StatUnits.area_to_pixels(definition.attack_range)
+	if global_position.distance_squared_to(nearest.global_position) > range_px * range_px:
+		return null
+	return nearest
+
+
+## Splash radius in engine pixels from the weapon's design area, scaled by area.
+func _splash_pixels() -> float:
+	if definition == null:
+		return 0.0
+	return StatUnits.area_to_pixels(definition.area) * get_area_multiplier()
 
 
 func _fire_at(target: Node2D) -> void:
@@ -63,5 +82,12 @@ func _spawn_projectile(container: Node2D, direction: Vector2, damage: int) -> vo
 		)
 	if projectile.has_method("set_crit_stats"):
 		projectile.set_crit_stats(_crit_chance, _crit_damage)
+	if projectile.has_method("set_splash_radius"):
+		projectile.set_splash_radius(_splash_pixels())
+	if projectile.has_method("set_visual_size"):
+		# Render the projectile at the same on-screen size as the weapon icon.
+		var visual_size := _player_render_diameter() * WEAPON_DIAMETER_FRACTION
+		if visual_size > 0.0:
+			projectile.set_visual_size(visual_size)
 	container.add_child(projectile)
 	projectile.global_position = global_position

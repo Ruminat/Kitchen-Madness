@@ -4,7 +4,7 @@ extends GdUnitTestSuite
 
 func test_balance_metrics_tracks_kills() -> void:
 	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
-	metrics.start_run("chef")
+	metrics.start_run("the_newbie")
 	metrics.start_wave(1, 1)
 
 	metrics.record_kill(&"chaser")
@@ -21,24 +21,24 @@ func test_balance_metrics_tracks_kills() -> void:
 
 func test_balance_metrics_tracks_damage() -> void:
 	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
-	metrics.start_run("goblin")
+	metrics.start_run("the_newbie")
 	metrics.start_wave(1, 1)
 
-	metrics.record_damage_dealt(25, "pepper_grinder_gun")
-	metrics.record_damage_dealt(30, "pepper_grinder_gun")
-	metrics.record_damage_dealt(15, "kitchen_knife")
+	metrics.record_damage_dealt(25, "kitchen_knife")
+	metrics.record_damage_dealt(30, "kitchen_knife")
+	metrics.record_damage_dealt(15, "frying_pan")
 
 	var summary := metrics.get_current_wave_summary()
 	assert_int(summary.get("damage_dealt", 0)).is_equal(70)
 
 	var damage_by_weapon: Dictionary = summary.get("damage_by_weapon", {})
-	assert_int(damage_by_weapon.get("pepper_grinder_gun", 0)).is_equal(55)
-	assert_int(damage_by_weapon.get("kitchen_knife", 0)).is_equal(15)
+	assert_int(damage_by_weapon.get("kitchen_knife", 0)).is_equal(55)
+	assert_int(damage_by_weapon.get("frying_pan", 0)).is_equal(15)
 
 
 func test_balance_metrics_tracks_damage_taken() -> void:
 	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
-	metrics.start_run("onion")
+	metrics.start_run("natsumi")
 	metrics.start_wave(1, 1)
 
 	metrics.record_damage_taken(8)
@@ -51,7 +51,7 @@ func test_balance_metrics_tracks_damage_taken() -> void:
 
 func test_balance_metrics_tracks_economy() -> void:
 	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
-	metrics.start_run("cookie")
+	metrics.start_run("natsumi")
 	metrics.start_wave(1, 1)
 
 	metrics.record_xp_collected(10)
@@ -71,7 +71,7 @@ func test_balance_metrics_calculates_effective_dps() -> void:
 	metrics.start_wave(1, 1)
 	await get_tree().create_timer(0.05).timeout
 
-	metrics.record_damage_dealt(120, "garlic_bomb")
+	metrics.record_damage_dealt(120, "frying_pan")
 
 	var summary := metrics.get_current_wave_summary()
 	assert_float(summary.get("effective_dps", 0.0)).is_greater(0.0)

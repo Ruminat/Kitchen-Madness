@@ -12,10 +12,20 @@ var camera_target: Node2D
 var camera_focus := Vector2.ZERO
 var camera_view_size := Arena.DEFAULT_VIEW_SIZE
 var is_active := true
+## Multiplier on the alive-enemy cap, grown by the "Bring me more" perk.
+var count_multiplier := 1.0
 
 var _has_camera_focus := false
 var _spawn_timer: Timer
 var _elapsed_time := 0.0
+
+
+func _ready() -> void:
+	EventBus.enemy_count_percent_added.connect(_on_enemy_count_percent_added)
+
+
+func _on_enemy_count_percent_added(percent: float) -> void:
+	count_multiplier = maxf(count_multiplier * (1.0 + percent), 0.1)
 
 
 func configure(definition: LevelDefinition, container: Node2D, bounds: Rect2) -> void:
@@ -131,9 +141,10 @@ func _resolve_group_count() -> int:
 
 
 func _max_alive_enemies() -> int:
+	var base := 120
 	if level_definition:
-		return level_definition.get_max_enemies(_level_progress())
-	return 120
+		base = level_definition.get_max_enemies(_level_progress())
+	return maxi(roundi(float(base) * count_multiplier), 1)
 
 
 func _resolve_swarm_size(definition: EnemyDefinition) -> int:

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=5 format=3 uid="uid://perk_getting_fatty"]
+
+[ext_resource type="Script" path="res://scripts/data/perk_definition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/data/stat_effect.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/rework/perks/getting-fatty.png" id="3"]
+
+[sub_resource type="Resource" id="eff_move"]
+script = ExtResource("2")
+effect = &"move_speed_percent"
+amount = -0.03
+
+[sub_resource type="Resource" id="eff_armor"]
+script = ExtResource("2")
+effect = &"armor_flat"
+amount = 1.0
+
+[resource]
+script = ExtResource("1")
+id = "getting_fatty"
+display_name = "Getting Fatty"
+description = "-3% move speed, +1 armor. Slow and sturdy."
+icon = ExtResource("3")
+effects = Array[Resource]([SubResource("eff_move"), SubResource("eff_armor")])

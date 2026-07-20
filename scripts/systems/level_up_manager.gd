@@ -2,16 +2,14 @@ class_name LevelUpManager
 extends Node
 
 const DEFAULT_UPGRADE_PATHS: Array[String] = [
-	"res://resources/upgrades/max_health.tres",
 	"res://resources/upgrades/armor.tres",
-	"res://resources/upgrades/damage_boost.tres",
+	"res://resources/upgrades/max_health.tres",
 	"res://resources/upgrades/attack_speed.tres",
-	"res://resources/upgrades/speed_boost.tres",
+	"res://resources/upgrades/damage.tres",
+	"res://resources/upgrades/area.tres",
+	"res://resources/upgrades/move_speed.tres",
 	"res://resources/upgrades/luck.tres",
-	"res://resources/upgrades/pickup_range.tres",
-	"res://resources/upgrades/xp_gain.tres",
-	"res://resources/upgrades/crit_chance.tres",
-	"res://resources/upgrades/crit_damage.tres",
+	"res://resources/upgrades/evasion.tres",
 ]
 
 @export var upgrades: Array[Resource] = []
@@ -19,6 +17,8 @@ const DEFAULT_UPGRADE_PATHS: Array[String] = [
 
 var _player: Node
 var _ui: Node
+var _skill_runner: SkillRunner
+var _entity_manager: EntityManager
 var _can_resume := Callable()
 var _pending_levels := 0
 var _menu_open := false
@@ -29,10 +29,18 @@ func _ready() -> void:
 	EventBus.level_up.connect(_on_level_up)
 
 
-func configure(player: Node, ui: Node, can_resume: Callable = Callable()) -> void:
+func configure(
+	player: Node,
+	ui: Node,
+	can_resume: Callable = Callable(),
+	skill_runner: SkillRunner = null,
+	entity_manager: EntityManager = null
+) -> void:
 	_player = player
 	_ui = ui
 	_can_resume = can_resume
+	_skill_runner = skill_runner
+	_entity_manager = entity_manager
 
 	if _ui and _ui.has_signal("upgrade_selected"):
 		_ui.upgrade_selected.connect(_on_upgrade_selected)
@@ -92,25 +100,23 @@ func _on_upgrade_selected(upgrade: Resource) -> void:
 		get_tree().paused = false
 
 
+## Level-up choices come from a unified pool — stat upgrades plus skill and entity
+## acquire/upgrade offers — selected with the same luck bias the shop uses, so a
+## lucky player is more likely to be offered upgrades for content they already own.
 func _pick_choices() -> Array[Resource]:
-	var pool := upgrades.duplicate()
-	pool.shuffle()
+	var pool: Array = []
+	pool.append_array(upgrades)
+	pool.append_array(OfferCatalog.skill_offers(_skill_runner))
+	pool.append_array(OfferCatalog.entity_offers(_entity_manager))
 
-	var candidate_count := choice_count
+	var luck := 0.0
 	if _player and _player.has_method("get_luck"):
-		candidate_count += mini(_player.get_luck() / 10, 2)
-	candidate_count = mini(candidate_count, pool.size())
+		luck = float(_player.get_luck())
 
-	var candidates: Array[Resource] = []
-	for index in candidate_count:
-		candidates.append(pool[index])
-
-	candidates.sort_custom(_sort_upgrades_by_amount_desc)
-	return candidates.slice(0, choice_count)
-
-
-func _sort_upgrades_by_amount_desc(a: Resource, b: Resource) -> bool:
-	return float(a.get("amount")) > float(b.get("amount"))
+	var chosen: Array[Resource] = []
+	for offer in OfferSelection.select(pool, choice_count, luck):
+		chosen.append(offer as Resource)
+	return chosen
 
 
 func _can_resume_run() -> bool:

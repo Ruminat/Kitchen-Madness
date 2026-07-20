@@ -2,8 +2,9 @@
 extends GdUnitTestSuite
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
-const CHEF_DEF := preload("res://resources/characters/chef.tres")
-const KNIFE_DEF := preload("res://resources/weapons/kitchen_knife.tres")
+const NEWBIE_DEF := preload("res://resources/characters/the_newbie.tres")
+# The Newbie starts with the kitchen knife, so secondary weapons must be distinct.
+const PAN_DEF := preload("res://resources/weapons/frying_pan.tres")
 
 
 class MockEnemy:
@@ -27,14 +28,14 @@ class MockEnemy:
 func test_get_owned_weapon_ids_returns_starting_weapon() -> void:
 	var controller := await _create_controller()
 	assert_int(controller.get_owned_weapon_ids().size()).is_equal(1)
-	assert_str(controller.get_owned_weapon_ids()[0]).is_equal("pepper_grinder_gun")
+	assert_str(controller.get_owned_weapon_ids()[0]).is_equal("kitchen_knife")
 
 
 func test_add_weapon_respects_max_weapons() -> void:
 	var controller := await _create_controller()
 
 	for index in WeaponController.MAX_WEAPONS - 1:
-		controller.add_weapon(KNIFE_DEF)
+		controller.add_weapon(PAN_DEF)
 
 	assert_bool(controller.can_add_weapon()).is_false()
 	assert_int(controller.get_owned_weapon_ids().size()).is_equal(WeaponController.MAX_WEAPONS)
@@ -47,19 +48,19 @@ func test_max_weapons_is_six() -> void:
 func test_weapon_count_tracks_loadout_size() -> void:
 	var controller := await _create_controller()
 	assert_int(controller.weapon_count()).is_equal(1)
-	controller.add_weapon(KNIFE_DEF)
+	controller.add_weapon(PAN_DEF)
 	assert_int(controller.weapon_count()).is_equal(2)
 
 
 func test_remove_weapon_drops_target_and_frees_slot() -> void:
 	var controller := await _create_controller()
-	controller.add_weapon(KNIFE_DEF)
+	controller.add_weapon(PAN_DEF)
 
-	var removed := controller.remove_weapon("kitchen_knife")
+	var removed := controller.remove_weapon("frying_pan")
 
 	assert_bool(removed).is_true()
-	assert_bool(controller.has_weapon("kitchen_knife")).is_false()
-	assert_bool(controller.has_weapon("pepper_grinder_gun")).is_true()
+	assert_bool(controller.has_weapon("frying_pan")).is_false()
+	assert_bool(controller.has_weapon("kitchen_knife")).is_true()
 	assert_int(controller.weapon_count()).is_equal(1)
 
 
@@ -71,14 +72,14 @@ func test_remove_weapon_returns_false_for_unowned() -> void:
 
 func test_upgrade_weapon_damage_only_affects_target_weapon() -> void:
 	var controller := await _create_controller()
-	controller.add_weapon(KNIFE_DEF)
+	controller.add_weapon(PAN_DEF)
 
 	var starter: BaseWeapon = controller.get_child(0) as BaseWeapon
 	var knife: BaseWeapon = controller.get_child(1) as BaseWeapon
 	var starter_before := starter.get_damage()
 	var knife_before := knife.get_damage()
 
-	controller.upgrade_weapon_damage("kitchen_knife", 0.5)
+	controller.upgrade_weapon_damage("frying_pan", 0.5)
 
 	assert_int(starter.get_damage()).is_equal(starter_before)
 	assert_int(knife.get_damage()).is_greater(knife_before)
@@ -89,6 +90,18 @@ func test_weapons_create_visible_orbit_sprite() -> void:
 	var weapon := controller.get_child(0) as BaseWeapon
 
 	assert_object(weapon.get_node_or_null("WeaponSprite")).is_not_null()
+
+
+func test_weapon_sprite_is_scaled_to_half_player_diameter() -> void:
+	var controller := await _create_controller()
+	var weapon := controller.get_child(0) as BaseWeapon
+	var sprite := weapon.get_node("WeaponSprite") as Sprite2D
+
+	var player_sprite := (controller.get_parent().get_node("Visual/Sprite")) as Sprite2D
+	var player_diameter := float(player_sprite.texture.get_width()) * player_sprite.scale.x
+	var weapon_width := float(sprite.texture.get_width()) * sprite.scale.x
+
+	assert_float(weapon_width).is_equal_approx(player_diameter * 0.5, 0.5)
 
 
 func test_controller_offsets_orbiting_weapons() -> void:
@@ -122,6 +135,6 @@ func _create_controller() -> WeaponController:
 	add_child(projectile_container)
 	if not player.is_node_ready():
 		await player.ready
-	player.configure(CHEF_DEF)
+	player.configure(NEWBIE_DEF)
 	player.setup(Rect2(-100.0, -100.0, 200.0, 200.0), projectile_container)
 	return player.get_node("WeaponController") as WeaponController

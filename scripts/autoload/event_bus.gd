@@ -13,6 +13,8 @@ signal level_time_changed(elapsed_seconds: float, seconds_remaining: float)
 signal level_completed
 signal gold_changed(gold: int)
 signal upgrades_pending_changed(count: int)
+## A perk added +percent to the enemy-count multiplier (e.g. 0.05 = +5% enemies).
+signal enemy_count_percent_added(percent: float)
 
 # Balance metrics signals
 signal metrics_damage_dealt(amount: int, weapon_id: String)

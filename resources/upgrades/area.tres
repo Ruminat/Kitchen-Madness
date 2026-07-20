@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=3 format=3 uid="uid://upgrade_area"]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/upgrades/area.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "area"
+title = "Wide Reach"
+description = "+5% area"
+icon = ExtResource("2")
+effect = &"area_percent"
+amount = 0.05
+gold_cost = 20

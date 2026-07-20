@@ -50,14 +50,51 @@ func test_heal_caps_at_max_health() -> void:
 	assert_int(health.current_health).is_equal(100)
 
 
-func test_armor_reduces_damage_with_one_minimum() -> void:
+func test_armor_reduces_damage_as_percentage() -> void:
 	var health := _create_health_component(100, 0.0)
 	await _wait_ready(health)
 	health.increase_armor(3)
-	health.take_damage(10)
-	assert_int(health.current_health).is_equal(93)
-	health.take_damage(2)
-	assert_int(health.current_health).is_equal(92)
+	var expected := StatUnits.apply_armor(20, 3)
+	var dealt := health.take_damage(20)
+	assert_int(dealt).is_equal(expected)
+	assert_int(health.current_health).is_equal(100 - expected)
+	assert_int(dealt).is_less(20)
+
+
+func test_armor_keeps_minimum_of_one_damage() -> void:
+	var health := _create_health_component(100, 0.0)
+	await _wait_ready(health)
+	health.increase_armor(1000)
+	assert_int(health.take_damage(1)).is_equal(1)
+
+
+func test_negative_armor_increases_damage() -> void:
+	var health := _create_health_component(100, 0.0)
+	await _wait_ready(health)
+	health.increase_armor(-4)
+	assert_int(health.take_damage(20)).is_greater(20)
+
+
+func test_evasion_negates_damage_but_grants_iframes() -> void:
+	var health := _create_health_component(100, 0.2)
+	await _wait_ready(health)
+	health.set_evasion(1.0)
+	var evaded_signals: Array = []
+	health.evaded.connect(func() -> void: evaded_signals.append(true))
+
+	var dealt := health.take_damage(30)
+
+	assert_int(dealt).is_equal(0)
+	assert_int(health.current_health).is_equal(100)
+	assert_int(evaded_signals.size()).is_equal(1)
+	# The evade still triggers the invulnerability window.
+	assert_bool(health.is_invincible()).is_true()
+
+
+func test_take_damage_returns_amount_dealt() -> void:
+	var health := _create_health_component(100, 0.0)
+	await _wait_ready(health)
+	assert_int(health.take_damage(15)).is_equal(15)
 
 
 func _create_health_component(max_health: int, invincibility: float) -> HealthComponent:

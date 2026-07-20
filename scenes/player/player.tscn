@@ -1,10 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://player001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/chef.png" id="2_chef"]
+[ext_resource type="Texture2D" path="res://assets/rework/characters/the-newbie.png" id="2_newbie"]
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="3_health"]
 [ext_resource type="Script" path="res://scripts/weapons/weapon_controller.gd" id="4_weapon_ctrl"]
-[ext_resource type="Resource" uid="uid://8bg0m3o6c7pi" path="res://resources/weapons/pepper_grinder_gun.tres" id="5_pistol"]
+[ext_resource type="Resource" uid="uid://weapondef_kitchen_knife" path="res://resources/weapons/kitchen_knife.tres" id="5_weapon"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_player"]
 radius = 14.0
@@ -18,7 +18,7 @@ script = ExtResource("1_player")
 [node name="Visual" type="Node2D" parent="."]
 
 [node name="Sprite" type="Sprite2D" parent="Visual"]
-texture = ExtResource("2_chef")
+texture = ExtResource("2_newbie")
 offset = Vector2(0, -18)
 scale = Vector2(0.175, 0.175)
 
@@ -32,4 +32,4 @@ invincibility_time = 0.5
 
 [node name="WeaponController" type="Node2D" parent="."]
 script = ExtResource("4_weapon_ctrl")
-starting_weapon = ExtResource("5_pistol")
+starting_weapon = ExtResource("5_weapon")

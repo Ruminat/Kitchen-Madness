@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=5 format=3 uid="uid://weapondef_rotten_tomato"]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_definition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/weapons/projectile_weapon.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/projectiles/projectile.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/rework/weapons/rotten-tomato.png" id="4"]
+
+[resource]
+script = ExtResource("1")
+id = "rotten_tomato"
+display_name = "Rotten Tomato"
+description = "Lobs a splattering rotten tomato that bursts on impact."
+icon = ExtResource("4")
+weapon_type = 0
+weapon_script = ExtResource("2")
+damage = 40
+fire_rate = 1.2
+area = 5.0
+attack_range = 80.0
+projectile_scene = ExtResource("3")
+projectile_texture = ExtResource("4")
+pellet_count = 1
+projectile_speed = 520.0
+projectile_lifetime = 1.4
+vfx_accent = Color(0.85, 0.28, 0.2, 1)

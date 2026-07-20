@@ -1,36 +1,16 @@
 # GdUnit generated TestSuite
 extends GdUnitTestSuite
 
-const PEPPER_DEF := preload("res://resources/weapons/pepper_grinder_gun.tres")
-const SOUP_DEF := preload("res://resources/weapons/boiling_soup_splash.tres")
-const ONION_RING_DEF := preload("res://resources/weapons/onion_ring_blade.tres")
 const KNIFE_DEF := preload("res://resources/weapons/kitchen_knife.tres")
 const PAN_DEF := preload("res://resources/weapons/frying_pan.tres")
-const GARLIC_DEF := preload("res://resources/weapons/garlic_bomb.tres")
-const LADLE_DEF := preload("res://resources/weapons/ladle_boomerang.tres")
-const TOASTER_DEF := preload("res://resources/weapons/toaster_turret.tres")
-const BURST_SCRIPT := preload("res://scripts/weapons/burst_weapon.gd")
-const BOOMERANG_SCRIPT := preload("res://scripts/weapons/boomerang_weapon.gd")
-const TURRET_SCRIPT := preload("res://scripts/weapons/turret_weapon.gd")
-const ORBIT_SCRIPT := preload("res://scripts/weapons/orbit_weapon.gd")
+const TOMATO_DEF := preload("res://resources/weapons/rotten_tomato.tres")
 const MELEE_SCRIPT := preload("res://scripts/weapons/melee_weapon.gd")
+const PROJECTILE_SCRIPT := preload("res://scripts/weapons/projectile_weapon.gd")
 
 
-class MockOrbitEnemy:
-	extends Node2D
-
-	var last_damage := 0
-
-	func take_damage(amount: int) -> void:
-		last_damage = amount
-
-	func get_collision_radius() -> float:
-		return 12.0
-
-
-func test_weapon_roster_loads_eight_kitchen_weapons() -> void:
+func test_weapon_roster_loads_three_kitchen_weapons() -> void:
 	var roster := WeaponRoster.load_roster()
-	assert_int(roster.size()).is_equal(8)
+	assert_int(roster.size()).is_equal(3)
 
 
 func test_each_weapon_has_required_fields() -> void:
@@ -54,11 +34,6 @@ func test_get_by_id_returns_matching_weapon() -> void:
 	assert_object(WeaponRoster.get_by_id("missing_weapon")).is_null()
 
 
-func test_projectile_weapons_reference_projectile_scene() -> void:
-	for weapon in [PEPPER_DEF, SOUP_DEF, GARLIC_DEF, LADLE_DEF, TOASTER_DEF]:
-		assert_object(weapon.projectile_scene).is_not_null()
-
-
 func test_melee_weapons_use_melee_script_without_projectiles() -> void:
 	for weapon in [KNIFE_DEF, PAN_DEF]:
 		assert_object(weapon.weapon_script).is_same(MELEE_SCRIPT)
@@ -66,35 +41,22 @@ func test_melee_weapons_use_melee_script_without_projectiles() -> void:
 		assert_object(weapon.projectile_scene).is_null()
 
 
-func test_special_weapons_use_expected_scripts() -> void:
-	assert_object(GARLIC_DEF.weapon_script).is_same(BURST_SCRIPT)
-	assert_object(LADLE_DEF.weapon_script).is_same(BOOMERANG_SCRIPT)
-	assert_object(TOASTER_DEF.weapon_script).is_same(TURRET_SCRIPT)
-	assert_object(ONION_RING_DEF.weapon_script).is_same(ORBIT_SCRIPT)
+func test_rotten_tomato_is_a_ranged_projectile_weapon() -> void:
+	assert_object(TOMATO_DEF.weapon_script).is_same(PROJECTILE_SCRIPT)
+	assert_int(TOMATO_DEF.weapon_type).is_equal(WeaponDefinition.WeaponType.PROJECTILE)
+	assert_object(TOMATO_DEF.projectile_scene).is_not_null()
 
 
-func test_orbit_blade_hit_emits_damage_dealt_once() -> void:
-	var weapon: Node2D = Node2D.new()
-	weapon.set_script(ORBIT_SCRIPT)
-	add_child(weapon)
-	weapon.setup(ONION_RING_DEF, Rect2(), null)
+func test_weapons_author_design_unit_stats() -> void:
+	# Design-unit stats from plans.md R3.
+	assert_int(KNIFE_DEF.damage).is_equal(25)
+	assert_float(KNIFE_DEF.fire_rate).is_equal(0.8)
+	assert_float(KNIFE_DEF.area).is_equal(20.0)
+	assert_float(KNIFE_DEF.attack_range).is_equal(10.0)
 
-	var enemy := MockOrbitEnemy.new()
-	enemy.add_to_group("enemies")
-	add_child(enemy)
-	enemy.global_position = Vector2(58.0, 0.0)
+	assert_int(PAN_DEF.damage).is_equal(60)
+	assert_float(PAN_DEF.fire_rate).is_equal(1.9)
 
-	var emission_info := {"count": 0, "amount": 0, "is_crit": true}
-	EventBus.damage_dealt.connect(
-		func(_pos: Vector2, amount: int, is_crit: bool) -> void:
-			emission_info.count += 1
-			emission_info.amount = amount
-			emission_info.is_crit = is_crit
-	)
-
-	weapon._check_blade_hits(Vector2(58.0, 0.0), ONION_RING_DEF.damage)
-
-	assert_int(emission_info.count).is_equal(1)
-	assert_int(emission_info.amount).is_equal(ONION_RING_DEF.damage)
-	assert_bool(emission_info.is_crit).is_false()
-	assert_int(enemy.last_damage).is_equal(ONION_RING_DEF.damage)
+	assert_int(TOMATO_DEF.damage).is_equal(40)
+	assert_float(TOMATO_DEF.fire_rate).is_equal(1.2)
+	assert_float(TOMATO_DEF.attack_range).is_equal(80.0)

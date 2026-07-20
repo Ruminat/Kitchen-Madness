@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=2 format=3 uid="uid://upgrade_health"]
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=3 format=3 uid="uid://upgrade_max_health"]
 
 [ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/upgrades/hp.png" id="2"]
 
 [resource]
 script = ExtResource("1")
 id = "max_health"
-title = "Vitality"
-description = "+15 max HP and heal 15"
-effect = &"max_health_flat"
-amount = 15.0
-gold_cost = 18
+title = "Hearty"
+description = "+5% max HP"
+icon = ExtResource("2")
+effect = &"max_health_percent"
+amount = 0.05
+gold_cost = 20

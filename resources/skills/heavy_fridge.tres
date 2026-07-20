@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3 uid="uid://skill_heavy_fridge"]
+
+[ext_resource type="Script" path="res://scripts/data/skill_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/skills/heavy-fridge.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "heavy_fridge"
+display_name = "Heavy Fridge"
+description = "A fridge falls on a random enemy, crushing everything nearby."
+icon = ExtResource("2")
+kind = 0
+cadence = 3.0
+damage = 60
+area = 60.0
+base_hits = 1
+max_level = 6
+damage_per_level = 0.1
+area_per_level = 0.05
+cadence_per_level = 0.0
+hits_per_level = 0

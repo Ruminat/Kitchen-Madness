@@ -4,8 +4,8 @@ extends GdUnitTestSuite
 const GAME_SCENE := preload("res://scenes/main/game.tscn")
 const GAME_SCRIPT := preload("res://scripts/game.gd")
 const LEVEL_01 := preload("res://resources/levels/level_01.tres")
-const CHEF_DEF := preload("res://resources/characters/chef.tres")
-const GOBLIN_DEF := preload("res://resources/characters/goblin.tres")
+const NEWBIE_DEF := preload("res://resources/characters/the_newbie.tres")
+const BARRET_DEF := preload("res://resources/characters/mr_barret.tres")
 
 
 func before() -> void:
@@ -31,20 +31,22 @@ func test_game_auto_applies_default_character_in_headless() -> void:
 	await _wait_ready(game)
 
 	var player: CharacterBody2D = game.get_node("Player") as CharacterBody2D
-	assert_object(player.get_character()).is_same(CHEF_DEF)
-	assert_int(player.get_max_health()).is_equal(CHEF_DEF.max_health)
+	assert_object(player.get_character()).is_same(NEWBIE_DEF)
+	assert_int(player.get_max_health()).is_equal(NEWBIE_DEF.max_health)
 
 
 func test_game_applies_exported_starting_character() -> void:
 	var game: Node2D = auto_free(GAME_SCENE.instantiate()) as Node2D
-	game.starting_character = GOBLIN_DEF
+	game.starting_character = BARRET_DEF
 	add_child(game)
 	await _wait_ready(game)
 
 	var player: CharacterBody2D = game.get_node("Player") as CharacterBody2D
-	assert_object(player.get_character()).is_same(GOBLIN_DEF)
-	assert_float(player.move_speed).is_equal(GOBLIN_DEF.move_speed)
-	assert_int(player.get_luck()).is_equal(GOBLIN_DEF.luck)
+	assert_object(player.get_character()).is_same(BARRET_DEF)
+	assert_float(player.move_speed).is_equal_approx(
+		StatUnits.speed_to_pixels(BARRET_DEF.move_speed), 0.001
+	)
+	assert_float(player.get_luck()).is_equal_approx(BARRET_DEF.luck, 0.0001)
 
 
 func test_game_pauses_on_player_death() -> void:

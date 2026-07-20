@@ -11,6 +11,18 @@ class MockEnemy:
 		pass
 
 
+func test_set_visual_size_scales_sprite_to_target_width() -> void:
+	var projectile: Area2D = auto_free(PROJECTILE_SCENE.instantiate()) as Area2D
+	add_child(projectile)
+	await _wait_ready(projectile)
+
+	projectile.set_visual_size(24.0)
+
+	var sprite := projectile.get_node("Visual/Sprite") as Sprite2D
+	var rendered_width := float(sprite.texture.get_width()) * sprite.scale.x
+	assert_float(rendered_width).is_equal_approx(24.0, 0.01)
+
+
 func test_setup_adds_trail_and_tints_sprite() -> void:
 	var projectile: Area2D = auto_free(PROJECTILE_SCENE.instantiate()) as Area2D
 	add_child(projectile)

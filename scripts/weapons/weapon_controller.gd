@@ -9,12 +9,33 @@ const MAX_WEAPONS := 6
 var _weapons: Array[BaseWeapon] = []
 var _projectile_container: Node2D
 var _arena_bounds := Rect2()
+## Global outgoing modifiers from the character + level/shop upgrades. New weapons
+## inherit these so a bought weapon respects the character's damage/attack penalties.
+var _global_damage_mult := 1.0
+var _global_fire_rate_mult := 1.0
+## Global area/size modifier applied to weapon reach and effect radii.
+var _area_multiplier := 1.0
 
 
 func configure_weapons(starting: WeaponDefinition) -> void:
 	clear_weapons()
 	starting_weapon = starting
 	extra_weapons.clear()
+
+
+## Seed the global outgoing modifiers from the selected character (percentages,
+## e.g. -0.12 = -12%). Applied to any weapon added afterwards.
+func set_character_modifiers(damage_mult: float, attack_speed_mult: float) -> void:
+	_global_damage_mult = 1.0 + damage_mult
+	_global_fire_rate_mult = 1.0 + attack_speed_mult
+
+
+## Update the global area multiplier and push it to every owned weapon.
+func set_area_multiplier(value: float) -> void:
+	_area_multiplier = value
+	for weapon in _weapons:
+		if is_instance_valid(weapon):
+			weapon.set_area_multiplier(value)
 
 
 func clear_weapons() -> void:
@@ -57,6 +78,9 @@ func add_weapon(definition: WeaponDefinition) -> BaseWeapon:
 		weapon = BaseWeapon.new()
 	add_child(weapon)
 	weapon.setup(definition, _arena_bounds, _projectile_container)
+	weapon.apply_damage_multiplier(_global_damage_mult)
+	weapon.apply_fire_rate_multiplier(_global_fire_rate_mult)
+	weapon.set_area_multiplier(_area_multiplier)
 	_weapons.append(weapon)
 	_sync_crit_stats(weapon)
 	return weapon
@@ -99,13 +123,20 @@ func set_arena_bounds(bounds: Rect2) -> void:
 
 
 func increase_damage_percent(percent: float) -> void:
+	_global_damage_mult *= 1.0 + percent
 	for weapon in _weapons:
 		weapon.increase_damage_percent(percent)
 
 
 func increase_fire_rate_percent(percent: float) -> void:
+	_global_fire_rate_mult *= 1.0 + percent
 	for weapon in _weapons:
 		weapon.increase_fire_rate_percent(percent)
+
+
+## Global outgoing-damage multiplier (character + upgrades). Shared with skills/pets.
+func get_global_damage_multiplier() -> float:
+	return _global_damage_mult
 
 
 func get_owned_weapon_ids() -> Array[String]:

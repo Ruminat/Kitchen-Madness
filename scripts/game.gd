@@ -11,8 +11,11 @@ const ENEMY_FULL_DETAIL_MARGIN := 180.0
 
 var is_victory := false
 var is_game_over := false
+var skill_runner: SkillRunner
+var entity_manager: EntityManager
 var _arena_bounds := Rect2()
 var _enemy_detail_timer := 0.0
+var _entity_container: Node2D
 
 @onready var arena: Arena = $Arena
 @onready var camera: Camera2D = $Camera2D
@@ -45,10 +48,25 @@ func _ready() -> void:
 	_configure_level()
 	loot_spawner.configure(pickup_container, health_drop)
 	vfx_manager.configure(vfx_container, camera, Callable(self, "_get_camera_world_view_size"))
+	skill_runner = SkillRunner.new()
+	skill_runner.name = "SkillRunner"
+	add_child(skill_runner)
+	skill_runner.configure(player)
+	_entity_container = Node2D.new()
+	_entity_container.name = "EntityContainer"
+	add_child(_entity_container)
+	entity_manager = EntityManager.new()
+	entity_manager.name = "EntityManager"
+	add_child(entity_manager)
+	entity_manager.configure(player, _entity_container, _arena_bounds)
 	if level_up_manager.has_method("configure"):
-		level_up_manager.configure(player, ui, Callable(self, "is_run_active"))
+		level_up_manager.configure(
+			player, ui, Callable(self, "is_run_active"), skill_runner, entity_manager
+		)
 	if shop_manager.has_method("configure"):
-		shop_manager.configure(player, ui, gold_system, Callable(self, "resume_run"))
+		shop_manager.configure(
+			player, ui, gold_system, Callable(self, "resume_run"), skill_runner, entity_manager
+		)
 
 	EventBus.level_completed.connect(_on_level_completed)
 	EventBus.player_died.connect(_on_player_died)

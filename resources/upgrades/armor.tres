@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=2 format=3 uid="uid://upgrade_armor"]
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=3 format=3 uid="uid://upgrade_armor"]
 
 [ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/upgrades/armor.png" id="2"]
 
 [resource]
 script = ExtResource("1")
 id = "armor"
 title = "Thick Hide"
-description = "+2 armor (reduces damage taken)"
+description = "+1 armor (reduces damage taken)"
+icon = ExtResource("2")
 effect = &"armor_flat"
-amount = 2.0
+amount = 1.0
 gold_cost = 20

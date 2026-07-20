@@ -8,8 +8,10 @@ const DEFAULT_HIT_RATE := 0.7
 const MULTI_TARGET_FACTOR := 1.5
 const BURST_FACTOR := 2.0
 
-## Target single-target DPS every tier-1 weapon should hit (Phase 8C parity).
-const BASE_DPS_TARGET := 36.0
+## Target single-target DPS every tier-1 weapon should hit. Re-baselined for the
+## Great Rework roster: Kitchen Knife 25/0.8s, Frying Pan 60/1.9s, Rotten Tomato
+## 40/1.2s all land near ~32 DPS.
+const BASE_DPS_TARGET := 32.0
 const BASE_DPS_TOLERANCE := 0.12
 const BOOMERANG_HITS_PER_THROW := 2.0
 

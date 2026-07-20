@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=2 format=3 uid="uid://upgrade_attack_speed"]
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=3 format=3 uid="uid://upgrade_attack_speed"]
 
 [ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/upgrades/attack-speed.png" id="2"]
 
 [resource]
 script = ExtResource("1")
 id = "attack_speed"
-title = "Quick Trigger"
-description = "+5% attack speed"
+title = "Quick Hands"
+description = "+10% attack speed"
+icon = ExtResource("2")
 effect = &"attack_speed_percent"
-amount = 0.05
-gold_cost = 15
+amount = 0.1
+gold_cost = 20

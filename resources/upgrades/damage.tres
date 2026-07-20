@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" load_steps=3 format=3 uid="uid://upgrade_damage"]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/upgrades/damage.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "damage"
+title = "Sharp Edge"
+description = "+10% damage"
+icon = ExtResource("2")
+effect = &"damage_percent"
+amount = 0.1
+gold_cost = 20

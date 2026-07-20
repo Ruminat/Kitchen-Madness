@@ -2,14 +2,9 @@ class_name WeaponRoster
 extends RefCounted
 
 const WEAPON_PATHS: PackedStringArray = [
-	"res://resources/weapons/pepper_grinder_gun.tres",
-	"res://resources/weapons/boiling_soup_splash.tres",
-	"res://resources/weapons/onion_ring_blade.tres",
 	"res://resources/weapons/kitchen_knife.tres",
 	"res://resources/weapons/frying_pan.tres",
-	"res://resources/weapons/garlic_bomb.tres",
-	"res://resources/weapons/ladle_boomerang.tres",
-	"res://resources/weapons/toaster_turret.tres",
+	"res://resources/weapons/rotten_tomato.tres",
 ]
 
 

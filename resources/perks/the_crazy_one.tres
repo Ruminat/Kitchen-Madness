@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=5 format=3 uid="uid://perk_the_crazy_one"]
+
+[ext_resource type="Script" path="res://scripts/data/perk_definition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/data/stat_effect.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/rework/perks/the-crazy-one.png" id="3"]
+
+[sub_resource type="Resource" id="eff_armor"]
+script = ExtResource("2")
+effect = &"armor_flat"
+amount = -2.0
+
+[sub_resource type="Resource" id="eff_attack_speed"]
+script = ExtResource("2")
+effect = &"attack_speed_percent"
+amount = 0.1
+
+[resource]
+script = ExtResource("1")
+id = "the_crazy_one"
+display_name = "The Crazy One"
+description = "-2 armor, +10% attack speed. Live fast."
+icon = ExtResource("3")
+effects = Array[Resource]([SubResource("eff_armor"), SubResource("eff_attack_speed")])

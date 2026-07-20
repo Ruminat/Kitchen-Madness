@@ -16,7 +16,7 @@ func after_test() -> void:
 func test_build_run_record_maps_summary_fields() -> void:
 	var persistence := RunStatsPersistence.new()
 	var summary := {
-		"character_id": "chef",
+		"character_id": "the_newbie",
 		"time_survived": 320.5,
 		"level_reached": 7,
 		"total_run_time": 52.5,
@@ -31,11 +31,11 @@ func test_build_run_record_maps_summary_fields() -> void:
 		},
 		"waves": [{"wave_number": 1, "duration_seconds": 12.0}],
 	}
-	var upgrades: Array[String] = ["damage_boost", "crit_chance"]
+	var upgrades: Array[String] = ["damage", "armor"]
 
 	var record := persistence.build_run_record(summary, upgrades)
 
-	assert_str(record.get("character", "")).is_equal("chef")
+	assert_str(record.get("character", "")).is_equal("the_newbie")
 	assert_array(record.get("weapons", [])).is_equal([])
 	assert_array(record.get("upgrades", [])).is_equal(upgrades)
 	assert_float(record.get("time_survived", 0.0)).is_equal(320.5)
@@ -50,7 +50,7 @@ func test_build_run_record_maps_summary_fields() -> void:
 
 func test_save_run_creates_session_file_and_appends_runs() -> void:
 	var persistence: RunStatsPersistence = _create_test_persistence()
-	var summary_a := _sample_summary("chef", 1)
+	var summary_a := _sample_summary("the_newbie", 1)
 	var summary_b := _sample_summary("goblin", 2)
 
 	assert_int(persistence.save_run(summary_a, ["max_health"])).is_equal(OK)
@@ -65,7 +65,7 @@ func test_save_run_creates_session_file_and_appends_runs() -> void:
 
 	var runs: Array = session_data.get("runs", [])
 	assert_int(runs.size()).is_equal(2)
-	assert_str(runs[0].get("character", "")).is_equal("chef")
+	assert_str(runs[0].get("character", "")).is_equal("the_newbie")
 	assert_str(runs[1].get("character", "")).is_equal("goblin")
 
 
@@ -73,13 +73,13 @@ func test_save_run_disabled_skips_write() -> void:
 	var persistence: RunStatsPersistence = _create_test_persistence()
 	persistence.enabled = false
 
-	assert_int(persistence.save_run(_sample_summary("chef", 1), [])).is_equal(OK)
+	assert_int(persistence.save_run(_sample_summary("the_newbie", 1), [])).is_equal(OK)
 	assert_str(persistence.get_session_file_path()).is_empty()
 
 
 func test_balance_metrics_aggregates_totals_across_waves() -> void:
 	var metrics := auto_free(BalanceMetrics.new()) as BalanceMetrics
-	metrics.start_run("chef")
+	metrics.start_run("the_newbie")
 
 	metrics.start_wave(1, 1)
 	metrics.record_kill(&"chaser")

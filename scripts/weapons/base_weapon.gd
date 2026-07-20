@@ -5,12 +5,18 @@ const ORBIT_RADIUS := 34.0
 const ORBIT_FLOAT_SPEED := 1.2
 const RECOIL_DISTANCE := 7.0
 const RECOIL_TIME := 0.14
+## Weapon icons (and their projectiles) render at this fraction of the player's
+## on-screen diameter.
+const WEAPON_DIAMETER_FRACTION := 0.50
+## Fallback scale when the player's render size can't be measured (e.g. tests).
+const DEFAULT_WEAPON_SPRITE_SCALE := 0.0875
 
 var definition: WeaponDefinition
 var arena_bounds := Rect2()
 var _projectile_container: Node2D
 var _damage_multiplier := 1.0
 var _fire_rate_multiplier := 1.0
+var _area_multiplier := 1.0
 var _sprite: Sprite2D
 var _base_orbit_angle := 0.0
 var _orbit_phase := 0.0
@@ -44,21 +50,39 @@ func get_projectile_container() -> Node2D:
 
 
 func increase_damage_percent(percent: float) -> void:
-	if percent <= 0.0:
+	if is_zero_approx(percent):
 		return
 
-	_damage_multiplier *= 1.0 + percent
+	apply_damage_multiplier(1.0 + percent)
 
 
 func increase_fire_rate_percent(percent: float) -> void:
-	if percent <= 0.0:
+	if is_zero_approx(percent):
 		return
 
-	_fire_rate_multiplier *= 1.0 + percent
+	apply_fire_rate_multiplier(1.0 + percent)
+
+
+## Multiply the damage multiplier directly (supports character penalties < 1.0).
+func apply_damage_multiplier(factor: float) -> void:
+	_damage_multiplier *= factor
+
+
+## Multiply the fire-rate multiplier directly (supports character penalties < 1.0).
+func apply_fire_rate_multiplier(factor: float) -> void:
+	_fire_rate_multiplier *= factor
 
 
 func get_fire_rate_multiplier() -> float:
 	return maxf(_fire_rate_multiplier, 0.1)
+
+
+func set_area_multiplier(value: float) -> void:
+	_area_multiplier = maxf(value, 0.1)
+
+
+func get_area_multiplier() -> float:
+	return _area_multiplier
 
 
 func set_crit_stats(crit_chance: float, crit_damage: float) -> void:
@@ -132,9 +156,35 @@ func _setup_visual() -> void:
 	_sprite = Sprite2D.new()
 	_sprite.name = "WeaponSprite"
 	_sprite.texture = definition.icon if definition.icon else definition.projectile_texture
-	_sprite.scale = Vector2(0.24, 0.24)
+	_sprite.scale = _resolve_sprite_scale()
 	_sprite.z_index = 2
 	add_child(_sprite)
+
+
+## Scale the weapon icon to WEAPON_DIAMETER_FRACTION of the player's rendered
+## diameter so it reads as a small held tool rather than dwarfing the character.
+func _resolve_sprite_scale() -> Vector2:
+	var texture_width := float(_sprite.texture.get_width()) if _sprite.texture else 0.0
+	var player_diameter := _player_render_diameter()
+	if texture_width <= 0.0 or player_diameter <= 0.0:
+		return Vector2(DEFAULT_WEAPON_SPRITE_SCALE, DEFAULT_WEAPON_SPRITE_SCALE)
+	var scale := player_diameter * WEAPON_DIAMETER_FRACTION / texture_width
+	return Vector2(scale, scale)
+
+
+## The player's on-screen diameter in pixels (texture width × sprite scale), or 0
+## when the weapon isn't parented under a player (e.g. isolated unit tests).
+func _player_render_diameter() -> float:
+	var controller := get_parent()
+	if controller == null:
+		return 0.0
+	var player := controller.get_parent()
+	if player == null:
+		return 0.0
+	var sprite := player.get_node_or_null("Visual/Sprite") as Sprite2D
+	if sprite == null or sprite.texture == null:
+		return 0.0
+	return float(sprite.texture.get_width()) * absf(sprite.scale.x)
 
 
 func _update_visual(delta: float, target: Node2D) -> void:

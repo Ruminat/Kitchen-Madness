@@ -159,24 +159,24 @@ func test_open_upgrades_does_not_show_when_run_is_inactive() -> void:
 	assert_bool(get_tree().paused).is_false()
 
 
-func test_lucky_player_expands_upgrade_candidate_pool() -> void:
-	var upgrades: Array[Resource] = []
-	for index in 5:
-		upgrades.append(_create_damage_upgrade(0.1 * float(index + 1)))
-	var manager := _create_manager(upgrades)
-	var player := _create_player()
-	player.luck = 20
+func test_level_up_pool_includes_skill_offers_when_runner_present() -> void:
+	# Unified acquisition: skills join the level-up pool. With one stat upgrade and
+	# three skill learn offers, three choices always include at least one skill.
+	var runner: SkillRunner = auto_free(SkillRunner.new()) as SkillRunner
+	add_child(runner)
+	var manager := _create_manager([_create_damage_upgrade(0.1)])
 	var ui := _create_ui()
-	manager.configure(player, ui, func() -> bool: return true)
+	manager.configure(_create_player(), ui, func() -> bool: return true, runner)
 
 	EventBus.level_up.emit(2)
 	manager.open_upgrades()
 
 	assert_int(ui.choices.size()).is_equal(3)
-	var amounts: Array[float] = []
+	var has_skill_offer := false
 	for choice in ui.choices:
-		amounts.append(choice.amount)
-	assert_float(amounts.max()).is_equal(0.5)
+		if choice is SkillShopOffer:
+			has_skill_offer = true
+	assert_bool(has_skill_offer).is_true()
 
 
 func _create_manager(upgrades: Array[Resource]) -> LevelUpManager:

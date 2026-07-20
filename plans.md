@@ -16,9 +16,133 @@ Every player-facing action must support both mouse and keyboard. WASD and arrow 
 
 ---
 
-## Active roadmap
+## Active roadmap — The Great Rework (R-series) — ✅ COMPLETE
 
-_Roadmap 8A–8C and the UI design system (Phase 9) complete. Add the next phase here._
+**Status: R0–R8 all complete** (383 tests, 0 failures; codecheck green). See
+[progress.md](progress.md) for the per-phase outcome summary.
+
+The current build is technically complete but **not fun**: content was added by
+volume, not by design. This roadmap deletes most of that content and rebuilds around
+a small, hand-tuned, fully data-driven core — **quality over quantity**. See
+[GAME_DESIGN.md](GAME_DESIGN.md) for the originating design brief, [docs/stats.md](docs/stats.md)
+for the stat spec, and [docs/players/index.md](docs/players/index.md) for the roster.
+
+Everything below stays true to the North star: new content is authored through
+`.tres` resources and focused scenes, never hardcoded into systems.
+
+### Guiding decisions
+
+- **Reset, don't extend.** Old characters, weapons, and level upgrades are removed
+  wholesale and replaced with the small curated sets below.
+- **Five content categories**, three of them brand new:
+  1. **Weapons** — attached to the player (exists, reworked).
+  2. **Level upgrades** — chosen on level-up (exists, reworked).
+  3. **Perks** — bought in the shop (new).
+  4. **Skills** — autonomous effects, *not* attached to the player (new).
+  5. **Pets / structures / traps** — autonomous entities, *not* attached to the
+     player (new).
+- **Design units, not pixels.** All distances are authored in "area units"
+  (10 area = player radius) and speeds in area/second (see [docs/stats.md](docs/stats.md)).
+  Implementation converts design units → engine units through a single documented
+  factor. Base move speed in design units is `30`; the engine's current `220`
+  becomes that factor's job, not scattered magic numbers.
+
+### R0 — Design & docs *(this pass)*
+
+- [x] Player bios + stats: `docs/players/{TheNewbie,MrBarret,Natsumi}.md` + `index.md`.
+- [x] Stat spec: `docs/stats.md` (units, armor, evasion, luck, area, attack range).
+- [x] Base circle template `assets/base/PlayerCircle.png` (256×256 RGBA) — every
+      player is generated one-at-a-time from this, never as a grid sheet.
+- [x] plans.md / progress.md updated to this roadmap.
+
+### R1 — Stat foundation ✅
+
+Extend the stat model so the new characters, upgrades, and perks have something to
+modify. Do this first — everything else depends on it.
+
+- Add to `CharacterDefinition` (and the player runtime): `armor` (points),
+  `damage_mult` (%), `attack_speed_mult` (%), `evasion` (%); change `luck` and
+  `crit_chance` to the percentage-modifier model from [docs/stats.md](docs/stats.md).
+- Introduce the **area-unit → pixels** and **move-speed → engine** conversion in one
+  place (e.g. a `StatUnits`/balance constant). Base move speed `30` design units.
+- Apply `armor` (% damage reduction) and `evasion` (chance to negate a hit while
+  still granting i-frames) in the player damage path.
+- Tests: armor reduction, evasion negation + i-frames, modifier stacking.
+
+### R2 — Player roster reset (3 characters) ✅
+
+- Remove the 9 old character `.tres` and their sprites; add **The Newbie**,
+  **Mr. Barret**, **Natsumi** with the stats from `docs/players/`.
+- Generate each sprite individually from `assets/base/PlayerCircle.png` (transparent
+  bg, 256×256), then retire the grid-splitter path for players. Update
+  `docs/player-roster.md`.
+- Character-select UI adapts to 3 entries (keyboard + mouse still required).
+
+### R3 — Weapon reset (3 weapons) ✅
+
+Remove all 8 current weapons; add these, authored in design units (attack speed as
+seconds/attack, area & range in area units):
+
+| Weapon | Type | Rate | Damage | Area | Range |
+|---|---|---|---|---|---|
+| Kitchen Knife | melee | 0.8s | 25 | 20 | 10 |
+| Frying Pan | melee | 1.9s | 60 | 25 | 15 |
+| Rotten Tomato | ranged (tomato projectile) | 1.2s | 40 | 5 | 80 |
+
+- Map design-unit fields onto `WeaponDefinition`; re-point each character's
+  `starting_weapon`. Re-baseline `BalanceCalculator` on the new numbers.
+
+### R4 — Level-upgrade reset (8 upgrades) ✅
+
+Replace the current upgrade `.tres` with: `Armor +1`, `HP +5%`, `Attack speed +10%`,
+`Damage +10%`, `Area +5%`, `Move speed +5%`, `Luck +5%`, `Evasion +4%`. Each wires to
+the R1 stat model. Level-up picker still offers 1-of-3, mouse + keyboard.
+
+### R5 — Perks (shop content, new) ✅
+
+New content type bought in the shop:
+
+| Perk | Effect |
+|---|---|
+| Bring me more | +5% enemies |
+| The crazy one | −2 armor, +10% attack speed |
+| Getting fatty | −3% move speed, +1 armor |
+
+- "Bring me more" feeds the spawner's count multiplier. Integrate perks into
+  `ShopManager` offers alongside weapons.
+
+### R6 — Skills (autonomous, new) ✅
+
+Player-independent effects with per-level scaling and max levels:
+
+| Skill | Cadence | Damage | Area | Per level | Max |
+|---|---|---|---|---|---|
+| Heavy Fridge | falls / 3s on a random enemy | 60 | 60 | +10% dmg, +5% area | 6 |
+| Wraith of Cooking God | fires / 6s, lightning on some enemies | 300 | 10 | +10% dmg, +1 hit | 5 |
+| Garlic Stench | aura ticks / 0.2s around player | 10 | 30 | +10% faster ticks, +15% area | 6 |
+
+- Build a `SkillDefinition` + a skill runner that ticks independently of the weapon
+  system. Acquisition & upgrades flow through shop / level-up (respecting Luck's
+  duplicate-offer rule).
+
+### R7 — Pets / structures / traps (autonomous entities, new) ✅
+
+Non-weapon entities. Start with one of each:
+
+| Entity | Kind | Rate | Damage | Area | Range | Move | Notes |
+|---|---|---|---|---|---|---|---|
+| Nasty Cat | pet | 1.0s | 40 | 20 | 10 | 30 | fights; immune to all damage |
+| Bean Shooter | structure | 0.5s | 50 | — (single target) | 240 | — | can't move |
+| Banana Mine | trap | spawn /2s | 50 | 40 | — | — | spawns 30–240 from player; per level +10% dmg, +20% spawn rate, +10% area, max 6 |
+
+- Add an `EntityDefinition`/spawner for autonomous allies distinct from weapons.
+
+### R8 — Acquisition & integration polish ✅
+
+- Unify how weapons / skills / pets / structures / traps / perks appear in the shop
+  and level-up flows; make Luck's "offer a duplicate you already own" rule apply
+  across all upgradeable categories.
+- Rebalance pressure/economy against the new roster and re-green the test suite.
 
 ---
 

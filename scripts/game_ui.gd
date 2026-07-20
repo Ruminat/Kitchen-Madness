@@ -767,6 +767,7 @@ func show_level_up_options(upgrades: Array[Resource]) -> void:
 			var upgrade: Resource = _upgrade_choices[index]
 			button.text = UpgradeDisplay.format_card_text(upgrade, "[%d]" % (index + 1))
 			UpgradeDisplay.apply_card_style(button, upgrade)
+			UpgradeDisplay.apply_icon(button, upgrade)
 
 	_focus_first_visible_button(_upgrade_buttons)
 
@@ -899,7 +900,7 @@ func _on_character_button_focus(index: int) -> void:
 		return
 
 	var character := _character_choices[index]
-	character_detail_label.text = _format_character_detail(character)
+	character_detail_label.text = CharacterSelectDisplay.format_detail(character)
 	_update_character_preview(character)
 
 
@@ -921,25 +922,6 @@ func _update_character_detail_from_focus() -> void:
 	var focused_index := _focused_button_index(_character_buttons)
 	if focused_index >= 0:
 		_on_character_button_focus(focused_index)
-
-
-func _format_character_detail(character: CharacterDefinition) -> String:
-	var weapon_name := (
-		character.starting_weapon.display_name
-		if character.starting_weapon and not character.starting_weapon.display_name.is_empty()
-		else character.starting_weapon.id if character.starting_weapon else "none"
-	)
-	return (
-		"%s - %s\nHP %d  |  Speed %.0f  |  Luck %d  |  Starts with %s"
-		% [
-			character.display_name,
-			character.description,
-			character.max_health,
-			character.move_speed,
-			character.luck,
-			weapon_name,
-		]
-	)
 
 
 func _on_character_button_pressed(index: int) -> void:

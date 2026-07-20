@@ -4,12 +4,10 @@
 extends GdUnitTestSuite
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
-const CHEF_DEF := preload("res://resources/characters/chef.tres")
+const NEWBIE_DEF := preload("res://resources/characters/the_newbie.tres")
 const KNIFE_DEF := preload("res://resources/weapons/kitchen_knife.tres")
 const PAN_DEF := preload("res://resources/weapons/frying_pan.tres")
-const GARLIC_DEF := preload("res://resources/weapons/garlic_bomb.tres")
-const ONION_DEF := preload("res://resources/weapons/onion_ring_blade.tres")
-const SOUP_DEF := preload("res://resources/weapons/boiling_soup_splash.tres")
+const TOMATO_DEF := preload("res://resources/weapons/rotten_tomato.tres")
 
 
 class MockShopUi:
@@ -56,16 +54,16 @@ func test_selling_weapon_invalidates_its_stale_upgrade_offer() -> void:
 	var ui: MockShopUi = bits[1]
 	var gold: GoldSystem = bits[2]
 	var controller: WeaponController = bits[3]
-	controller.add_weapon(KNIFE_DEF)  # own pepper + knife
+	controller.add_weapon(PAN_DEF)  # own knife (starter) + pan
 
-	var sell := _sell_offer("kitchen_knife", 6)
-	var sharpen := _upgrade_offer(WeaponShopOffer.OfferType.WEAPON_DAMAGE, "kitchen_knife", 8)
+	var sell := _sell_offer("frying_pan", 6)
+	var sharpen := _upgrade_offer(WeaponShopOffer.OfferType.WEAPON_DAMAGE, "frying_pan", 8)
 	_arm(manager, [sell, sharpen])
 
 	ui.shop_purchase_requested.emit(sell)
-	assert_bool(controller.has_weapon("kitchen_knife")).is_false()
+	assert_bool(controller.has_weapon("frying_pan")).is_false()
 
-	# The orphaned "sharpen knife" offer must be greyed out and non-chargeable.
+	# The orphaned "sharpen pan" offer must be greyed out and non-chargeable.
 	assert_bool(manager._is_slot_sold(1)).is_true()
 	var after_sell := gold.gold
 	ui.shop_purchase_requested.emit(sharpen)
@@ -77,14 +75,15 @@ func test_reaching_weapon_cap_invalidates_other_add_offers() -> void:
 	var manager: ShopManager = bits[0]
 	var ui: MockShopUi = bits[1]
 	var controller: WeaponController = bits[3]
-	for weapon in [KNIFE_DEF, PAN_DEF, GARLIC_DEF, ONION_DEF]:
-		controller.add_weapon(weapon)  # pepper + 4 = 5, one slot free
+	# Fill to five of six slots (knife starter + four), leaving one free.
+	for _index in 4:
+		controller.add_weapon(PAN_DEF)
 	assert_int(controller.weapon_count()).is_equal(5)
 
-	var add_soup := _add_offer(SOUP_DEF, 12)
+	var add_tomato := _add_offer(TOMATO_DEF, 12)
 	var add_pan := _add_offer(PAN_DEF, 12)  # already owned -> also invalid
-	_arm(manager, [add_soup, add_pan])
-	ui.shop_purchase_requested.emit(add_soup)  # sixth weapon caps the loadout
+	_arm(manager, [add_tomato, add_pan])
+	ui.shop_purchase_requested.emit(add_tomato)  # sixth weapon caps the loadout
 
 	assert_int(controller.weapon_count()).is_equal(6)
 	assert_bool(controller.can_add_weapon()).is_false()
@@ -96,16 +95,16 @@ func test_buying_a_weapon_keeps_every_previously_owned_weapon() -> void:
 	var manager: ShopManager = bits[0]
 	var ui: MockShopUi = bits[1]
 	var controller: WeaponController = bits[3]
-	controller.add_weapon(KNIFE_DEF)  # pepper + knife
+	controller.add_weapon(PAN_DEF)  # knife (starter) + pan
 	var before := controller.get_owned_weapon_ids()
 
-	var offer := _add_offer(PAN_DEF, 10)
+	var offer := _add_offer(TOMATO_DEF, 10)
 	_arm(manager, [offer])
 	ui.shop_purchase_requested.emit(offer)
 
 	for id in before:
 		assert_bool(controller.has_weapon(id)).is_true()
-	assert_bool(controller.has_weapon("frying_pan")).is_true()
+	assert_bool(controller.has_weapon("rotten_tomato")).is_true()
 	assert_int(controller.weapon_count()).is_equal(3)
 	assert_int(ui.loadout_size).is_equal(3)
 
@@ -115,7 +114,7 @@ func _shop_with_gold(amount: int) -> Array:
 	add_child(player)
 	if not player.is_node_ready():
 		await player.ready
-	player.configure(CHEF_DEF)
+	player.configure(NEWBIE_DEF)
 	var pc := Node2D.new()
 	add_child(pc)
 	player.setup(Rect2(-100.0, -100.0, 200.0, 200.0), pc)

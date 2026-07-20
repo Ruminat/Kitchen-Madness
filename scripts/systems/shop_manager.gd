@@ -2,14 +2,14 @@ class_name ShopManager
 extends Node
 
 const STAT_UPGRADE_PATHS: Array[String] = [
-	"res://resources/upgrades/max_health.tres",
 	"res://resources/upgrades/armor.tres",
-	"res://resources/upgrades/damage_boost.tres",
+	"res://resources/upgrades/max_health.tres",
 	"res://resources/upgrades/attack_speed.tres",
-	"res://resources/upgrades/speed_boost.tres",
+	"res://resources/upgrades/damage.tres",
+	"res://resources/upgrades/area.tres",
+	"res://resources/upgrades/move_speed.tres",
 	"res://resources/upgrades/luck.tres",
-	"res://resources/upgrades/pickup_range.tres",
-	"res://resources/upgrades/xp_gain.tres",
+	"res://resources/upgrades/evasion.tres",
 ]
 
 const ADD_WEAPON_BASE_COST := 12
@@ -22,6 +22,11 @@ const PELLET_UPGRADE_AMOUNT := 1
 const MAX_PELLET_COUNT := 8
 const REROLL_BASE_COST := 6
 const REROLL_COST_STEP := 4
+const PERK_BASE_COST := 14
+const SKILL_BASE_COST := 18
+const SKILL_UPGRADE_COST := 12
+const ENTITY_BASE_COST := 20
+const ENTITY_UPGRADE_COST := 12
 const COST_GROWTH_PER_MINUTE := 0.15
 const SELL_REFUND_RATE := 0.5
 
@@ -30,6 +35,8 @@ const SELL_REFUND_RATE := 0.5
 var _player: Node
 var _ui: Node
 var _gold_system: GoldSystem
+var _skill_runner: SkillRunner
+var _entity_manager: EntityManager
 var _on_continue := Callable()
 var _shop_open := false
 var _elapsed_level_seconds := 0.0
@@ -44,11 +51,18 @@ func _ready() -> void:
 
 
 func configure(
-	player: Node, ui: Node, gold_system: GoldSystem, on_continue: Callable = Callable()
+	player: Node,
+	ui: Node,
+	gold_system: GoldSystem,
+	on_continue: Callable = Callable(),
+	skill_runner: SkillRunner = null,
+	entity_manager: EntityManager = null
 ) -> void:
 	_player = player
 	_ui = ui
 	_gold_system = gold_system
+	_skill_runner = skill_runner
+	_entity_manager = entity_manager
 	_on_continue = on_continue
 
 	if _ui and _ui.has_signal("shop_purchase_requested"):
@@ -109,7 +123,7 @@ func _on_shop_purchase(offer: Resource) -> void:
 		return
 	_ensure_sold_slots()
 
-	if int(offer.get("offer_type")) == WeaponShopOffer.OfferType.SELL_WEAPON:
+	if offer is WeaponShopOffer and offer.offer_type == WeaponShopOffer.OfferType.SELL_WEAPON:
 		_process_sell(offer, slot_index)
 		return
 
@@ -131,9 +145,11 @@ func _on_shop_purchase(offer: Resource) -> void:
 
 
 func _record_purchase_price(offer: Resource, cost: int) -> void:
-	if int(offer.get("offer_type")) != WeaponShopOffer.OfferType.ADD_WEAPON:
+	if not offer is WeaponShopOffer:
 		return
-	var weapon: WeaponDefinition = offer.get("weapon")
+	if offer.offer_type != WeaponShopOffer.OfferType.ADD_WEAPON:
+		return
+	var weapon: WeaponDefinition = offer.weapon
 	if weapon:
 		_weapon_purchase_price[weapon.id] = cost
 
@@ -174,6 +190,9 @@ func _invalidate_stale_offers() -> void:
 func _offer_still_valid(offer: Resource) -> bool:
 	if offer == null:
 		return false
+	# Non-weapon offers (perks) are repeatable, so they never go stale.
+	if not offer is WeaponShopOffer:
+		return true
 	var controller := _get_weapon_controller()
 	if controller == null:
 		return false
@@ -226,23 +245,16 @@ func _on_shop_continue() -> void:
 
 func generate_offers() -> Array[Resource]:
 	var candidates := _build_offer_candidates()
-	candidates.shuffle()
-
 	var selected: Array[Resource] = []
-	var used_keys: Dictionary = {}
-
-	for candidate in candidates:
-		if selected.size() >= offer_count:
-			break
-
-		var key := (candidate as WeaponShopOffer).get_offer_key()
-		if used_keys.has(key):
-			continue
-
-		used_keys[key] = true
-		selected.append(candidate)
-
+	for offer in OfferSelection.select(candidates, offer_count, _player_luck()):
+		selected.append(offer as Resource)
 	return selected
+
+
+func _player_luck() -> float:
+	if _player and _player.has_method("get_luck"):
+		return float(_player.get_luck())
+	return 0.0
 
 
 func _reset_sold_slots() -> void:
@@ -272,8 +284,8 @@ func _refresh_ui(opening: bool = false) -> void:
 		_ui.update_shop_gold(_current_gold())
 
 
-func _build_offer_candidates() -> Array[WeaponShopOffer]:
-	var candidates: Array[WeaponShopOffer] = []
+func _build_offer_candidates() -> Array[Resource]:
+	var candidates: Array[Resource] = []
 	var controller := _get_weapon_controller()
 	var owned_ids: Array[String] = controller.get_owned_weapon_ids() if controller else []
 
@@ -308,7 +320,45 @@ func _build_offer_candidates() -> Array[WeaponShopOffer]:
 			)
 			candidates.append(_create_sell_offer(weapon_id, sell_name))
 
+	# Perks are always available (repeatable, stackable buys).
+	for perk in PerkRoster.load_roster():
+		candidates.append(_create_perk_offer(perk))
+
+	_append_skill_offers(candidates)
+	_append_entity_offers(candidates)
+
 	return candidates
+
+
+## Add skill acquire/upgrade offers (built by the shared catalog), priced by time.
+func _append_skill_offers(candidates: Array[Resource]) -> void:
+	for offer in OfferCatalog.skill_offers(_skill_runner):
+		var skill_offer := offer as SkillShopOffer
+		skill_offer.gold_cost = _scaled_cost(
+			SKILL_UPGRADE_COST if skill_offer.is_upgrade else SKILL_BASE_COST
+		)
+		candidates.append(skill_offer)
+
+
+## Add entity acquire/upgrade offers (built by the shared catalog), priced by time.
+func _append_entity_offers(candidates: Array[Resource]) -> void:
+	for offer in OfferCatalog.entity_offers(_entity_manager):
+		var entity_offer := offer as EntityShopOffer
+		entity_offer.gold_cost = _scaled_cost(
+			ENTITY_UPGRADE_COST if entity_offer.is_upgrade else ENTITY_BASE_COST
+		)
+		candidates.append(entity_offer)
+
+
+func _create_perk_offer(perk: PerkDefinition) -> PerkShopOffer:
+	var offer := PerkShopOffer.new()
+	offer.id = "perk_%s" % perk.id
+	offer.perk = perk
+	offer.title = perk.display_name
+	offer.description = perk.description
+	offer.icon = perk.icon
+	offer.gold_cost = _scaled_cost(PERK_BASE_COST)
+	return offer
 
 
 func _get_weapon_controller() -> WeaponController:

@@ -4,15 +4,15 @@
 
 ## Current status
 
-**Latest: Phase 9 — UI Design System** — token-driven UI. `DesignSystem` (`scripts/ui/design_system.gd`) is the single source of truth for palette, spacing (4px base), radii, borders, a modular type scale, and elevation; all UI style files consume it (no hardcoded colors/sizes). Docs: [docs/ui-design-system.md](docs/ui-design-system.md).
+**Latest: The Great Rework (R1–R8) — complete.** Full content reset for fun (quality over quantity). Stat model rebuilt on design units (`StatUnits`: single `220/30` factor for area↔pixels & move-speed), armor as % reduction, evasion + i-frames. Roster reset to **3 characters** (The Newbie / Mr. Barret / Natsumi), **3 weapons** (Kitchen Knife, Frying Pan, Rotten Tomato) in design units, **8 level upgrades**. New content categories: **perks** (shop, `PerkDefinition`), **skills** (autonomous `SkillRunner`: Heavy Fridge, Wraith of Cooking God, Garlic Stench), **pets/structures/traps** (`EntityManager`: Nasty Cat, Bean Shooter, Banana Mine). Acquisition unified across shop + level-up with a luck-biased selector (`OfferSelection`/`OfferCatalog`). Docs: [plans.md](plans.md), [docs/stats.md](docs/stats.md), [progress.md](progress.md).
 
-**Prior: Phase 8C** — all tier-1 weapons at equal DPS (~36), 6 weapon slots, shop buy/sell/upgrade economy.
+**Prior: Phase 9 — UI Design System** — token-driven UI. `DesignSystem` (`scripts/ui/design_system.gd`) is the single source of truth for palette, spacing, radii, borders, type scale, elevation. Docs: [docs/ui-design-system.md](docs/ui-design-system.md).
 
-**Loop:** character select → survive the 10-minute level while pressure ramps → level-ups bank upgrade picks (open on demand) → shop to buy/upgrade/sell weapons anytime. Survive → win, die → lose. SFX + run stats to `ignored/stats/`.
+**Loop:** character select (3) → survive the 10-minute level while pressure ramps → level-ups bank picks (stat upgrades / skills / entities) opened on demand → shop (weapons, perks, skills, pets/structures/traps, weapon sell/upgrade) anytime. Survive → win, die → lose. SFX + run stats to `ignored/stats/`.
 
-**Content:** 9 characters · 8 weapons (2 melee), DPS-balanced tier-1 · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers · idle squash bob · settings overlay.
+**Content:** 3 characters · 3 weapons (2 melee + 1 ranged w/ splash) · 3 perks · 3 skills · 3 entities (pet/structure/trap) · 8 level upgrades · 5 enemy types · `2640×1440` arena · crit · VFX · pooled world-space damage numbers · idle squash bob · settings overlay.
 
-**Next: open** — roadmap 8A–8C + UI design system done; pick from the optimizations backlog or add a new phase in [plans.md](plans.md).
+**Next: open** — pick from the optimizations backlog or add a new phase in [plans.md](plans.md). Deeper economy/pressure tuning wants live playtesting.
 
 ---
 
@@ -72,12 +72,16 @@
 ## Key paths
 
 ```
-scripts/systems/     enemy_spawner.gd, level_manager.gd, shop_manager.gd
+scripts/systems/     enemy_spawner.gd, level_manager.gd, shop_manager.gd,
+                     skill_runner.gd, entity_manager.gd, entity_combat.gd,
+                     offer_selection.gd (luck bias), offer_catalog.gd
+scripts/entities/    nasty_cat.gd, bean_shooter.gd, banana_mine.gd
 scripts/enemies/     base_enemy.gd, moth_enemy.gd
-scripts/data/        level_definition.gd, collision_layers.gd
-resources/levels/    level_01.tres (10 min, full enemy roster, 1×→6× spawn ramp)
-resources/enemies/   chaser, sprinter, tank, ant, moth
-tests/               unit + integration (GdUnit4) — 303 tests
+scripts/data/        stat_units.gd, stat_effects.gd, level_definition.gd,
+                     character/weapon/upgrade/perk/skill/entity_definition.gd
+resources/           characters/ weapons/ upgrades/ perks/ skills/ entities/ levels/ enemies/
+assets/rework/       characters/ weapons/ upgrades/ perks/ skills/ entities/ (production PNGs)
+tests/               unit + integration (GdUnit4) — 383 tests
 tools/codecheck.sh   (codecheck.ps1 on Windows)
 ```
 

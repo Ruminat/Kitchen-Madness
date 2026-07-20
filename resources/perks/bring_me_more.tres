@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=4 format=3 uid="uid://perk_bring_me_more"]
+
+[ext_resource type="Script" path="res://scripts/data/perk_definition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/data/stat_effect.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/rework/perks/bring-me-more.png" id="3"]
+
+[sub_resource type="Resource" id="eff_enemies"]
+script = ExtResource("2")
+effect = &"enemy_count_percent"
+amount = 0.05
+
+[resource]
+script = ExtResource("1")
+id = "bring_me_more"
+display_name = "Bring Me More"
+description = "+5% more enemies. More chaos, more loot."
+icon = ExtResource("3")
+effects = Array[Resource]([SubResource("eff_enemies")])

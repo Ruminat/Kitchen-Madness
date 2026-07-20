@@ -10,7 +10,13 @@ enum WeaponType { PROJECTILE, ORBIT, BURST, BOOMERANG, TURRET, MELEE }
 @export var weapon_type: WeaponType = WeaponType.PROJECTILE
 @export var weapon_script: Script
 @export var damage: int = 15
+## Seconds between attacks (design "attack speed" as seconds/attack).
 @export var fire_rate: float = 0.45
+## Effect radius in design area units (10 = player radius). Splash for projectiles,
+## swing reach for melee. Converted to pixels via StatUnits. See docs/stats.md.
+@export var area: float = 0.0
+## Targeting/acquisition range in design area units. Converted via StatUnits.
+@export var attack_range: float = 0.0
 @export var projectile_scene: PackedScene
 @export var projectile_texture: Texture2D
 @export var pellet_count: int = 1

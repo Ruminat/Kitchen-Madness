@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3 uid="uid://skill_garlic_stench"]
+
+[ext_resource type="Script" path="res://scripts/data/skill_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/rework/skills/garlic-stench.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "garlic_stench"
+display_name = "Garlic Stench"
+description = "A reeking aura constantly damages enemies around you."
+icon = ExtResource("2")
+kind = 2
+cadence = 0.2
+damage = 10
+area = 30.0
+base_hits = 1
+max_level = 6
+damage_per_level = 0.0
+area_per_level = 0.15
+cadence_per_level = 0.1
+hits_per_level = 0

@@ -1,10 +1,13 @@
 extends BaseWeapon
+## Melee hit model: pick the nearest enemy within `attack_range` of the player, then
+## damage every enemy inside a circle centered on that target. The weapon's design
+## `area` is the *diameter* of that circle (so the radius is area / 2). No cone.
 
 const SWING_VISUAL_TIME := 0.2
 
 var _cooldown := 0.0
 var _swing_timer := 0.0
-var _swing_direction := Vector2.RIGHT
+var _hit_center := Vector2.ZERO
 
 
 func _process(delta: float) -> void:
@@ -30,41 +33,33 @@ func _process(delta: float) -> void:
 		return
 
 	_perform_swing(attack_origin, target)
-	var fire_rate := definition.fire_rate if definition else 0.45
+	var fire_rate := definition.fire_rate if definition else 0.8
 	_cooldown = fire_rate / get_fire_rate_multiplier()
 
 
-static func is_target_in_arc(
-	origin: Vector2,
-	attack_direction: Vector2,
-	target_position: Vector2,
-	target_radius: float,
-	melee_range: float,
-	arc_degrees: float
-) -> bool:
-	if attack_direction.length_squared() <= 0.0001:
-		return false
+## Max distance from the player at which an enemy can be picked as the swing target
+## (the design "attack range", in pixels).
+func _acquire_pixels() -> float:
+	if definition == null:
+		return 48.0
+	return StatUnits.area_to_pixels(definition.attack_range)
 
-	var to_target := target_position - origin
-	var reach := melee_range + target_radius
-	if to_target.length_squared() > reach * reach:
-		return false
 
-	var angle_diff := absf(
-		rad_to_deg(attack_direction.normalized().angle_to(to_target.normalized()))
-	)
-	return angle_diff <= arc_degrees * 0.5
+## Radius of the circular hit centered on the target. The weapon's design `area` is
+## the diameter of that circle, scaled by the player's area multiplier.
+func _hit_radius_pixels() -> float:
+	if definition == null:
+		return 24.0
+	return StatUnits.area_to_pixels(definition.area) * 0.5 * get_area_multiplier()
 
 
 func _perform_swing(attack_origin: Vector2, target: Node2D) -> void:
-	var attack_direction := (target.global_position - attack_origin).normalized()
-	_swing_direction = attack_direction
+	_hit_center = target.global_position
 	_swing_timer = SWING_VISUAL_TIME
 	play_fire_feedback()
 	AudioManager.play_shoot_sound("default")
 
-	var melee_range := definition.melee_range if definition else 48.0
-	var arc_degrees := definition.melee_arc_degrees if definition else 60.0
+	var radius := _hit_radius_pixels()
 	var knockback := definition.melee_knockback if definition else 0.0
 	var weapon_id := definition.id if definition else ""
 	var accent := definition.vfx_accent if definition else Color.WHITE
@@ -78,14 +73,8 @@ func _perform_swing(attack_origin: Vector2, target: Node2D) -> void:
 		if enemy.has_method("get_collision_radius"):
 			enemy_radius = enemy.get_collision_radius()
 
-		if not is_target_in_arc(
-			attack_origin,
-			attack_direction,
-			enemy_node.global_position,
-			enemy_radius,
-			melee_range,
-			arc_degrees
-		):
+		var reach := radius + enemy_radius
+		if _hit_center.distance_squared_to(enemy_node.global_position) > reach * reach:
 			continue
 
 		var final_damage := _roll_damage(get_damage())
@@ -95,7 +84,8 @@ func _perform_swing(attack_origin: Vector2, target: Node2D) -> void:
 			var knock_dir := (enemy_node.global_position - attack_origin).normalized()
 			enemy.apply_knockback(knock_dir, knockback)
 
-		EventBus.projectile_hit.emit(enemy_node.global_position, attack_direction, accent)
+		var hit_dir := (enemy_node.global_position - attack_origin).normalized()
+		EventBus.projectile_hit.emit(enemy_node.global_position, hit_dir, accent)
 		EventBus.damage_dealt.emit(
 			enemy_node.global_position, final_damage.amount, final_damage.is_crit
 		)
@@ -103,7 +93,7 @@ func _perform_swing(attack_origin: Vector2, target: Node2D) -> void:
 
 
 func _find_melee_target(attack_origin: Vector2) -> Node2D:
-	var melee_range := definition.melee_range if definition else 48.0
+	var range_px := _acquire_pixels()
 	var nearest: Node2D = null
 	var nearest_dist_sq := INF
 
@@ -117,7 +107,7 @@ func _find_melee_target(attack_origin: Vector2) -> Node2D:
 			enemy_radius = enemy.get_collision_radius()
 
 		var dist_sq := attack_origin.distance_squared_to(enemy_node.global_position)
-		var max_reach := melee_range + enemy_radius
+		var max_reach := range_px + enemy_radius
 		if dist_sq > max_reach * max_reach:
 			continue
 
@@ -147,24 +137,7 @@ func _draw() -> void:
 	if _swing_timer <= 0.0 or definition == null:
 		return
 
-	var player := _get_player()
-	if player == null:
-		return
-
-	var local_origin := to_local(player.global_position)
-	var melee_range := definition.melee_range
-	var arc_degrees := definition.melee_arc_degrees
 	var alpha := _swing_timer / SWING_VISUAL_TIME
 	var swing_color := definition.vfx_accent
 	swing_color.a = 0.22 * alpha
-
-	var start_angle := _swing_direction.angle() - deg_to_rad(arc_degrees * 0.5)
-	var end_angle := _swing_direction.angle() + deg_to_rad(arc_degrees * 0.5)
-	var points := PackedVector2Array([local_origin])
-	var segments := maxi(int(arc_degrees / 12.0), 4)
-	for segment in segments + 1:
-		var t := float(segment) / float(segments)
-		var angle := lerpf(start_angle, end_angle, t)
-		points.append(local_origin + Vector2(cos(angle), sin(angle)) * melee_range)
-
-	draw_colored_polygon(points, swing_color)
+	draw_circle(to_local(_hit_center), _hit_radius_pixels(), swing_color)

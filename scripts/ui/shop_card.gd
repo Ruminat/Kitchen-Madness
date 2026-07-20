@@ -80,8 +80,11 @@ func configure(offer: Resource, slot_index: int, player_gold: int, is_sold: bool
 	else:
 		_title_label.text = str(offer.get("title"))
 		_desc_label.text = str(offer.get("description"))
-		_type_badge.text = "UPGRADE"
-		_icon_rect.texture = null
+		var offer_icon: Texture2D = offer.get("icon")
+		_type_badge.text = _generic_type_label(offer)
+		_type_badge.add_theme_color_override("font_color", COLOR_INK)
+		_icon_rect.texture = offer_icon
+		_icon_rect.modulate = Color.WHITE if offer_icon else Color(0.35, 0.31, 0.25, 0.5)
 		_accent_strip.color = Color(0.35, 0.61, 0.58, 1.0)
 		ShopDisplay.apply_card_style(self, offer)
 
@@ -185,6 +188,29 @@ func _build_layout() -> void:
 	_price_label.add_theme_font_override("font", DISPLAY_FONT)
 	_price_label.add_theme_font_size_override("font_size", DS.FONT_SIZE_SUBHEADING)
 	footer.add_child(_price_label)
+
+
+## Badge label for non-weapon offers (perks, skills, plain upgrades).
+func _generic_type_label(offer: Resource) -> String:
+	if offer is PerkShopOffer:
+		return "PERK"
+	if offer is SkillShopOffer:
+		return "SKILL"
+	if offer is EntityShopOffer:
+		return _entity_label((offer as EntityShopOffer).entity)
+	return "UPGRADE"
+
+
+func _entity_label(entity: EntityDefinition) -> String:
+	if entity == null:
+		return "ALLY"
+	match entity.kind:
+		EntityDefinition.Kind.STRUCTURE:
+			return "TOWER"
+		EntityDefinition.Kind.TRAP:
+			return "TRAP"
+		_:
+			return "PET"
 
 
 func _make_inset_style() -> StyleBoxFlat:

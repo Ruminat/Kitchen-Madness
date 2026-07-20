@@ -27,6 +27,13 @@ class MockMeleeEnemy:
 		last_knockback = direction * force
 
 
+func after_test() -> void:
+	# Keep the shared "enemies" group clean between tests (and suites).
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if is_instance_valid(enemy):
+			enemy.remove_from_group("enemies")
+
+
 func test_kitchen_knife_is_melee_weapon() -> void:
 	assert_int(KNIFE_DEF.weapon_type).is_equal(WeaponDefinition.WeaponType.MELEE)
 	assert_object(KNIFE_DEF.weapon_script).is_same(MELEE_SCRIPT)
@@ -35,74 +42,66 @@ func test_kitchen_knife_is_melee_weapon() -> void:
 
 func test_frying_pan_is_melee_weapon_with_knockback() -> void:
 	assert_int(PAN_DEF.weapon_type).is_equal(WeaponDefinition.WeaponType.MELEE)
-	assert_float(PAN_DEF.melee_arc_degrees).is_equal(180.0)
+	assert_float(PAN_DEF.area).is_greater(0.0)
 	assert_float(PAN_DEF.melee_knockback).is_greater(0.0)
 
 
-func test_is_target_in_arc_accepts_forward_target() -> void:
-	var in_arc := MELEE_SCRIPT.is_target_in_arc(
-		Vector2.ZERO, Vector2.RIGHT, Vector2(40.0, 0.0), 12.0, 50.0, 60.0
-	)
-	assert_bool(in_arc).is_true()
-
-
-func test_is_target_in_arc_rejects_out_of_range_target() -> void:
-	var in_arc := MELEE_SCRIPT.is_target_in_arc(
-		Vector2.ZERO, Vector2.RIGHT, Vector2(120.0, 0.0), 12.0, 50.0, 180.0
-	)
-	assert_bool(in_arc).is_false()
-
-
-func test_is_target_in_arc_rejects_behind_target_for_narrow_arc() -> void:
-	var in_arc := MELEE_SCRIPT.is_target_in_arc(
-		Vector2.ZERO, Vector2.RIGHT, Vector2(-30.0, 0.0), 12.0, 50.0, 50.0
-	)
-	assert_bool(in_arc).is_false()
-
-
-func test_is_target_in_arc_accepts_side_target_for_wide_arc() -> void:
-	var in_arc := MELEE_SCRIPT.is_target_in_arc(
-		Vector2.ZERO, Vector2.RIGHT, Vector2(20.0, 35.0), 12.0, 60.0, 180.0
-	)
-	assert_bool(in_arc).is_true()
-
-
-func test_melee_swing_hits_enemy_in_arc() -> void:
-	var weapon: Node2D = Node2D.new()
-	weapon.set_script(MELEE_SCRIPT)
-	add_child(weapon)
-	weapon.setup(KNIFE_DEF, Rect2(), null)
-
-	var enemy := MockMeleeEnemy.new()
-	add_child(enemy)
-	enemy.global_position = Vector2(40.0, 0.0)
-
-	var emission_info := {"count": 0, "amount": 0}
-	EventBus.damage_dealt.connect(
-		func(_pos: Vector2, amount: int, _is_crit: bool) -> void:
-			emission_info.count += 1
-			emission_info.amount = amount
-	)
+func test_melee_swing_hits_the_target_enemy() -> void:
+	var weapon := _melee_weapon(KNIFE_DEF)
+	var enemy := _enemy(Vector2(40.0, 0.0))
 
 	weapon._perform_swing(Vector2.ZERO, enemy)
 
 	assert_int(enemy.last_damage).is_equal(KNIFE_DEF.damage)
-	assert_int(emission_info.count).is_equal(1)
-	assert_int(emission_info.amount).is_equal(KNIFE_DEF.damage)
+
+
+func test_melee_hits_a_circle_around_the_target_not_a_cone() -> void:
+	var weapon := _melee_weapon(KNIFE_DEF)
+	# Circle radius = area (diameter) / 2 = 20 units / 2 = 10 units ≈ 73 px.
+	var target := _enemy(Vector2(200.0, 0.0))
+	var neighbor := _enemy(Vector2(200.0, 60.0))  # ~60 px from the target -> inside
+	var far := _enemy(Vector2(200.0, 400.0))  # far from the target -> outside
+
+	weapon._perform_swing(Vector2.ZERO, target)
+
+	assert_int(target.last_damage).is_equal(KNIFE_DEF.damage)
+	assert_int(neighbor.last_damage).is_equal(KNIFE_DEF.damage)
+	assert_int(far.last_damage).is_equal(0)
+
+
+func test_melee_only_targets_enemies_within_attack_range() -> void:
+	var weapon := _melee_weapon(KNIFE_DEF)
+	# Kitchen Knife attack_range = 10 units ≈ 73 px.
+	var in_range := _enemy(Vector2(60.0, 0.0))
+	assert_object(weapon._find_melee_target(Vector2.ZERO)).is_same(in_range)
+
+	in_range.remove_from_group("enemies")
+	_enemy(Vector2(400.0, 0.0))  # only a far enemy remains
+	assert_object(weapon._find_melee_target(Vector2.ZERO)).is_null()
 
 
 func test_melee_swing_applies_knockback_for_frying_pan() -> void:
-	var weapon: Node2D = Node2D.new()
-	weapon.set_script(MELEE_SCRIPT)
-	add_child(weapon)
-	weapon.setup(PAN_DEF, Rect2(), null)
-
-	var enemy := MockMeleeEnemy.new()
-	add_child(enemy)
-	enemy.global_position = Vector2(30.0, 0.0)
+	var weapon := _melee_weapon(PAN_DEF)
+	var enemy := _enemy(Vector2(30.0, 0.0))
 
 	weapon._perform_swing(Vector2.ZERO, enemy)
 
 	assert_int(enemy.last_damage).is_equal(PAN_DEF.damage)
 	assert_int(enemy.knockback_calls).is_equal(1)
 	assert_float(enemy.last_knockback.length()).is_greater(0.0)
+
+
+func _melee_weapon(definition: WeaponDefinition) -> Node2D:
+	var weapon: Node2D = Node2D.new()
+	weapon.set_script(MELEE_SCRIPT)
+	add_child(weapon)
+	weapon.setup(definition, Rect2(), null)
+	weapon.set_crit_stats(0.0, 1.5)  # deterministic: no crit roll
+	return weapon
+
+
+func _enemy(position: Vector2) -> MockMeleeEnemy:
+	var enemy: MockMeleeEnemy = auto_free(MockMeleeEnemy.new()) as MockMeleeEnemy
+	add_child(enemy)
+	enemy.global_position = position
+	return enemy

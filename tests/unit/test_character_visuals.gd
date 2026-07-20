@@ -11,15 +11,9 @@ const XP_ORB_SCENE := preload("res://scenes/pickups/xp_orb.tscn")
 const HEALTH_PICKUP_SCENE := preload("res://scenes/pickups/health_pickup.tscn")
 const CHASER_DEF := preload("res://resources/enemies/chaser.tres")
 
-const CHEF_TEXTURE := preload("res://assets/characters/player/chef.png")
-const GOBLIN_TEXTURE := preload("res://assets/characters/player/goblin.png")
-const ONION_TEXTURE := preload("res://assets/characters/player/onion.png")
-const COOKIE_TEXTURE := preload("res://assets/characters/player/cookie.png")
-const MUSHROOM_TEXTURE := preload("res://assets/characters/player/mushroom.png")
-const VAMPIRE_TEXTURE := preload("res://assets/characters/player/vampire.png")
-const WITCH_TEXTURE := preload("res://assets/characters/player/witch.png")
-const DUMPLING_TEXTURE := preload("res://assets/characters/player/dumpling.png")
-const SNOWMAN_TEXTURE := preload("res://assets/characters/player/snowman.png")
+const NEWBIE_TEXTURE := preload("res://assets/rework/characters/the-newbie.png")
+const BARRET_TEXTURE := preload("res://assets/rework/characters/mr-barret.png")
+const NATSUMI_TEXTURE := preload("res://assets/rework/characters/natsumi.png")
 const COCKROACH_TEXTURE := preload("res://assets/characters/enemies/cockroach.png")
 const RAT_TEXTURE := preload("res://assets/characters/enemies/rat.png")
 const FLY_TEXTURE := preload("res://assets/characters/enemies/fly.png")
@@ -29,29 +23,19 @@ const XP_ORB_TEXTURE_PATH := "res://assets/effects/xp_orb.png"
 const HEALTH_PICKUP_TEXTURE_PATH := "res://assets/effects/health_pickup.png"
 
 
-func test_player_uses_chef_sprite() -> void:
+func test_player_uses_default_sprite() -> void:
 	var player: CharacterBody2D = auto_free(PLAYER_SCENE.instantiate()) as CharacterBody2D
 	add_child(player)
 	await _wait_ready(player)
 
 	var sprite: Sprite2D = player.get_node("Visual/Sprite") as Sprite2D
 	assert_object(sprite).is_not_null()
-	assert_object(sprite.texture).is_same(CHEF_TEXTURE)
+	assert_object(sprite.texture).is_same(NEWBIE_TEXTURE)
 	assert_vector(sprite.scale).is_equal(Vector2(0.175, 0.175))
 
 
 func test_player_roster_textures_are_available() -> void:
-	var roster: Array[Texture2D] = [
-		CHEF_TEXTURE,
-		GOBLIN_TEXTURE,
-		ONION_TEXTURE,
-		COOKIE_TEXTURE,
-		MUSHROOM_TEXTURE,
-		VAMPIRE_TEXTURE,
-		WITCH_TEXTURE,
-		DUMPLING_TEXTURE,
-		SNOWMAN_TEXTURE,
-	]
+	var roster: Array[Texture2D] = [NEWBIE_TEXTURE, BARRET_TEXTURE, NATSUMI_TEXTURE]
 
 	for texture in roster:
 		assert_object(texture).is_not_null()

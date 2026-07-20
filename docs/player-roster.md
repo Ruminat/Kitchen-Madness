@@ -1,21 +1,23 @@
 # Player Roster
 
-The 3x3 player grid from `assets/characters/Players.png` is split into named sprites under `assets/characters/player/`.
+The starting roster is a curated set of **three** hand-tuned characters — quality over
+quantity (see [players/index.md](players/index.md) and **plans.md → R2**). Each sprite is
+generated **one at a time** from [assets/base/PlayerCircle.png](../assets/base/PlayerCircle.png),
+never from a grid sheet, so every character shares an almost identical round silhouette while
+looking distinct.
 
-| Grid Slot | Name | Sprite |
+| Character | Sprite | Fantasy |
 |---|---|---|
-| Top left | Chef | `assets/characters/player/chef.png` |
-| Top center | Goblin | `assets/characters/player/goblin.png` |
-| Top right | Onion | `assets/characters/player/onion.png` |
-| Middle left | Cookie | `assets/characters/player/cookie.png` |
-| Middle center | Mushroom | `assets/characters/player/mushroom.png` |
-| Middle right | Vampire | `assets/characters/player/vampire.png` |
-| Bottom left | Witch | `assets/characters/player/witch.png` |
-| Bottom center | Dumpling | `assets/characters/player/dumpling.png` |
-| Bottom right | Snowman | `assets/characters/player/snowman.png` |
+| The Newbie | `assets/rework/characters/the-newbie.png` | Fragile late-bloomer — fast, crit-heavy, lucky |
+| Mr. Barret | `assets/rework/characters/mr-barret.png` | Tanky heavy hitter — high HP + damage |
+| Natsumi | `assets/rework/characters/natsumi.png` | Balanced all-rounder — good at everything |
 
-Current main player: **Chef** (top-left) — default when headless or tests run; chosen at pre-run select in normal play.
+Default / headless character: **The Newbie** (`CharacterRoster.DEFAULT_CHARACTER_PATH`).
 
-Character resources: `resources/characters/*.tres` (see `CharacterDefinition` in `scripts/data/character_definition.gd`).
+Character resources live at `resources/characters/{the_newbie,mr_barret,natsumi}.tres`
+(see `CharacterDefinition` in `scripts/data/character_definition.gd`). Stats are authored in
+design units and percentage modifiers — see [stats.md](stats.md) and
+[players/*.md](players/) for each character's full stat block and story.
 
-Source sheet: `assets/characters/Players.png` (3×3 grid, split via `tools/split_grid_sprites.gd`).
+The generic grid splitter (`tools/grid_sprite_splitter.gd`) remains for other assets, but the
+player-generation path no longer uses a 3×3 sheet.

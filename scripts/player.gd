@@ -1,3 +1,7 @@
+# gdlint:ignore=max-public-methods
+# The player is the central stat hub: it exposes one small mutator/getter per
+# stat so upgrades, perks, and systems stay data-driven. That legitimately
+# exceeds the default method budget; R4/R8 prune the retired stat surfaces.
 extends CharacterBody2D
 
 signal died
@@ -10,14 +14,19 @@ const COLLISION := preload("res://scripts/data/collision_layers.gd")
 const CONTACT_FORGIVENESS := 2.0
 const CONTACT_SLOW_RADIUS := 88.0
 
+## Base crit chance every player starts from; the character adds a modifier on top.
+const BASE_CRIT_CHANCE := 0.05
+
 var arena_bounds := Rect2(-440.0, -240.0, 880.0, 480.0)
 var move_speed := BASE_MOVE_SPEED
-var luck := 0
+## Luck modifier as a fraction (0.12 = +12%). See docs/stats.md.
+var luck := 0.0
 var pickup_range_bonus := 0.0
 
 var _xp_gain_multiplier := 1.0
+var _area_multiplier := 1.0
 var _character: CharacterDefinition
-var _crit_chance := 0.05
+var _crit_chance := BASE_CRIT_CHANCE
 var _crit_damage := 1.5
 
 @onready var visual: Node2D = $Visual
@@ -82,15 +91,18 @@ func configure(character: CharacterDefinition) -> void:
 		return
 
 	_character = character
-	move_speed = character.move_speed
+	move_speed = StatUnits.speed_to_pixels(character.move_speed)
 	luck = character.luck
-	_crit_chance = character.crit_chance
+	_crit_chance = clampf(BASE_CRIT_CHANCE + character.crit_chance, 0.0, 1.0)
 	_crit_damage = character.crit_damage
 	health_component.max_health = character.max_health
 	health_component.current_health = character.max_health
+	health_component.armor = character.armor
+	health_component.set_evasion(character.evasion)
 	if character.sprite:
 		sprite.texture = character.sprite
 	weapon_controller.configure_weapons(character.starting_weapon)
+	weapon_controller.set_character_modifiers(character.damage_mult, character.attack_speed_mult)
 	weapon_controller.sync_all_crit_stats()
 	_emit_initial_health()
 
@@ -114,13 +126,21 @@ func increase_attack_speed_percent(percent: float) -> void:
 
 
 func increase_move_speed_percent(percent: float) -> void:
-	if percent <= 0.0:
+	if is_zero_approx(percent):
 		return
 
-	move_speed *= 1.0 + percent
+	move_speed = maxf(move_speed * (1.0 + percent), 1.0)
 
 
 func increase_max_health(amount: int) -> void:
+	health_component.increase_max_health(amount, amount)
+
+
+func increase_max_health_percent(percent: float) -> void:
+	if percent <= 0.0:
+		return
+
+	var amount := maxi(roundi(float(health_component.max_health) * percent), 1)
 	health_component.increase_max_health(amount, amount)
 
 
@@ -128,8 +148,23 @@ func increase_armor(amount: int) -> void:
 	health_component.increase_armor(amount)
 
 
-func increase_luck(amount: int) -> void:
-	if amount <= 0:
+func increase_evasion(amount: float) -> void:
+	if is_zero_approx(amount):
+		return
+
+	health_component.increase_evasion(amount)
+
+
+func increase_area_percent(percent: float) -> void:
+	if is_zero_approx(percent):
+		return
+
+	_area_multiplier = maxf(_area_multiplier * (1.0 + percent), 0.1)
+	weapon_controller.set_area_multiplier(_area_multiplier)
+
+
+func increase_luck(amount: float) -> void:
+	if is_zero_approx(amount):
 		return
 
 	luck += amount
@@ -149,8 +184,22 @@ func increase_xp_gain_percent(percent: float) -> void:
 	_xp_gain_multiplier *= 1.0 + percent
 
 
-func get_luck() -> int:
+func get_luck() -> float:
 	return luck
+
+
+func get_area_multiplier() -> float:
+	return _area_multiplier
+
+
+## Global outgoing-damage multiplier from the character + upgrades. Skills, pets,
+## and traps read this so the Damage stat applies to them too (docs/stats.md).
+func get_damage_multiplier() -> float:
+	return weapon_controller.get_global_damage_multiplier()
+
+
+func get_evasion() -> float:
+	return health_component.evasion
 
 
 func get_pickup_range_bonus() -> float:
@@ -158,15 +207,15 @@ func get_pickup_range_bonus() -> float:
 
 
 func get_gold_multiplier() -> float:
-	return 1.0 + float(luck) * 0.01
+	return 1.0 + luck
 
 
 func get_xp_multiplier() -> float:
-	return _xp_gain_multiplier * (1.0 + float(luck) * 0.01)
+	return _xp_gain_multiplier * (1.0 + luck)
 
 
 func get_health_drop_chance_bonus() -> float:
-	return float(luck) * 0.0015
+	return luck * 0.15
 
 
 func get_crit_chance() -> float:

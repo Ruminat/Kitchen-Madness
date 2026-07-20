@@ -2,9 +2,8 @@
 extends GdUnitTestSuite
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
-const CHEF_DEF := preload("res://resources/characters/chef.tres")
-const PEPPER_DEF := preload("res://resources/weapons/pepper_grinder_gun.tres")
-const KNIFE_DEF := preload("res://resources/weapons/kitchen_knife.tres")
+const NEWBIE_DEF := preload("res://resources/characters/the_newbie.tres")
+const PAN_DEF := preload("res://resources/weapons/frying_pan.tres")
 
 
 class MockShopUi:
@@ -66,10 +65,13 @@ func test_open_shop_shows_weapon_offers_and_pauses() -> void:
 
 	assert_bool(get_tree().paused).is_true()
 	assert_bool(ui.shown).is_true()
-	assert_int(ui.offers.size()).is_equal(5)
+	# With the three-weapon roster the weapon-only pool is small; later phases
+	# (perks/skills/entities) fill the remaining slots. Never more than offer_count.
+	assert_int(ui.offers.size()).is_greater_equal(1)
+	assert_int(ui.offers.size()).is_less_equal(5)
 	assert_int(ui.last_gold).is_equal(30)
 	for offer in ui.offers:
-		assert_bool(offer is WeaponShopOffer).is_true()
+		assert_bool(offer is WeaponShopOffer or offer is PerkShopOffer).is_true()
 		assert_bool(ShopManager.is_stat_upgrade(offer)).is_false()
 
 
@@ -124,8 +126,8 @@ func test_starting_weapon_seeded_with_base_price() -> void:
 
 func test_sell_price_is_half_recorded_purchase_price() -> void:
 	var manager := _create_manager()
-	manager._weapon_purchase_price["kitchen_knife"] = 20
-	assert_int(manager._sell_price("kitchen_knife")).is_equal(10)
+	manager._weapon_purchase_price["frying_pan"] = 20
+	assert_int(manager._sell_price("frying_pan")).is_equal(10)
 
 
 func test_no_sell_offers_with_single_weapon() -> void:
@@ -142,14 +144,14 @@ func test_sell_offers_appear_with_multiple_weapons() -> void:
 	var manager := _create_manager()
 	var player := await _create_player()
 	manager.configure(player, _create_ui(), _create_gold_system())
-	_weapon_controller(player).add_weapon(KNIFE_DEF)
+	_weapon_controller(player).add_weapon(PAN_DEF)
 	manager.offer_count = 30
 
 	var sell_ids: Array[String] = []
 	for offer in manager.generate_offers():
 		if ShopDisplay.is_sell_offer(offer):
 			sell_ids.append((offer as WeaponShopOffer).weapon_id)
-	assert_bool(sell_ids.has("kitchen_knife")).is_true()
+	assert_bool(sell_ids.has("frying_pan")).is_true()
 
 
 func test_selling_weapon_refunds_grease_and_removes_it() -> void:
@@ -159,10 +161,10 @@ func test_selling_weapon_refunds_grease_and_removes_it() -> void:
 	var gold_system := _create_gold_system()
 	gold_system.add_gold(30)
 	manager.configure(player, ui, gold_system, func() -> void: pass)
-	_weapon_controller(player).add_weapon(KNIFE_DEF)
-	manager._weapon_purchase_price["kitchen_knife"] = 12
+	_weapon_controller(player).add_weapon(PAN_DEF)
+	manager._weapon_purchase_price["frying_pan"] = 12
 
-	var sell_offer := _create_sell_offer("kitchen_knife", 6)
+	var sell_offer := _create_sell_offer("frying_pan", 6)
 	manager._current_offers = [sell_offer]
 	manager._reset_sold_slots()
 	manager._shop_open = true
@@ -170,7 +172,7 @@ func test_selling_weapon_refunds_grease_and_removes_it() -> void:
 	ui.shop_purchase_requested.emit(sell_offer)
 
 	assert_int(gold_system.gold).is_equal(36)
-	assert_bool(_weapon_controller(player).has_weapon("kitchen_knife")).is_false()
+	assert_bool(_weapon_controller(player).has_weapon("frying_pan")).is_false()
 	assert_bool(ui.last_sold_slots[0]).is_true()
 
 
@@ -203,7 +205,7 @@ func test_generated_offers_never_include_stat_upgrades() -> void:
 
 	assert_int(offers.size()).is_less_equal(5)
 	for offer in offers:
-		assert_bool(offer is WeaponShopOffer).is_true()
+		assert_bool(offer is WeaponShopOffer or offer is PerkShopOffer).is_true()
 		assert_bool(ShopManager.is_stat_upgrade(offer)).is_false()
 
 
@@ -214,7 +216,7 @@ func test_shop_does_not_offer_owned_weapons_for_add() -> void:
 
 	for offer in manager.generate_offers():
 		var shop_offer := offer as WeaponShopOffer
-		if shop_offer.offer_type != WeaponShopOffer.OfferType.ADD_WEAPON:
+		if shop_offer == null or shop_offer.offer_type != WeaponShopOffer.OfferType.ADD_WEAPON:
 			continue
 		assert_bool(_weapon_controller(player).has_weapon(shop_offer.weapon.id)).is_false()
 
@@ -227,14 +229,14 @@ func test_purchase_add_weapon_spends_gold_and_equips_weapon() -> void:
 	gold_system.add_gold(30)
 	manager.configure(player, ui, gold_system, func() -> void: pass)
 
-	var offer := _create_add_weapon_offer(KNIFE_DEF, 9)
+	var offer := _create_add_weapon_offer(PAN_DEF, 9)
 	manager._current_offers = [offer]
 	manager._shop_open = true
 
 	ui.shop_purchase_requested.emit(offer)
 
 	assert_int(gold_system.gold).is_equal(21)
-	assert_bool(_weapon_controller(player).has_weapon("kitchen_knife")).is_true()
+	assert_bool(_weapon_controller(player).has_weapon("frying_pan")).is_true()
 
 
 func test_purchase_weapon_damage_upgrade_targets_one_weapon() -> void:
@@ -244,14 +246,14 @@ func test_purchase_weapon_damage_upgrade_targets_one_weapon() -> void:
 	var gold_system := _create_gold_system()
 	gold_system.add_gold(20)
 	manager.configure(player, ui, gold_system, func() -> void: pass)
-	_weapon_controller(player).add_weapon(KNIFE_DEF)
+	_weapon_controller(player).add_weapon(PAN_DEF)
 
 	var weapon: BaseWeapon = _weapon_controller(player).get_child(1) as BaseWeapon
 	var before := weapon.get_damage()
 
 	var offer := WeaponShopOffer.new()
 	offer.offer_type = WeaponShopOffer.OfferType.WEAPON_DAMAGE
-	offer.weapon_id = "kitchen_knife"
+	offer.weapon_id = "frying_pan"
 	offer.amount = 0.1
 	offer.gold_cost = 8
 	manager._current_offers = [offer]
@@ -268,11 +270,15 @@ func test_level_start_shop_costs_use_base_prices() -> void:
 	var player := await _create_player()
 	manager.configure(player, _create_ui(), _create_gold_system())
 	manager._elapsed_level_seconds = 0.0
+	# Widen the window so the (luck-shuffled) add-weapon offer is always present.
+	manager.offer_count = 20
 
 	var offers := manager.generate_offers()
 	assert_int(offers.size()).is_greater(0)
 	for offer in offers:
 		var shop_offer := offer as WeaponShopOffer
+		if shop_offer == null:
+			continue
 		if shop_offer.offer_type == WeaponShopOffer.OfferType.ADD_WEAPON:
 			assert_int(shop_offer.gold_cost).is_equal(12)
 			return
@@ -291,6 +297,8 @@ func test_late_level_shop_costs_scale_up() -> void:
 	assert_int(offers.size()).is_greater(0)
 	for offer in offers:
 		var shop_offer := offer as WeaponShopOffer
+		if shop_offer == null:
+			continue
 		if shop_offer.offer_type == WeaponShopOffer.OfferType.WEAPON_DAMAGE:
 			assert_int(shop_offer.gold_cost).is_equal(12)
 			return
@@ -305,7 +313,7 @@ func test_generate_offers_skips_duplicate_offer_keys() -> void:
 	var offers := manager.generate_offers()
 	var keys: Dictionary = {}
 	for offer in offers:
-		var key := (offer as WeaponShopOffer).get_offer_key()
+		var key := String(offer.call("get_offer_key"))
 		assert_bool(keys.has(key)).is_false()
 		keys[key] = true
 
@@ -318,7 +326,7 @@ func test_purchase_marks_slot_sold_without_removing_offer() -> void:
 	gold_system.add_gold(30)
 	manager.configure(player, ui, gold_system, func() -> void: pass)
 
-	var offer := _create_add_weapon_offer(KNIFE_DEF, 9)
+	var offer := _create_add_weapon_offer(PAN_DEF, 9)
 	manager._current_offers = [offer]
 	manager._reset_sold_slots()
 	manager._shop_open = true
@@ -345,7 +353,8 @@ func test_reroll_spends_grease_and_regenerates_offers() -> void:
 
 	assert_int(gold_system.gold).is_equal(24)
 	assert_int(ui.last_reroll_cost).is_equal(10)
-	assert_int(ui.offers.size()).is_equal(5)
+	assert_int(ui.offers.size()).is_greater_equal(1)
+	assert_int(ui.offers.size()).is_less_equal(5)
 
 
 func test_reroll_cost_increases_each_time() -> void:
@@ -382,7 +391,7 @@ func _create_player() -> CharacterBody2D:
 	add_child(player)
 	if not player.is_node_ready():
 		await player.ready
-	player.configure(CHEF_DEF)
+	player.configure(NEWBIE_DEF)
 	var projectile_container := Node2D.new()
 	add_child(projectile_container)
 	player.setup(Rect2(-100.0, -100.0, 200.0, 200.0), projectile_container)

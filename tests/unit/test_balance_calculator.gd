@@ -1,17 +1,16 @@
 # GdUnit generated TestSuite
 extends GdUnitTestSuite
 
-const PEPPER_DEF := preload("res://resources/weapons/pepper_grinder_gun.tres")
-const SOUP_DEF := preload("res://resources/weapons/boiling_soup_splash.tres")
-const ONION_RING_DEF := preload("res://resources/weapons/onion_ring_blade.tres")
 const KNIFE_DEF := preload("res://resources/weapons/kitchen_knife.tres")
+const PAN_DEF := preload("res://resources/weapons/frying_pan.tres")
+const TOMATO_DEF := preload("res://resources/weapons/rotten_tomato.tres")
 const LEVEL_01_DEF := preload("res://resources/levels/level_01.tres")
 const CHASER_DEF := preload("res://resources/enemies/chaser.tres")
 
 
 func test_all_base_weapons_share_equal_dps() -> void:
 	var roster := WeaponRoster.load_roster()
-	assert_int(roster.size()).is_equal(8)
+	assert_int(roster.size()).is_equal(3)
 	for weapon in roster:
 		var dps := BalanceCalculator.single_target_dps(weapon)
 		var low := BalanceCalculator.BASE_DPS_TARGET * (1.0 - BalanceCalculator.BASE_DPS_TOLERANCE)
@@ -44,7 +43,7 @@ func test_single_target_dps_dispatches_by_weapon_type() -> void:
 
 
 func test_calculate_weapon_dps_returns_positive_value() -> void:
-	var dps := BalanceCalculator.calculate_weapon_dps(PEPPER_DEF)
+	var dps := BalanceCalculator.calculate_weapon_dps(TOMATO_DEF)
 	assert_float(dps).is_greater(0.0)
 
 
@@ -82,7 +81,13 @@ func test_calculate_weapon_dps_with_hit_rate_reduces_output() -> void:
 
 
 func test_calculate_orbit_dps_returns_positive_value() -> void:
-	var dps := BalanceCalculator.calculate_orbit_dps(ONION_RING_DEF)
+	# The orbit DPS formula still exists for future weapons; drive it with a synthetic def.
+	var orbit := WeaponDefinition.new()
+	orbit.weapon_type = WeaponDefinition.WeaponType.ORBIT
+	orbit.damage = 10
+	orbit.pellet_count = 2
+	orbit.orbit_speed = 4.0
+	var dps := BalanceCalculator.calculate_orbit_dps(orbit)
 	assert_float(dps).is_greater(0.0)
 
 
@@ -130,10 +135,10 @@ func test_calculate_level_hp_budget_returns_positive() -> void:
 
 
 func test_compare_weapon_dps_returns_dictionary() -> void:
-	var weapons: Array[WeaponDefinition] = [PEPPER_DEF, KNIFE_DEF]
+	var weapons: Array[WeaponDefinition] = [TOMATO_DEF, KNIFE_DEF]
 	var comparison := BalanceCalculator.compare_weapon_dps(weapons)
 	assert_dict(comparison).is_not_empty()
-	assert_dict(comparison).contains_keys(["pepper_grinder_gun"])
+	assert_dict(comparison).contains_keys(["rotten_tomato"])
 	assert_dict(comparison).contains_keys(["kitchen_knife"])
 
 
@@ -169,7 +174,7 @@ func test_level_1_duration_matches_target() -> void:
 
 
 func test_kitchen_weapons_have_reasonable_dps() -> void:
-	var weapons: Array[WeaponDefinition] = [PEPPER_DEF, SOUP_DEF, ONION_RING_DEF, KNIFE_DEF]
+	var weapons: Array[WeaponDefinition] = [KNIFE_DEF, PAN_DEF, TOMATO_DEF]
 	for weapon in weapons:
 		var w_path := weapon.weapon_script.get_path() if weapon.weapon_script else ""
 		var is_orbit := w_path.contains("orbit")
